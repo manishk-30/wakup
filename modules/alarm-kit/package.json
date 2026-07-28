@@ -2,8 +2,13 @@
   "name": "alarm-kit",
   "version": "1.0.0",
   "description": "Native iOS alarm module for Wakup",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "expo": {
+    "modules": [
+      "expo-module.config.json"
+    ]
+  },
   "scripts": {
     "build": "expo-module build",
     "clean": "expo-module clean",
