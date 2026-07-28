@@ -31,9 +31,9 @@ module.exports = function withAlarmAudio(config) {
         fs.copyFileSync(sourcePath, destPath);
         
         // Add the file to the Xcode project so it gets bundled
-        if (!xcodeProject.hasFile(file)) {
-          const group = xcodeProject.findPBXGroupKey({ name: 'Resources' });
-          xcodeProject.addResourceFile(file, { target: xcodeProject.getFirstTarget().uuid });
+        const relativePath = path.join(config.name, file);
+        if (!xcodeProject.hasFile(relativePath)) {
+          xcodeProject.addResourceFile(relativePath, { target: xcodeProject.getFirstTarget().uuid });
         }
       }
     } else {
