@@ -8,7 +8,7 @@ module.exports = function withAlarmAudio(config) {
     const projectPath = config.modRequest.projectRoot;
     
     const soundsDir = path.join(projectPath, 'assets', 'sounds');
-    const iosPath = config.modRequest.platformProjectRoot;
+    const iosPath = path.join(config.modRequest.platformProjectRoot, config.name);
     
     // Ensure destination directory exists
     if (!fs.existsSync(iosPath)) {
@@ -32,9 +32,10 @@ module.exports = function withAlarmAudio(config) {
         
         // Add the file to the Xcode project so it gets bundled
         if (!xcodeProject.hasFile(file)) {
-          // Fix for newer Expo versions where the 'Resources' group might not exist by default
+          // Fix for newer Expo versions where the 'Resources' group might not exist by default.
+          // We set its path to config.name (Wakup) so Xcode knows the files are in ios/Wakup/
           if (!xcodeProject.pbxGroupByName('Resources')) {
-            xcodeProject.addPbxGroup([], 'Resources', 'Resources');
+            xcodeProject.addPbxGroup([], 'Resources', config.name);
           }
           xcodeProject.addResourceFile(file, { target: xcodeProject.getFirstTarget().uuid });
         }
