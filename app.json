@@ -44,7 +44,8 @@
         }
       ],
       "@react-native-community/datetimepicker",
-      "./scripts/withAlarmAudio.js"
+      "./scripts/withAlarmAudio.js",
+      "./scripts/withAppIntent.js"
     ],
     "experiments": {
       "typedRoutes": true,

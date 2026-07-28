@@ -6,8 +6,34 @@ import SwiftUI
 
 @available(iOS 26.0, *)
 struct AppMetadata: AlarmMetadata { }
+@available(iOS 26.0, *)
+public struct OpenGameIntent: LiveActivityIntent {
+    public static var title: LocalizedStringResource = "Play Game"
+    public static var openAppWhenRun: Bool = true
+    
+    @Parameter(title: "Alarm ID")
+    public var alarmId: String
+    
+    public init() {
+        self.alarmId = ""
+    }
+    
+    public init(alarmId: String) {
+        self.alarmId = alarmId
+    }
+    
+    public func perform() async throws -> some IntentResult & OpensIntent {
+        let url = URL(string: "wakup://alarm/ringing?alarmId=\(alarmId)")!
+        return .result(opensIntent: OpenURLIntent(url))
+    }
+}
 
-// We use OpenURLIntent (built into Apple's AppIntents) to avoid registration issues with Expo modules.
+@available(iOS 26.0, *)
+public struct AlarmKitAppIntentsPackage: AppIntentsPackage {
+    public static var intentClasses: [any AppIntent.Type] {
+        return [OpenGameIntent.self]
+    }
+}
 
 public class AlarmKitModule: Module {
   public func definition() -> ModuleDefinition {
@@ -84,12 +110,10 @@ public class AlarmKitModule: Module {
               tintColor: Color.blue
           )
           
-          let url = URL(string: "wakup://alarm/ringing?alarmId=\(idString)")!
-          
           let config = AlarmManager.AlarmConfiguration(
               schedule: schedule,
               attributes: attributes,
-              stopIntent: OpenURLIntent(url)
+              stopIntent: OpenGameIntent(alarmId: idString)
           )
           
           do {
