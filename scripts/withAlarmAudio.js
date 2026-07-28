@@ -8,7 +8,7 @@ module.exports = function withAlarmAudio(config) {
     const projectPath = config.modRequest.projectRoot;
     
     const soundsDir = path.join(projectPath, 'assets', 'sounds');
-    const iosPath = path.join(config.modRequest.platformProjectRoot, config.name);
+    const iosPath = config.modRequest.platformProjectRoot;
     
     // Ensure destination directory exists
     if (!fs.existsSync(iosPath)) {
