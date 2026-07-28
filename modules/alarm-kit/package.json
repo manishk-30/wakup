@@ -1,0 +1,31 @@
+{
+  "name": "alarm-kit",
+  "version": "1.0.0",
+  "description": "Native iOS alarm module for Wakup",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "expo-module build",
+    "clean": "expo-module clean",
+    "lint": "expo-module lint",
+    "test": "expo-module test",
+    "prepare": "expo-module prepare",
+    "prepublishOnly": "expo-module prepublishOnly",
+    "expo-module": "expo-module"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "alarm",
+    "alarm-kit"
+  ],
+  "author": "Antigravity",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "expo": "*",
+    "react": "*"
+  },
+  "devDependencies": {
+    "expo-module-scripts": "^3.4.1"
+  }
+}
