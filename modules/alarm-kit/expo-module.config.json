@@ -1,7 +1,7 @@
 {
   "name": "AlarmKit",
-  "language": "swift",
-  "ios": {
+  "platforms": ["apple"],
+  "apple": {
     "modules": ["AlarmKitModule"]
   }
 }
