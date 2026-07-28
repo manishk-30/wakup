@@ -4,7 +4,6 @@ import AVFoundation
 import SwiftUI
 
 struct AppMetadata: AlarmMetadata { }
-#warning("ALARMKIT IS COMPILING")
 
 public class AlarmKitModule: Module {
   public func definition() -> ModuleDefinition {
@@ -60,7 +59,9 @@ public class AlarmKitModule: Module {
         let recurrence: Alarm.Schedule.Relative.Recurrence = weekdays.isEmpty ? .never : .weekly(weekdays)
         let schedule = Alarm.Schedule.relative(.init(time: time, repeats: recurrence))
         
-        let alertContent = AlarmPresentation.Alert(title: label, stopButton: .stopButton)
+        let titleResource = LocalizedStringResource(stringLiteral: label)
+        let stopBtn = AlarmButton(text: "Stop", textColor: .white, systemImageName: "stop.circle")
+        let alertContent = AlarmPresentation.Alert(title: titleResource, stopButton: stopBtn)
         let presentation = AlarmPresentation(alert: alertContent)
         
         let attributes = AlarmAttributes(
