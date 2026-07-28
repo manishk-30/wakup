@@ -4,6 +4,7 @@ import AVFoundation
 import SwiftUI
 
 struct AppMetadata: AlarmMetadata { }
+#warning("ALARMKIT IS COMPILING")
 
 public class AlarmKitModule: Module {
   public func definition() -> ModuleDefinition {

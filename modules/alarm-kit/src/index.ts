@@ -14,6 +14,7 @@ let AlarmKit: AlarmKitModule | null = null;
 try {
   AlarmKit = requireNativeModule<AlarmKitModule>('AlarmKit');
 } catch (e) {
+  console.error('FATAL ERROR LOADING ALARMKIT NATIVE MODULE:', e);
   console.warn('AlarmKit native module not found. This is expected if you are running in Expo Go.');
 }
 
