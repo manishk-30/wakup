@@ -31,9 +31,12 @@ module.exports = function withAlarmAudio(config) {
         fs.copyFileSync(sourcePath, destPath);
         
         // Add the file to the Xcode project so it gets bundled
-        const relativePath = path.join(config.name, file);
-        if (!xcodeProject.hasFile(relativePath)) {
-          xcodeProject.addResourceFile(relativePath, { target: xcodeProject.getFirstTarget().uuid });
+        if (!xcodeProject.hasFile(file)) {
+          // Fix for newer Expo versions where the 'Resources' group might not exist by default
+          if (!xcodeProject.pbxGroupByName('Resources')) {
+            xcodeProject.addPbxGroup([], 'Resources', 'Resources');
+          }
+          xcodeProject.addResourceFile(file, { target: xcodeProject.getFirstTarget().uuid });
         }
       }
     } else {
