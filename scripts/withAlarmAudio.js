@@ -8,11 +8,12 @@ module.exports = function withAlarmAudio(config) {
     const projectPath = config.modRequest.projectRoot;
     
     const soundsDir = path.join(projectPath, 'assets', 'sounds');
-    const iosPath = path.join(config.modRequest.platformProjectRoot, config.name);
+    const iosRootPath = config.modRequest.platformProjectRoot;
+    const iosWakupPath = path.join(config.modRequest.platformProjectRoot, config.name);
     
-    // Ensure destination directory exists
-    if (!fs.existsSync(iosPath)) {
-      fs.mkdirSync(iosPath, { recursive: true });
+    // Ensure destination directories exist
+    if (!fs.existsSync(iosWakupPath)) {
+      fs.mkdirSync(iosWakupPath, { recursive: true });
     }
     
     // Scan the sounds directory and bundle all .wav files
@@ -26,9 +27,11 @@ module.exports = function withAlarmAudio(config) {
       
       for (const file of wavFiles) {
         const sourcePath = path.join(soundsDir, file);
-        const destPath = path.join(iosPath, file);
         
-        fs.copyFileSync(sourcePath, destPath);
+        // FAILSAFE: Xcode's path resolution through node-xcode is buggy. 
+        // We will copy the audio files to BOTH locations it might look for them.
+        fs.copyFileSync(sourcePath, path.join(iosRootPath, file));
+        fs.copyFileSync(sourcePath, path.join(iosWakupPath, file));
         
         // Add the file to the Xcode project so it gets bundled
         if (!xcodeProject.hasFile(file)) {
