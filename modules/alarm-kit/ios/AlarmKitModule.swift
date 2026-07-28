@@ -89,14 +89,11 @@ public class AlarmKitModule: Module {
           let schedule = Alarm.Schedule.relative(.init(time: time, repeats: recurrence))
           
           let titleResource = LocalizedStringResource(stringLiteral: label)
-          let stopBtn = AlarmButton(text: "Stop", textColor: .white, systemImageName: "stop.circle")
-          let gameBtn = AlarmButton(text: "Play Game", textColor: .white, systemImageName: "gamecontroller.fill")
+          let stopBtn = AlarmButton(text: "Play Game", textColor: .white, systemImageName: "gamecontroller.fill")
           
           let alertContent = AlarmPresentation.Alert(
               title: titleResource,
-              stopButton: stopBtn,
-              secondaryButton: gameBtn,
-              secondaryButtonBehavior: .custom(OpenGameIntent(alarmId: idString))
+              stopButton: stopBtn
           )
           
           let presentation = AlarmPresentation(alert: alertContent)
@@ -109,7 +106,8 @@ public class AlarmKitModule: Module {
           
           let config = AlarmManager.AlarmConfiguration(
               schedule: schedule,
-              attributes: attributes
+              attributes: attributes,
+              stopIntent: OpenGameIntent(alarmId: idString)
           )
           
           do {
