@@ -12,7 +12,7 @@ import alarm_kit
 
 @available(iOS 26.0, *)
 public struct WakupAppIntents: AppIntentsPackage {
-    static var includedPackages: [any AppIntentsPackage.Type] {
+    public static var includedPackages: [any AppIntentsPackage.Type] {
         #if canImport(alarm_kit)
         return [AlarmKitAppIntentsPackage.self]
         #else
