@@ -19,9 +19,11 @@ module.exports = function withAppIntent(config) {
     
     const schedulerCode = `import Foundation
 import AlarmKit
-import alarm_kit
 import SwiftUI
 import AppIntents
+
+@available(iOS 26.0, *)
+public var GlobalAlarmScheduler: WakupAlarmScheduler?
 
 @available(iOS 26.0, *)
 struct WakupAppMetadata: AlarmMetadata { }
@@ -30,6 +32,7 @@ struct WakupAppMetadata: AlarmMetadata { }
 @objc public class WakupAlarmScheduler: NSObject, AlarmSchedulerProtocol {
     public override init() {
         super.init()
+        AlarmKitModule.delegate = self
     }
     
     public func requestAuthorization() async throws -> Bool {
@@ -111,17 +114,11 @@ struct WakupAppMetadata: AlarmMetadata { }
     if (fs.existsSync(appDelegatePath)) {
       let appDelegateContent = fs.readFileSync(appDelegatePath, 'utf8');
       
-      if (!appDelegateContent.includes('AlarmKitModule.delegate')) {
-        // Add import
-        appDelegateContent = appDelegateContent.replace(
-          /import UIKit/,
-          "import UIKit\nimport alarm_kit"
-        );
-        
+      if (!appDelegateContent.includes('GlobalAlarmScheduler')) {
         // Add initialization
         const target = 'override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {';
         const target2 = 'override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {';
-        const initCode = `\n    if #available(iOS 26.0, *) {\n        alarm_kit.AlarmKitModule.delegate = WakupAlarmScheduler()\n    }\n`;
+        const initCode = `\n    if #available(iOS 26.0, *) {\n        GlobalAlarmScheduler = WakupAlarmScheduler()\n    }\n`;
         
         if (appDelegateContent.includes(target)) {
           appDelegateContent = appDelegateContent.replace(target, target + initCode);
