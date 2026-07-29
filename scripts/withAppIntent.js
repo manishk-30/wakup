@@ -29,10 +29,63 @@ public var GlobalAlarmScheduler: WakupAlarmScheduler?
 struct WakupAppMetadata: AlarmMetadata { }
 
 @available(iOS 26.0, *)
-@objc public class WakupAlarmScheduler: NSObject, AlarmSchedulerProtocol {
+@objc public class WakupAlarmScheduler: NSObject {
     public override init() {
         super.init()
-        AlarmKitModule.delegate = self
+        
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("WakupRequestAuth"), object: nil, queue: nil) { [weak self] notification in
+            guard let self = self,
+                  let userInfo = notification.userInfo,
+                  let completion = userInfo["completion"] as? (Bool) -> Void else { return }
+            Task {
+                do {
+                    let success = try await self.requestAuthorization()
+                    completion(success)
+                } catch {
+                    completion(false)
+                }
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("WakupScheduleAlarm"), object: nil, queue: nil) { [weak self] notification in
+            guard let self = self,
+                  let userInfo = notification.userInfo,
+                  let options = userInfo["options"] as? [String: Any],
+                  let completion = userInfo["completion"] as? (Bool, String?, String?) -> Void else { return }
+            Task {
+                do {
+                    guard let idString = options["id"] as? String,
+                          let id = UUID(uuidString: idString),
+                          let hour = options["hour"] as? Int,
+                          let minute = options["minute"] as? Int,
+                          let label = options["label"] as? String else {
+                        completion(false, nil, "Invalid arguments")
+                        return
+                    }
+                    let repeatDays = options["repeatDays"] as? [Int] ?? []
+                    let success = try await self.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays)
+                    completion(success, id.uuidString, nil)
+                } catch {
+                    completion(false, nil, error.localizedDescription)
+                }
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("WakupCancelAlarm"), object: nil, queue: nil) { [weak self] notification in
+            guard let self = self,
+                  let userInfo = notification.userInfo,
+                  let idString = userInfo["id"] as? String,
+                  let id = UUID(uuidString: idString),
+                  let completion = userInfo["completion"] as? (Bool) -> Void else { return }
+            Task {
+                do {
+                    try self.cancel(id: id)
+                    completion(true)
+                } catch {
+                    completion(false)
+                }
+            }
+        }
     }
     
     public func requestAuthorization() async throws -> Bool {

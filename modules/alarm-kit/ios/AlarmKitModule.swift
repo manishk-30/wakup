@@ -2,14 +2,7 @@ import ExpoModulesCore
 import AlarmKit
 import AVFoundation
 
-public protocol AlarmSchedulerProtocol {
-    func requestAuthorization() async throws -> Bool
-    func schedule(id: UUID, hour: Int, minute: Int, label: String, repeatDays: [Int]) async throws -> Bool
-    func cancel(id: UUID) throws
-}
-
 public class AlarmKitModule: Module {
-  public static var delegate: AlarmSchedulerProtocol?
 
   public func definition() -> ModuleDefinition {
     Name("AlarmKit")
@@ -18,7 +11,17 @@ public class AlarmKitModule: Module {
       if #available(iOS 26.0, *) {
         Task {
           do {
-              let authorized = try await AlarmKitModule.delegate?.requestAuthorization() ?? false
+              let authorized = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Bool, Error>) in
+                  NotificationCenter.default.post(
+                      name: NSNotification.Name("WakupRequestAuth"),
+                      object: nil,
+                      userInfo: [
+                          "completion": { (success: Bool) in
+                              continuation.resume(returning: success)
+                          }
+                      ]
+                  )
+              }
               promise.resolve(authorized)
           } catch {
               promise.resolve(false)
@@ -54,11 +57,23 @@ public class AlarmKitModule: Module {
           let repeatDays = options["repeatDays"] as? [Int] ?? []
           
           do {
-              let success = try await AlarmKitModule.delegate?.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays) ?? false
+              let (success, alarmId, errorMsg) = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<(Bool, String?, String?), Error>) in
+                  NotificationCenter.default.post(
+                      name: NSNotification.Name("WakupScheduleAlarm"),
+                      object: nil,
+                      userInfo: [
+                          "options": options,
+                          "completion": { (s: Bool, a: String?, e: String?) in
+                              continuation.resume(returning: (s, a, e))
+                          }
+                      ]
+                  )
+              }
+              
               if success {
-                  promise.resolve(["success": true, "alarmId": id.uuidString])
+                  promise.resolve(["success": true, "alarmId": alarmId!])
               } else {
-                  promise.resolve(["success": false, "error": "Scheduler failed"])
+                  promise.resolve(["success": false, "error": errorMsg ?? "Scheduler failed"])
               }
           } catch {
               promise.resolve(["success": false, "error": error.localizedDescription])
@@ -77,8 +92,19 @@ public class AlarmKitModule: Module {
               return
           }
           do {
-              try AlarmKitModule.delegate?.cancel(id: id)
-              promise.resolve(true)
+              let success = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Bool, Error>) in
+                  NotificationCenter.default.post(
+                      name: NSNotification.Name("WakupCancelAlarm"),
+                      object: nil,
+                      userInfo: [
+                          "id": idString,
+                          "completion": { (s: Bool) in
+                              continuation.resume(returning: s)
+                          }
+                      ]
+                  )
+              }
+              promise.resolve(success)
           } catch {
               promise.resolve(false)
           }
