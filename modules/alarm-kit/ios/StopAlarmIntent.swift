@@ -1,7 +1,7 @@
 import AppIntents
 import Foundation
 
-@available(iOS 26.0, *)
+@available(iOS 16.0, *)
 public struct StopAlarmIntent: LiveActivityIntent {
     public static var title: LocalizedStringResource = "Stop Alarm"
     

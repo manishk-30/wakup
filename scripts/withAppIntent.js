@@ -22,13 +22,13 @@ import AlarmKit
 import SwiftUI
 import AppIntents
 
-@available(iOS 26.0, *)
+@available(iOS 16.0, *)
 public var GlobalAlarmScheduler: WakupAlarmScheduler?
 
-@available(iOS 26.0, *)
+@available(iOS 16.0, *)
 struct WakupAppMetadata: AlarmMetadata { }
 
-@available(iOS 26.0, *)
+@available(iOS 16.0, *)
 @objc public class WakupAlarmScheduler: NSObject {
     public override init() {
         super.init()
@@ -151,14 +151,14 @@ struct WakupAppMetadata: AlarmMetadata { }
 
     // 2. Add files to the Wakup Xcode target directly
     const filesToAdd = [
-      { name: 'StartChallengeIntent.swift', relativePath: path.join('..', 'modules', 'alarm-kit', 'ios', 'StartChallengeIntent.swift') },
-      { name: 'StopAlarmIntent.swift', relativePath: path.join('..', 'modules', 'alarm-kit', 'ios', 'StopAlarmIntent.swift') },
-      { name: 'WakupAlarmScheduler.swift', relativePath: path.join(projectName, 'WakupAlarmScheduler.swift') }
+      { relativePath: '../modules/alarm-kit/ios/StartChallengeIntent.swift' },
+      { relativePath: '../modules/alarm-kit/ios/StopAlarmIntent.swift' },
+      { relativePath: projectName + '/WakupAlarmScheduler.swift' }
     ];
 
     filesToAdd.forEach(file => {
       if (!xcodeProject.hasFile(file.relativePath)) {
-        xcodeProject.addSourceFile(file.relativePath, { target: targetUuid }, mainGroupKey);
+        xcodeProject.addSourceFile(file.relativePath, { target: targetUuid, sourceTree: '"SOURCE_ROOT"' }, mainGroupKey);
       }
     });
 
@@ -171,7 +171,7 @@ struct WakupAppMetadata: AlarmMetadata { }
         // Add initialization
         const target = 'override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {';
         const target2 = 'override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {';
-        const initCode = `\n    if #available(iOS 26.0, *) {\n        GlobalAlarmScheduler = WakupAlarmScheduler()\n    }\n`;
+        const initCode = `\n    if #available(iOS 16.0, *) {\n        GlobalAlarmScheduler = WakupAlarmScheduler()\n    }\n`;
         
         if (appDelegateContent.includes(target)) {
           appDelegateContent = appDelegateContent.replace(target, target + initCode);

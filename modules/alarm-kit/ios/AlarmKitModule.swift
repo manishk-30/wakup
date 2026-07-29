@@ -8,7 +8,7 @@ public class AlarmKitModule: Module {
     Name("AlarmKit")
 
     AsyncFunction("requestAuthorization") { (promise: Promise) in
-      if #available(iOS 26.0, *) {
+      if #available(iOS 16.0, *) {
         Task {
           do {
               let authorized = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Bool, Error>) in
@@ -43,7 +43,7 @@ public class AlarmKitModule: Module {
     }
 
     AsyncFunction("scheduleAlarm") { (options: [String: Any], promise: Promise) in
-      if #available(iOS 26.0, *) {
+      if #available(iOS 16.0, *) {
         Task {
           guard let idString = options["id"] as? String,
                 let id = UUID(uuidString: idString),
@@ -85,7 +85,7 @@ public class AlarmKitModule: Module {
     }
 
     AsyncFunction("cancelAlarm") { (idString: String, promise: Promise) in
-      if #available(iOS 26.0, *) {
+      if #available(iOS 16.0, *) {
         Task {
           guard let id = UUID(uuidString: idString) else {
               promise.resolve(false)
