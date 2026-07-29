@@ -38,12 +38,15 @@ module.exports = function withAlarmKitNative(config) {
     
     // Check if group exists, if not create it
     let group = xcodeProject.pbxGroupByName(groupName);
+    let groupKey;
     if (!group) {
       const mainGroupKey = xcodeProject.findPBXGroupKey({ name: projectName });
-      const groupKey = xcodeProject.addPbxGroup([], groupName, groupName).uuid;
+      groupKey = xcodeProject.addPbxGroup([], groupName, groupName).uuid;
       if (mainGroupKey) {
         xcodeProject.addToPbxGroup(groupKey, mainGroupKey);
       }
+    } else {
+      groupKey = xcodeProject.findPBXGroupKey({ name: groupName });
     }
     
     // Add source files to the target
@@ -53,7 +56,7 @@ module.exports = function withAlarmKitNative(config) {
       const filePath = path.join(projectName, 'AlarmKit', file);
       // Ensure we don't add duplicates
       if (!xcodeProject.hasFile(filePath)) {
-        xcodeProject.addSourceFile(filePath, { target: targetUuid }, groupName);
+        xcodeProject.addSourceFile(filePath, { target: targetUuid }, groupKey);
       }
     });
     
