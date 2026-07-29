@@ -137,10 +137,29 @@ public class AlarmKitModule: Module {
       promise.resolve(true)
     }
 
-    Function("getPendingGameAlarmId") { () -> String? in
-      let id = UserDefaults.standard.string(forKey: "PendingGameAlarmId")
-      UserDefaults.standard.removeObject(forKey: "PendingGameAlarmId")
-      return id
+    Function("getPendingGameAlarm") { () -> [String: String]? in
+      guard let alarmId = UserDefaults.standard.string(
+          forKey: "PendingGameAlarmId"
+      ) else {
+          return nil
+      }
+  
+      let reason = UserDefaults.standard.string(
+          forKey: "PendingGameReason"
+      ) ?? "unknown"
+  
+      UserDefaults.standard.removeObject(
+          forKey: "PendingGameAlarmId"
+      )
+  
+      UserDefaults.standard.removeObject(
+          forKey: "PendingGameReason"
+      )
+  
+      return [
+          "alarmId": alarmId,
+          "reason": reason
+      ]
     }
   }
 }

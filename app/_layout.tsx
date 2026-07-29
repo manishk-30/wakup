@@ -14,9 +14,9 @@ export default function RootLayout() {
   useEffect(() => {
     const checkPendingGame = async () => {
       try {
-        const pendingId = await alarmService.getPendingGameAlarmId();
-        if (pendingId) {
-          console.log('[App] Found pending alarm challenge! Navigating to ringing screen...');
+        const pendingAlarm = await alarmService.getPendingGameAlarm();
+        if (pendingAlarm?.alarmId) {
+          console.log(`[App] Found pending alarm challenge (reason: ${pendingAlarm.reason})! Navigating to ringing screen...`);
           router.replace('/alarm/ringing');
         }
       } catch (e) {

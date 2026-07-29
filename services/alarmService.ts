@@ -111,9 +111,9 @@ export const alarmService = {
     return true; // Mock success
   },
 
-  async getPendingGameAlarmId(): Promise<string | null> {
-    if (isNativeModuleAvailable && AlarmKit.default?.getPendingGameAlarmId) {
-      return AlarmKit.default!.getPendingGameAlarmId();
+  async getPendingGameAlarm(): Promise<{ alarmId: string; reason: string } | null> {
+    if (isNativeModuleAvailable && AlarmKit.default?.getPendingGameAlarm) {
+      return AlarmKit.default!.getPendingGameAlarm();
     }
     return null;
   }

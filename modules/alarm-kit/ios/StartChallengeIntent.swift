@@ -19,8 +19,17 @@ public struct StartChallengeIntent: LiveActivityIntent {
         self.alarmId = alarmId
     }
     
-    public func perform() async throws -> some IntentResult & OpensIntent {
-        let url = URL(string: "wakup://alarm/ringing?alarmId=\(alarmId)")!
-        return .result(opensIntent: OpenURLIntent(url))
+    public func perform() async throws -> some IntentResult {
+        UserDefaults.standard.set(
+            alarmId,
+            forKey: "PendingGameAlarmId"
+        )
+        
+        UserDefaults.standard.set(
+            "startChallenge",
+            forKey: "PendingGameReason"
+        )
+        
+        return .result()
     }
 }

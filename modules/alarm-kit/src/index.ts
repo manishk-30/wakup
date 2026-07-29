@@ -7,7 +7,7 @@ interface AlarmKitModule {
   stopAlarm(id: string): Promise<boolean>;
   snoozeAlarm(id: string): Promise<boolean>;
   configureAudioSession(): Promise<boolean>;
-  getPendingGameAlarmId(): string | null;
+  getPendingGameAlarm(): { alarmId: string; reason: string } | null;
 }
 
 let AlarmKit: AlarmKitModule | null = null;
