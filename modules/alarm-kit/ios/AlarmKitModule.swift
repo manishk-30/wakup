@@ -7,8 +7,8 @@ import SwiftUI
 @available(iOS 26.0, *)
 struct AppMetadata: AlarmMetadata { }
 @available(iOS 26.0, *)
-public struct OpenGameIntent: LiveActivityIntent {
-    public static var title: LocalizedStringResource = "Play Game"
+public struct StartChallengeIntent: LiveActivityIntent {
+    public static var title: LocalizedStringResource = "Start Challenge"
     public static var supportedModes: IntentModes {
         .foreground(.immediate)
     }
@@ -31,9 +31,31 @@ public struct OpenGameIntent: LiveActivityIntent {
 }
 
 @available(iOS 26.0, *)
+public struct StopAlarmIntent: LiveActivityIntent {
+    public static var title: LocalizedStringResource = "Stop Alarm"
+    
+    @Parameter(title: "Alarm ID")
+    public var alarmId: String
+    
+    public init() {
+        self.alarmId = ""
+    }
+    
+    public init(alarmId: String) {
+        self.alarmId = alarmId
+    }
+    
+    public func perform() async throws -> some IntentResult {
+        // Stop is tapped natively. Save it so the app knows a challenge is pending when it resumes.
+        UserDefaults.standard.set(alarmId, forKey: "PendingGameAlarmId")
+        return .result()
+    }
+}
+
+@available(iOS 26.0, *)
 public struct AlarmKitAppIntentsPackage: AppIntentsPackage {
     public static var intentClasses: [any AppIntent.Type] {
-        return [OpenGameIntent.self]
+        return [StartChallengeIntent.self, StopAlarmIntent.self]
     }
 }
 
@@ -97,11 +119,14 @@ public class AlarmKitModule: Module {
           let schedule = Alarm.Schedule.relative(.init(time: time, repeats: recurrence))
           
           let titleResource = LocalizedStringResource(stringLiteral: label)
-          let stopBtn = AlarmButton(text: "Play Game", textColor: .white, systemImageName: "gamecontroller.fill")
+          let stopBtn = AlarmButton(text: "Stop", textColor: .white, systemImageName: "stop.circle")
+          let gameBtn = AlarmButton(text: "Start Challenge", textColor: .white, systemImageName: "gamecontroller.fill")
           
           let alertContent = AlarmPresentation.Alert(
               title: titleResource,
-              stopButton: stopBtn
+              stopButton: stopBtn,
+              secondaryButton: gameBtn,
+              secondaryButtonBehavior: .custom
           )
           
           let presentation = AlarmPresentation(alert: alertContent)
@@ -115,7 +140,8 @@ public class AlarmKitModule: Module {
           let config = AlarmManager.AlarmConfiguration(
               schedule: schedule,
               attributes: attributes,
-              stopIntent: OpenGameIntent(alarmId: idString)
+              stopIntent: StopAlarmIntent(alarmId: idString),
+              secondaryIntent: StartChallengeIntent(alarmId: idString)
           )
           
           do {

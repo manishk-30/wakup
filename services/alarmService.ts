@@ -109,5 +109,12 @@ export const alarmService = {
       return await AlarmKit.default!.configureAudioSession();
     }
     return true; // Mock success
+  },
+
+  async getPendingGameAlarmId(): Promise<string | null> {
+    if (isNativeModuleAvailable && AlarmKit.default?.getPendingGameAlarmId) {
+      return AlarmKit.default!.getPendingGameAlarmId();
+    }
+    return null;
   }
 };
