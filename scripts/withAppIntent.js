@@ -95,9 +95,9 @@ struct WakupAppMetadata: AlarmMetadata { }
 
     // 2. Add files to the Wakup Xcode target directly
     const filesToAdd = [
-      { name: 'StartChallengeIntent.swift', relativePath: path.join('..', '..', 'modules', 'alarm-kit', 'ios', 'StartChallengeIntent.swift') },
-      { name: 'StopAlarmIntent.swift', relativePath: path.join('..', '..', 'modules', 'alarm-kit', 'ios', 'StopAlarmIntent.swift') },
-      { name: 'WakupAlarmScheduler.swift', relativePath: 'WakupAlarmScheduler.swift' }
+      { name: 'StartChallengeIntent.swift', relativePath: path.join('..', 'modules', 'alarm-kit', 'ios', 'StartChallengeIntent.swift') },
+      { name: 'StopAlarmIntent.swift', relativePath: path.join('..', 'modules', 'alarm-kit', 'ios', 'StopAlarmIntent.swift') },
+      { name: 'WakupAlarmScheduler.swift', relativePath: path.join(projectName, 'WakupAlarmScheduler.swift') }
     ];
 
     filesToAdd.forEach(file => {
