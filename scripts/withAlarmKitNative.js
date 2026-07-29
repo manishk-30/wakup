@@ -39,10 +39,10 @@ module.exports = function withAlarmKitNative(config) {
     // Check if group exists, if not create it
     let group = xcodeProject.pbxGroupByName(groupName);
     if (!group) {
-      const projectGroup = xcodeProject.pbxGroupByName(projectName);
+      const mainGroupKey = xcodeProject.findPBXGroupKey({ name: projectName });
       const groupKey = xcodeProject.addPbxGroup([], groupName, groupName).uuid;
-      if (projectGroup) {
-        xcodeProject.addToPbxGroup(groupKey, projectGroup);
+      if (mainGroupKey) {
+        xcodeProject.addToPbxGroup(groupKey, mainGroupKey);
       }
     }
     
