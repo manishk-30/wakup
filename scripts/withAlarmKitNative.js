@@ -28,8 +28,8 @@ module.exports = function withAlarmKitNative(config) {
     const targetUuid = xcodeProject.findTargetKey(projectName);
     
     files.forEach(file => {
-      // Relative path from ios/Wakup.xcodeproj to modules/alarm-kit/ios/
-      const filePath = path.join('..', 'modules', 'alarm-kit', 'ios', file);
+      // Relative path from ios/Wakup/ (the group's physical path) to the project root requires ../../
+      const filePath = path.join('..', '..', 'modules', 'alarm-kit', 'ios', file);
       
       // Add the source file directly from the modules directory
       if (!xcodeProject.hasFile(filePath)) {
