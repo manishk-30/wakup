@@ -9,7 +9,9 @@ struct AppMetadata: AlarmMetadata { }
 @available(iOS 26.0, *)
 public struct OpenGameIntent: LiveActivityIntent {
     public static var title: LocalizedStringResource = "Play Game"
-    public static var openAppWhenRun: Bool = true
+    public static var supportedModes: IntentModes {
+        .foreground(.immediate)
+    }
     
     @Parameter(title: "Alarm ID")
     public var alarmId: String
