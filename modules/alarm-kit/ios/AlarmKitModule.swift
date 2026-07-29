@@ -7,52 +7,6 @@ import SwiftUI
 @available(iOS 26.0, *)
 struct AppMetadata: AlarmMetadata { }
 @available(iOS 26.0, *)
-public struct StartChallengeIntent: LiveActivityIntent {
-    public static var title: LocalizedStringResource = "Start Challenge"
-    public static var supportedModes: IntentModes {
-        .foreground(.immediate)
-    }
-    
-    @Parameter(title: "Alarm ID")
-    public var alarmId: String
-    
-    public init() {
-        self.alarmId = ""
-    }
-    
-    public init(alarmId: String) {
-        self.alarmId = alarmId
-    }
-    
-    public func perform() async throws -> some IntentResult & OpensIntent {
-        let url = URL(string: "wakup://alarm/ringing?alarmId=\(alarmId)")!
-        return .result(opensIntent: OpenURLIntent(url))
-    }
-}
-
-@available(iOS 26.0, *)
-public struct StopAlarmIntent: LiveActivityIntent {
-    public static var title: LocalizedStringResource = "Stop Alarm"
-    
-    @Parameter(title: "Alarm ID")
-    public var alarmId: String
-    
-    public init() {
-        self.alarmId = ""
-    }
-    
-    public init(alarmId: String) {
-        self.alarmId = alarmId
-    }
-    
-    public func perform() async throws -> some IntentResult {
-        // Stop is tapped natively. Save it so the app knows a challenge is pending when it resumes.
-        UserDefaults.standard.set(alarmId, forKey: "PendingGameAlarmId")
-        return .result()
-    }
-}
-
-@available(iOS 26.0, *)
 public struct AlarmKitAppIntentsPackage: AppIntentsPackage {
     public static var intentClasses: [any AppIntent.Type] {
         return [StartChallengeIntent.self, StopAlarmIntent.self]
