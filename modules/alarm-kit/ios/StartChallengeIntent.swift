@@ -2,8 +2,9 @@ import AppIntents
 import UIKit
 
 @available(iOS 26.0, *)
-public struct StartChallengeIntent: LiveActivityIntent {
+public struct StartChallengeIntent: LiveActivityIntent, ForegroundContinuableIntent {
     public static var title: LocalizedStringResource = "Start Challenge"
+    public static var openAppWhenRun: Bool = true
     public static var supportedModes: IntentModes {
         .foreground(.immediate)
     }
@@ -20,6 +21,8 @@ public struct StartChallengeIntent: LiveActivityIntent {
     }
     
     public func perform() async throws -> some IntentResult {
+        try await requestToContinueInForeground()
+        
         UserDefaults.standard.set(
             alarmId,
             forKey: "PendingGameAlarmId"

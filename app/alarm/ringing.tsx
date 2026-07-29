@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Animated } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
 import { GAMES } from '../../types/games';
@@ -10,9 +10,10 @@ import { ALARM_SOUNDS } from '../../constants/sounds';
 
 export default function AlarmRinging() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ alarmId?: string }>();
   
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const [currentAlarmId, setCurrentAlarmId] = useState<string>('current');
+  const [currentAlarmId, setCurrentAlarmId] = useState<string>(params.alarmId || 'current');
 
   useEffect(() => {
     Animated.loop(
@@ -32,6 +33,11 @@ export default function AlarmRinging() {
 
     // Setup and play the aggressive looping alarm sound
     async function setupAudio() {
+      if (params.alarmId) {
+        console.log('[AlarmRinging] AlarmKit is already handling the audio natively');
+        return;
+      }
+
       // 1. Force the OS to play loud audio even if silent switch is on (via native module if compiled)
       await alarmService.configureAudioSession();
       

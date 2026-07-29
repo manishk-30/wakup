@@ -17,7 +17,7 @@ export default function RootLayout() {
         const pendingAlarm = await alarmService.getPendingGameAlarm();
         if (pendingAlarm?.alarmId) {
           console.log(`[App] Found pending alarm challenge (reason: ${pendingAlarm.reason})! Navigating to ringing screen...`);
-          router.replace('/alarm/ringing');
+          router.replace({ pathname: '/alarm/ringing', params: { alarmId: pendingAlarm.alarmId } });
         }
       } catch (e) {
         console.error('Failed to check pending alarm', e);

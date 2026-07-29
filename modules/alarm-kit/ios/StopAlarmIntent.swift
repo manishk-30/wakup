@@ -17,16 +17,6 @@ public struct StopAlarmIntent: LiveActivityIntent {
     }
     
     public func perform() async throws -> some IntentResult {
-        UserDefaults.standard.set(
-            alarmId,
-            forKey: "PendingGameAlarmId"
-        )
-        
-        UserDefaults.standard.set(
-            "stopAlarm",
-            forKey: "PendingGameReason"
-        )
-        
         return .result()
     }
 }
