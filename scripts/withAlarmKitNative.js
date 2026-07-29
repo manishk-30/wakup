@@ -1,60 +1,37 @@
 const { withXcodeProject } = require('@expo/config-plugins');
-const fs = require('fs');
 const path = require('path');
 
 module.exports = function withAlarmKitNative(config) {
   return withXcodeProject(config, async (config) => {
     const xcodeProject = config.modResults;
-    const projectRoot = config.modRequest.projectRoot;
     const projectName = config.modRequest.projectName;
     
-    // Paths
-    const sourceDir = path.join(projectRoot, 'modules', 'alarm-kit', 'ios');
-    const targetDir = path.join(projectRoot, 'ios', projectName, 'AlarmKit');
-    
-    // Create target directory
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
-    }
-    
-    // Files to copy and add
+    // Files to add
     const files = [
       'AlarmKitModule.swift',
       'StartChallengeIntent.swift',
       'StopAlarmIntent.swift'
     ];
     
-    // Copy files
-    files.forEach(file => {
-      const srcPath = path.join(sourceDir, file);
-      const destPath = path.join(targetDir, file);
-      if (fs.existsSync(srcPath)) {
-        fs.copyFileSync(srcPath, destPath);
-      }
-    });
-    
-    // Add files to Xcode project
+    // Create or find group in Xcode project
     const groupName = 'AlarmKit';
-    
-    // Check if group exists, if not create it
-    let group = xcodeProject.pbxGroupByName(groupName);
-    let groupKey;
-    if (!group) {
+    let groupKey = xcodeProject.findPBXGroupKey({ name: groupName });
+    if (!groupKey) {
       const mainGroupKey = xcodeProject.findPBXGroupKey({ name: projectName });
+      // The group path is just the name, files will handle their own relative paths
       groupKey = xcodeProject.addPbxGroup([], groupName, groupName).uuid;
       if (mainGroupKey) {
         xcodeProject.addToPbxGroup(groupKey, mainGroupKey);
       }
-    } else {
-      groupKey = xcodeProject.findPBXGroupKey({ name: groupName });
     }
     
-    // Add source files to the target
     const targetUuid = xcodeProject.findTargetKey(projectName);
     
     files.forEach(file => {
-      const filePath = path.join(projectName, 'AlarmKit', file);
-      // Ensure we don't add duplicates
+      // Relative path from ios/Wakup.xcodeproj to modules/alarm-kit/ios/
+      const filePath = path.join('..', 'modules', 'alarm-kit', 'ios', file);
+      
+      // Add the source file directly from the modules directory
       if (!xcodeProject.hasFile(filePath)) {
         xcodeProject.addSourceFile(filePath, { target: targetUuid }, groupKey);
       }
