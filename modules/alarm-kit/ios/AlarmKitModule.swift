@@ -8,9 +8,9 @@ public protocol AlarmSchedulerProtocol {
     func cancel(id: UUID) throws
 }
 
-public var GlobalAlarmScheduler: AlarmSchedulerProtocol?
-
 public class AlarmKitModule: Module {
+  public static var delegate: AlarmSchedulerProtocol?
+
   public func definition() -> ModuleDefinition {
     Name("AlarmKit")
 
@@ -18,7 +18,7 @@ public class AlarmKitModule: Module {
       if #available(iOS 26.0, *) {
         Task {
           do {
-              let authorized = try await GlobalAlarmScheduler?.requestAuthorization() ?? false
+              let authorized = try await AlarmKitModule.delegate?.requestAuthorization() ?? false
               promise.resolve(authorized)
           } catch {
               promise.resolve(false)
@@ -54,7 +54,7 @@ public class AlarmKitModule: Module {
           let repeatDays = options["repeatDays"] as? [Int] ?? []
           
           do {
-              let success = try await GlobalAlarmScheduler?.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays) ?? false
+              let success = try await AlarmKitModule.delegate?.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays) ?? false
               if success {
                   promise.resolve(["success": true, "alarmId": id.uuidString])
               } else {
@@ -77,7 +77,7 @@ public class AlarmKitModule: Module {
               return
           }
           do {
-              try GlobalAlarmScheduler?.cancel(id: id)
+              try AlarmKitModule.delegate?.cancel(id: id)
               promise.resolve(true)
           } catch {
               promise.resolve(false)

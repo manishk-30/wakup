@@ -111,17 +111,17 @@ struct WakupAppMetadata: AlarmMetadata { }
     if (fs.existsSync(appDelegatePath)) {
       let appDelegateContent = fs.readFileSync(appDelegatePath, 'utf8');
       
-      if (!appDelegateContent.includes('GlobalAlarmScheduler')) {
+      if (!appDelegateContent.includes('AlarmKitModule.delegate')) {
         // Add import
         appDelegateContent = appDelegateContent.replace(
           /import UIKit/,
-          "import UIKit\n#if canImport(alarm_kit)\nimport alarm_kit\n#endif"
+          "import UIKit\nimport alarm_kit"
         );
         
         // Add initialization
         const target = 'override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {';
         const target2 = 'override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {';
-        const initCode = `\n    #if canImport(alarm_kit)\n    if #available(iOS 26.0, *) {\n        GlobalAlarmScheduler = WakupAlarmScheduler()\n    }\n    #endif\n`;
+        const initCode = `\n    if #available(iOS 26.0, *) {\n        alarm_kit.AlarmKitModule.delegate = WakupAlarmScheduler()\n    }\n`;
         
         if (appDelegateContent.includes(target)) {
           appDelegateContent = appDelegateContent.replace(target, target + initCode);
