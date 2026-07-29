@@ -1,7 +1,7 @@
 import AppIntents
 import UIKit
 
-@available(iOS 16.0, *)
+@available(iOS 26.0, *)
 public struct StartChallengeIntent: LiveActivityIntent, ForegroundContinuableIntent {
     public static var title: LocalizedStringResource = "Start Challenge"
     public static var openAppWhenRun: Bool = true

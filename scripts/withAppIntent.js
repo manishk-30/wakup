@@ -22,13 +22,13 @@ import AlarmKit
 import SwiftUI
 import AppIntents
 
-@available(iOS 16.0, *)
+@available(iOS 26.0, *)
 public var GlobalAlarmScheduler: WakupAlarmScheduler?
 
-@available(iOS 16.0, *)
+@available(iOS 26.0, *)
 struct WakupAppMetadata: AlarmMetadata { }
 
-@available(iOS 16.0, *)
+@available(iOS 26.0, *)
 @objc public class WakupAlarmScheduler: NSObject {
     public override init() {
         super.init()
@@ -171,7 +171,7 @@ struct WakupAppMetadata: AlarmMetadata { }
         // Add initialization
         const target = 'override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {';
         const target2 = 'override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {';
-        const initCode = `\n    if #available(iOS 16.0, *) {\n        GlobalAlarmScheduler = WakupAlarmScheduler()\n    }\n`;
+        const initCode = `\n    if #available(iOS 26.0, *) {\n        GlobalAlarmScheduler = WakupAlarmScheduler()\n    }\n`;
         
         if (appDelegateContent.includes(target)) {
           appDelegateContent = appDelegateContent.replace(target, target + initCode);
