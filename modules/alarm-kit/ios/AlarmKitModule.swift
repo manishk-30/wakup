@@ -1,17 +1,14 @@
 import ExpoModulesCore
 import AlarmKit
-import AppIntents
 import AVFoundation
-import SwiftUI
 
-@available(iOS 26.0, *)
-struct AppMetadata: AlarmMetadata { }
-@available(iOS 26.0, *)
-public struct AlarmKitAppIntentsPackage: AppIntentsPackage {
-    public static var intentClasses: [any AppIntent.Type] {
-        return [StartChallengeIntent.self, StopAlarmIntent.self]
-    }
+public protocol AlarmSchedulerProtocol {
+    func requestAuthorization() async throws -> Bool
+    func schedule(id: UUID, hour: Int, minute: Int, label: String, repeatDays: [Int]) async throws -> Bool
+    func cancel(id: UUID) throws
 }
+
+public var GlobalAlarmScheduler: AlarmSchedulerProtocol?
 
 public class AlarmKitModule: Module {
   public func definition() -> ModuleDefinition {
@@ -21,8 +18,8 @@ public class AlarmKitModule: Module {
       if #available(iOS 26.0, *) {
         Task {
           do {
-              let state = try await AlarmManager.shared.requestAuthorization()
-              promise.resolve(state == .authorized)
+              let authorized = try await GlobalAlarmScheduler?.requestAuthorization() ?? false
+              promise.resolve(authorized)
           } catch {
               promise.resolve(false)
           }
@@ -55,52 +52,14 @@ public class AlarmKitModule: Module {
           }
           
           let repeatDays = options["repeatDays"] as? [Int] ?? []
-          let weekdays: [Locale.Weekday] = repeatDays.compactMap {
-              switch $0 {
-              case 0: return .sunday
-              case 1: return .monday
-              case 2: return .tuesday
-              case 3: return .wednesday
-              case 4: return .thursday
-              case 5: return .friday
-              case 6: return .saturday
-              default: return nil
-              }
-          }
-          
-          let time = Alarm.Schedule.Relative.Time(hour: hour, minute: minute)
-          let recurrence: Alarm.Schedule.Relative.Recurrence = weekdays.isEmpty ? .never : .weekly(weekdays)
-          let schedule = Alarm.Schedule.relative(.init(time: time, repeats: recurrence))
-          
-          let titleResource = LocalizedStringResource(stringLiteral: label)
-          let stopBtn = AlarmButton(text: "Stop", textColor: .white, systemImageName: "stop.circle")
-          let gameBtn = AlarmButton(text: "Start Challenge", textColor: .white, systemImageName: "gamecontroller.fill")
-          
-          let alertContent = AlarmPresentation.Alert(
-              title: titleResource,
-              stopButton: stopBtn,
-              secondaryButton: gameBtn,
-              secondaryButtonBehavior: .custom
-          )
-          
-          let presentation = AlarmPresentation(alert: alertContent)
-          
-          let attributes = AlarmAttributes(
-              presentation: presentation,
-              metadata: AppMetadata(),
-              tintColor: Color.blue
-          )
-          
-          let config = AlarmManager.AlarmConfiguration(
-              schedule: schedule,
-              attributes: attributes,
-              stopIntent: StopAlarmIntent(alarmId: idString),
-              secondaryIntent: StartChallengeIntent(alarmId: idString)
-          )
           
           do {
-              _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
-              promise.resolve(["success": true, "alarmId": id.uuidString])
+              let success = try await GlobalAlarmScheduler?.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays) ?? false
+              if success {
+                  promise.resolve(["success": true, "alarmId": id.uuidString])
+              } else {
+                  promise.resolve(["success": false, "error": "Scheduler failed"])
+              }
           } catch {
               promise.resolve(["success": false, "error": error.localizedDescription])
           }
@@ -118,7 +77,7 @@ public class AlarmKitModule: Module {
               return
           }
           do {
-              try AlarmManager.shared.cancel(id: id)
+              try GlobalAlarmScheduler?.cancel(id: id)
               promise.resolve(true)
           } catch {
               promise.resolve(false)
@@ -163,4 +122,3 @@ public class AlarmKitModule: Module {
     }
   }
 }
-
