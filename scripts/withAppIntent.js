@@ -29,6 +29,9 @@ public var GlobalAlarmScheduler: WakupAlarmScheduler?
 struct WakupAppMetadata: AlarmMetadata { }
 
 @available(iOS 26.0, *)
+public struct WakupAppIntentsPackage: AppIntentsPackage { }
+
+@available(iOS 26.0, *)
 @objc public class WakupAlarmScheduler: NSObject {
     public override init() {
         super.init()
@@ -149,10 +152,23 @@ struct WakupAppMetadata: AlarmMetadata { }
     const schedulerPath = path.join(wakupTargetDir, 'WakupAlarmScheduler.swift');
     fs.writeFileSync(schedulerPath, schedulerCode);
 
-    // 2. Add files to the Wakup Xcode target directly
+    // 2. Copy Intent files from alarm-kit module into the Wakup iOS target directory
+    const moduleIosDir = path.join(projectRoot, 'modules', 'alarm-kit', 'ios');
+    const startIntentPath = path.join(moduleIosDir, 'StartChallengeIntent.swift');
+    const stopIntentPath = path.join(moduleIosDir, 'StopAlarmIntent.swift');
+    
+    if (fs.existsSync(startIntentPath)) {
+        fs.copyFileSync(startIntentPath, path.join(wakupTargetDir, 'StartChallengeIntent.swift'));
+    }
+    
+    if (fs.existsSync(stopIntentPath)) {
+        fs.copyFileSync(stopIntentPath, path.join(wakupTargetDir, 'StopAlarmIntent.swift'));
+    }
+
+    // 3. Add files to the Wakup Xcode target directly
     const filesToAdd = [
-      { relativePath: '../modules/alarm-kit/ios/StartChallengeIntent.swift' },
-      { relativePath: '../modules/alarm-kit/ios/StopAlarmIntent.swift' },
+      { relativePath: projectName + '/StartChallengeIntent.swift' },
+      { relativePath: projectName + '/StopAlarmIntent.swift' },
       { relativePath: projectName + '/WakupAlarmScheduler.swift' }
     ];
 
@@ -162,7 +178,10 @@ struct WakupAppMetadata: AlarmMetadata { }
       }
     });
 
-    // 3. Inject GlobalAlarmScheduler assignment into AppDelegate
+    // Explicitly enable App Intents metadata generation in case Expo's template disables it
+    xcodeProject.addBuildProperty('ENABLE_APP_INTENTS', 'YES');
+
+    // 4. Inject GlobalAlarmScheduler assignment into AppDelegate
     const appDelegatePath = path.join(wakupTargetDir, 'AppDelegate.swift');
     if (fs.existsSync(appDelegatePath)) {
       let appDelegateContent = fs.readFileSync(appDelegatePath, 'utf8');
@@ -171,7 +190,7 @@ struct WakupAppMetadata: AlarmMetadata { }
         // Add initialization
         const target = 'override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {';
         const target2 = 'override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {';
-        const initCode = `\n    if #available(iOS 26.0, *) {\n        GlobalAlarmScheduler = WakupAlarmScheduler()\n    }\n`;
+        const initCode = `\n    if #available(iOS 26.0, *) {\n        GlobalAlarmScheduler = WakupAlarmScheduler()\n        AppDependencyManager.shared.add(package: WakupAppIntentsPackage.self)\n    }\n`;
         
         if (appDelegateContent.includes(target)) {
           appDelegateContent = appDelegateContent.replace(target, target + initCode);
