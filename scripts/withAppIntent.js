@@ -29,10 +29,14 @@ public var GlobalAlarmScheduler: WakupAlarmScheduler?
 struct WakupAppMetadata: AlarmMetadata { }
 
 @available(iOS 26.0, *)
-public struct WakupAppIntentsPackage: AppIntentsPackage { }
-
-@available(iOS 26.0, *)
 @objc public class WakupAlarmScheduler: NSObject {
+    // Force the Swift linker to retain the runtime type metadata for AppIntents
+    // by explicitly referencing them in an existential type array.
+    public static var retainedIntents: [any AppIntent.Type] = [
+        StartChallengeIntent.self,
+        StopAlarmIntent.self
+    ]
+    
     public override init() {
         super.init()
         
@@ -190,7 +194,7 @@ public struct WakupAppIntentsPackage: AppIntentsPackage { }
         // Add initialization
         const target = 'override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {';
         const target2 = 'override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {';
-        const initCode = `\n    if #available(iOS 26.0, *) {\n        GlobalAlarmScheduler = WakupAlarmScheduler()\n        AppDependencyManager.shared.add(package: WakupAppIntentsPackage.self)\n    }\n`;
+        const initCode = `\n    if #available(iOS 26.0, *) {\n        GlobalAlarmScheduler = WakupAlarmScheduler()\n    }\n`;
         
         if (appDelegateContent.includes(target)) {
           appDelegateContent = appDelegateContent.replace(target, target + initCode);
