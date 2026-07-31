@@ -39,8 +39,11 @@ export default function GameScreen() {
       // Analytics/logging could happen here
     }
     
-    setGameState('WON');
+    console.log(`[Challenge] Challenge completed successfully for alarm: ${alarmId || 'current'}`);
     await alarmService.stopAlarm((alarmId as string) || 'current');
+    
+    console.log('[Navigation] Returning to Home after challenge completion');
+    router.dismissAll();
   };
 
   const handleLose = () => {
@@ -77,24 +80,7 @@ export default function GameScreen() {
     });
   };
 
-  if (gameState === 'WON') {
-    return (
-      <View style={[styles.container, styles.center]}>
-        <Text style={[styles.title, { color: Colors.dark.success }]}>YOU WIN 🎉</Text>
-        <Text style={[styles.subtitle, { color: Colors.dark.text }]}>Alarm stopped.</Text>
-        
-        <View style={styles.buttonsContainer}>
-          <Pressable 
-            style={[styles.actionButton, { backgroundColor: Colors.dark.surface, borderWidth: 1, borderColor: Colors.dark.border }]}
-            onPress={() => router.dismissAll()}
-          >
-            <Text style={[styles.actionButtonText, { color: Colors.dark.text }]}>DONE</Text>
-          </Pressable>
-        </View>
-      </View>
-    );
-  }
-
+  // The manual WON screen has been removed since navigation is automatic
   const insets = useSafeAreaInsets();
 
   return (

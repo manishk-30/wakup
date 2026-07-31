@@ -14,6 +14,7 @@ export default function AlarmRinging() {
   
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const [currentAlarmId, setCurrentAlarmId] = useState<string>(params.alarmId || 'current');
+  const [alarmTime, setAlarmTime] = useState<string>('...');
 
   useEffect(() => {
     Animated.loop(
@@ -45,9 +46,33 @@ export default function AlarmRinging() {
       try {
         const alarms = await storageService.getAlarms();
         const now = new Date();
-        const activeAlarm = alarms.find(a => 
-          a.enabled && a.hour === now.getHours() && a.minute === now.getMinutes()
-        );
+        
+        console.log(`[AlarmRinging] Pending alarm ID: ${params.alarmId || 'none'}`);
+        
+        let activeAlarm = alarms.find(a => a.id === currentAlarmId);
+        
+        if (!activeAlarm) {
+          activeAlarm = alarms.find(a => 
+            a.enabled && a.hour === now.getHours() && a.minute === now.getMinutes()
+          );
+        }
+        
+        if (activeAlarm) {
+          setCurrentAlarmId(activeAlarm.id);
+          
+          let h = activeAlarm.hour;
+          const ampm = h >= 12 ? 'PM' : 'AM';
+          h = h % 12;
+          h = h ? h : 12;
+          const m = activeAlarm.minute < 10 ? '0' + activeAlarm.minute : activeAlarm.minute;
+          const timeStr = `${h}:${m} ${ampm}`;
+          
+          console.log(`[AlarmRinging] Resolved alarm time: ${timeStr} for alarm: ${activeAlarm.id}`);
+          setAlarmTime(timeStr);
+        } else {
+          console.log(`[AlarmRinging] Could not resolve alarm. Falling back to Unknown.`);
+          setAlarmTime('Unknown');
+        }
         
         const soundName = activeAlarm?.soundName || ALARM_SOUNDS[0].id;
         const soundConfig = ALARM_SOUNDS.find(s => s.id === soundName) || ALARM_SOUNDS[0];
@@ -81,7 +106,7 @@ export default function AlarmRinging() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Animated.Text style={[styles.timeText, { transform: [{ scale: pulseAnim }] }]}>
-          7:30 AM
+          {alarmTime}
         </Animated.Text>
         <Text style={styles.title}>WAKE UP</Text>
         <Text style={styles.subtitle}>
