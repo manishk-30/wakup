@@ -3,6 +3,7 @@ import * as AlarmKit from '../modules/alarm-kit/src';
 import { storageService } from './storageService';
 import { Platform } from 'react-native';
 import { Audio } from 'expo-av';
+import { EventSubscription } from 'expo-modules-core';
 
 // For Expo Go compatibility during UI development, we provide a mock fallback
 const isNativeModuleAvailable = Platform.OS === 'ios' && AlarmKit !== null;
@@ -114,6 +115,13 @@ export const alarmService = {
   async getPendingGameAlarm(): Promise<{ alarmId: string; reason: string } | null> {
     if (isNativeModuleAvailable && AlarmKit.default?.getPendingGameAlarm) {
       return AlarmKit.default!.getPendingGameAlarm();
+    }
+    return null;
+  },
+  
+  addListener(eventName: string, listener: (event: any) => void): EventSubscription | null {
+    if (isNativeModuleAvailable && (AlarmKit.default as any)?.addListener) {
+      return (AlarmKit.default as any).addListener(eventName, listener);
     }
     return null;
   }

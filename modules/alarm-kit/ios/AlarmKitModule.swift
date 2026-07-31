@@ -6,6 +6,27 @@ public class AlarmKitModule: Module {
 
   public func definition() -> ModuleDefinition {
     Name("AlarmKit")
+    
+    Events("onChallengeRequested")
+    
+    OnCreate {
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("WakupChallengeRequested"),
+            object: nil,
+            queue: nil
+        ) { [weak self] notification in
+            guard let self = self,
+                  let userInfo = notification.userInfo,
+                  let alarmId = userInfo["alarmId"] as? String,
+                  let reason = userInfo["reason"] as? String else { return }
+            
+            print("[AlarmKit] Pending challenge delivered to React Native")
+            self.sendEvent("onChallengeRequested", [
+                "alarmId": alarmId,
+                "reason": reason
+            ])
+        }
+    }
 
     AsyncFunction("requestAuthorization") { (promise: Promise) in
       if #available(iOS 26.0, *) {

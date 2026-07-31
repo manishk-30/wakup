@@ -14,9 +14,11 @@ export default function RootLayout() {
   useEffect(() => {
     const checkPendingGame = async () => {
       try {
+        console.log('[AlarmKit] Checking pending intent from UserDefaults...');
         const pendingAlarm = await alarmService.getPendingGameAlarm();
         if (pendingAlarm?.alarmId) {
-          console.log(`[App] Found pending alarm challenge (reason: ${pendingAlarm.reason})! Navigating to ringing screen...`);
+          console.log(`[AlarmKit] Received startChallenge from getPendingGameAlarm (reason: ${pendingAlarm.reason})!`);
+          console.log(`[AlarmKit] Navigating to Challenge Selection`);
           router.replace({ pathname: '/alarm/ringing', params: { alarmId: pendingAlarm.alarmId } });
         }
       } catch (e) {
@@ -24,10 +26,21 @@ export default function RootLayout() {
       }
     };
     
-    // Check initially in case app was launched completely from scratch by the intent
+    // Cold start check
     checkPendingGame();
 
-    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+    // Warm start / Background event listener
+    const eventSubscription = alarmService.addListener('onChallengeRequested', (event) => {
+      console.log(`[AlarmKit] Received startChallenge from onChallengeRequested event!`);
+      if (event?.alarmId) {
+        // Clear UserDefaults so it doesn't trigger again on next mount
+        alarmService.getPendingGameAlarm(); 
+        console.log(`[AlarmKit] Navigating to Challenge Selection`);
+        router.replace({ pathname: '/alarm/ringing', params: { alarmId: event.alarmId } });
+      }
+    });
+
+    const appStateSubscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
       if (
         appState.current.match(/inactive|background/) &&
         nextAppState === 'active'
@@ -38,7 +51,8 @@ export default function RootLayout() {
     });
 
     return () => {
-      subscription.remove();
+      appStateSubscription.remove();
+      if (eventSubscription) eventSubscription.remove();
     };
   }, [router]);
 

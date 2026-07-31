@@ -21,7 +21,7 @@ public struct StartChallengeIntent: LiveActivityIntent, ForegroundContinuableInt
     }
     
     public func perform() async throws -> some IntentResult {
-        try await requestToContinueInForeground()
+        print("[AlarmKit] StartChallengeIntent.perform alarmId=\(alarmId)")
         
         UserDefaults.standard.set(
             alarmId,
@@ -32,6 +32,20 @@ public struct StartChallengeIntent: LiveActivityIntent, ForegroundContinuableInt
             "startChallenge",
             forKey: "PendingGameReason"
         )
+        
+        print("[AlarmKit] Pending challenge stored")
+        
+        NotificationCenter.default.post(
+            name: NSNotification.Name("WakupChallengeRequested"),
+            object: nil,
+            userInfo: [
+                "alarmId": alarmId,
+                "reason": "startChallenge"
+            ]
+        )
+        
+        try await requestToContinueInForeground()
+        print("[AlarmKit] App became active")
         
         return .result()
     }
