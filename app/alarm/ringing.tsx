@@ -32,22 +32,10 @@ export default function AlarmRinging() {
       ])
     ).start();
 
-    // Setup and play the aggressive looping alarm sound
-    async function setupAudio() {
-      if (params.alarmId) {
-        console.log('[AlarmRinging] AlarmKit is already handling the audio natively');
-        return;
-      }
-
-      // 1. Force the OS to play loud audio even if silent switch is on (via native module if compiled)
-      await alarmService.configureAudioSession();
-      
-      // 2. Play our dynamically selected looping alarm file
+    async function resolveAlarmTime() {
       try {
         const alarms = await storageService.getAlarms();
         const now = new Date();
-        
-        console.log(`[AlarmRinging] Pending alarm ID: ${params.alarmId || 'none'}`);
         
         let activeAlarm = alarms.find(a => a.id === currentAlarmId);
         
@@ -67,17 +55,32 @@ export default function AlarmRinging() {
           const m = activeAlarm.minute < 10 ? '0' + activeAlarm.minute : activeAlarm.minute;
           const timeStr = `${h}:${m} ${ampm}`;
           
-          console.log(`[AlarmRinging] Resolved alarm time: ${timeStr} for alarm: ${activeAlarm.id}`);
           setAlarmTime(timeStr);
+          return activeAlarm;
         } else {
-          console.log(`[AlarmRinging] Could not resolve alarm. Falling back to Unknown.`);
           setAlarmTime('Unknown');
+          return null;
         }
-        
+      } catch (e) {
+        setAlarmTime('Unknown');
+        return null;
+      }
+    }
+
+    async function setupAudio() {
+      const activeAlarm = await resolveAlarmTime();
+
+      if (params.alarmId) {
+        console.log('[AlarmRinging] AlarmKit is already handling the audio natively');
+        return;
+      }
+
+      await alarmService.configureAudioSession();
+      
+      try {
         const soundName = activeAlarm?.soundName || ALARM_SOUNDS[0].id;
         const soundConfig = ALARM_SOUNDS.find(s => s.id === soundName) || ALARM_SOUNDS[0];
-        if (activeAlarm) setCurrentAlarmId(activeAlarm.id);
-
+        
         await alarmService.playForegroundAlarm(soundConfig.file);
       } catch (e) {
         console.warn('Failed to load alarm sound. Did you download it?', e);

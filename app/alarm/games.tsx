@@ -43,7 +43,7 @@ export default function GameScreen() {
     await alarmService.stopAlarm((alarmId as string) || 'current');
     
     console.log('[Navigation] Returning to Home after challenge completion');
-    router.dismissAll();
+    router.replace('/');
   };
 
   const handleLose = () => {
