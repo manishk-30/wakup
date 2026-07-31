@@ -182,8 +182,16 @@ struct WakupAppMetadata: AlarmMetadata { }
       }
     });
 
-    // Explicitly enable App Intents metadata generation in case Expo's template disables it
-    xcodeProject.addBuildProperty('ENABLE_APP_INTENTS', 'YES');
+    // Explicitly enable App Intents metadata generation deeply across all configurations
+    // because xcodeProject.addBuildProperty only adds it to the project-level config, 
+    // which Xcode/CocoaPods often overrides or ignores at the target level.
+    const buildConfigs = xcodeProject.pbxXCBuildConfigurationSection();
+    for (const uuid in buildConfigs) {
+      const config = buildConfigs[uuid];
+      if (typeof config === 'object' && config.buildSettings) {
+        config.buildSettings['ENABLE_APP_INTENTS'] = 'YES';
+      }
+    }
 
     // 4. Inject GlobalAlarmScheduler assignment into AppDelegate
     const appDelegatePath = path.join(wakupTargetDir, 'AppDelegate.swift');
