@@ -3,8 +3,10 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
 import { alarmService } from '../../services/alarmService';
+import { storageService } from '../../services/storageService';
 import { GameSession } from '../../types/games';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ALARM_SOUNDS } from '../../constants/sounds';
 
 // Import Games
 import BlackjackGame from '../../games/blackjack/BlackjackGame';
@@ -17,7 +19,7 @@ import CoinFlipGame from '../../games/coin-flip/CoinFlipGame';
 import CardGuessGame from '../../games/card-guess/CardGuessGame';
 
 export default function GameScreen() {
-  const { gameId, alarmId } = useLocalSearchParams();
+  const { gameId, alarmId, isPreview } = useLocalSearchParams();
   const router = useRouter();
   
   const [gameState, setGameState] = useState<'PLAYING' | 'WON' | 'LOST'>('PLAYING');
@@ -31,15 +33,37 @@ export default function GameScreen() {
       alarmId: (alarmId as string) || 'current',
       startedAt: Date.now(),
     });
-  }, [gameId]);
+
+    if (isPreview === 'true') {
+      const playPreviewSound = async () => {
+        await alarmService.configureAudioSession();
+        await alarmService.playForegroundAlarm(ALARM_SOUNDS[0].file);
+      };
+      playPreviewSound();
+
+      return () => {
+        alarmService.stopForegroundAlarm();
+      };
+    }
+  }, [gameId, isPreview]);
 
   const handleWin = async () => {
     if (session) {
       session.result = 'win';
       // Analytics/logging could happen here
     }
+    if (isPreview === 'true') {
+      alarmService.stopForegroundAlarm();
+      router.back();
+      return;
+    }
     
     console.log(`[Challenge] Challenge completed successfully for alarm: ${alarmId || 'current'}`);
+    
+    // Add streak for today
+    const todayStr = new Date().toISOString().split('T')[0];
+    await storageService.addStreakDay(todayStr);
+
     await alarmService.stopAlarm((alarmId as string) || 'current');
     
     console.log('[Navigation] Returning to Home after challenge completion');
@@ -93,7 +117,9 @@ export default function GameScreen() {
           style={styles.bottomNavButton}
           onPress={() => router.back()}
         >
-          <Text style={styles.bottomNavButtonText}>CHOOSE ANOTHER GAME</Text>
+          <Text style={styles.bottomNavButtonText}>
+            {isPreview === 'true' ? 'BACK TO SETUP' : 'CHOOSE ANOTHER GAME'}
+          </Text>
         </Pressable>
       </View>
     </View>

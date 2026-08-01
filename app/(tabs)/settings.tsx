@@ -16,18 +16,6 @@ export default function SettingsScreen() {
       
       <View style={styles.content}>
         <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          <Pressable style={styles.row}>
-            <Text style={[styles.rowText, { color: theme.text }]}>Default Alarm Sound</Text>
-            <Text style={[styles.rowValue, { color: theme.primary }]}>Radar</Text>
-          </Pressable>
-          <View style={[styles.divider, { backgroundColor: theme.border }]} />
-          <Pressable style={styles.row}>
-            <Text style={[styles.rowText, { color: theme.text }]}>Snooze Duration</Text>
-            <Text style={[styles.rowValue, { color: theme.primary }]}>5 mins</Text>
-          </Pressable>
-        </View>
-
-        <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <Pressable style={styles.row} onPress={() => router.push('/about')}>
             <Text style={[styles.rowText, { color: theme.text }]}>About Us</Text>
             <Ionicons name="chevron-forward" size={20} color={theme.textMuted} />

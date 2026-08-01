@@ -144,13 +144,7 @@ export default function Home() {
         )}
       </ScrollView>
       
-      {/* Dev Tool: Trigger alarm manually for testing */}
-      <Pressable 
-        style={[styles.devButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
-        onPress={() => router.push('/alarm/ringing')}
-      >
-        <Text style={{ color: theme.text }}>[DEV] Trigger Alarm</Text>
-      </Pressable>
+
     </View>
   );
 }

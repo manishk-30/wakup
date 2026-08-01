@@ -4,6 +4,7 @@ import { Colors } from '../constants/theme';
 import { useColorScheme, AppState, AppStateStatus } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { alarmService } from '../services/alarmService';
+import { storageService } from '../services/storageService';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -14,6 +15,15 @@ export default function RootLayout() {
   useEffect(() => {
     const checkPendingGame = async () => {
       try {
+        const hasOnboarded = await storageService.hasCompletedOnboarding();
+        if (!hasOnboarded) {
+          // Add a small delay to ensure router is ready
+          setTimeout(() => {
+            router.replace('/onboarding');
+          }, 100);
+          return;
+        }
+
         console.log('[AlarmKit] Checking pending intent from UserDefaults...');
         const pendingAlarm = await alarmService.getPendingGameAlarm();
         if (pendingAlarm?.alarmId) {
@@ -81,6 +91,7 @@ export default function RootLayout() {
         <Stack.Screen name="alarms/new" options={{ title: 'Add Alarm', presentation: 'modal' }} />
         <Stack.Screen name="alarm/ringing" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="alarm/games" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'fade' }} />
       </Stack>
     </>
   );
