@@ -420,6 +420,59 @@ export default function OnboardingScreen() {
           </View>
         );
       case 13:
+        return (
+          <View style={[styles.centerContainer, { justifyContent: 'flex-start', paddingTop: 40 }]}>
+            <Text style={[styles.title, { color: theme.text }]}>Choose Your Challenge</Text>
+            
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xl, width: '100%' }} showsVerticalScrollIndicator={false}>
+              <Pressable
+                style={[
+                  styles.gameCardRow,
+                  { 
+                    backgroundColor: gameId === 'random' ? 'rgba(139, 92, 246, 0.1)' : theme.surface,
+                    borderColor: gameId === 'random' ? theme.primary : theme.border,
+                  }
+                ]}
+                onPress={() => setGameId('random')}
+              >
+                <Text style={{ fontSize: 32, marginRight: Spacing.md }}>🎲</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ ...Typography.h3, color: theme.text }}>Any Game</Text>
+                  <Text style={{ ...Typography.body, color: theme.textMuted }}>Pick when you wake up</Text>
+                </View>
+                {gameId === 'random' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+              </Pressable>
+
+              {GAMES.map((game) => {
+                const isSelected = gameId === game.id;
+                return (
+                  <Pressable
+                    key={game.id}
+                    style={[
+                      styles.gameCardRow,
+                      { 
+                        backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.1)' : theme.surface,
+                        borderColor: isSelected ? theme.primary : theme.border,
+                      }
+                    ]}
+                    onPress={() => setGameId(game.id)}
+                  >
+                    <Text style={{ fontSize: 32, marginRight: Spacing.md }}>{game.icon}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ ...Typography.h3, color: theme.text }}>{game.title}</Text>
+                    </View>
+                    {isSelected && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+
+            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.md, marginBottom: Spacing.md }]} onPress={() => handleNext()}>
+              <Text style={styles.buttonText}>Next</Text>
+            </Pressable>
+          </View>
+        );
+      case 14:
         const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
         return (
           <View style={styles.centerContainer}>
@@ -488,60 +541,7 @@ export default function OnboardingScreen() {
               </ScrollView>
             </View>
 
-            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xl }]} onPress={() => handleNext()}>
-              <Text style={styles.buttonText}>Next</Text>
-            </Pressable>
-          </View>
-        );
-      case 14:
-        return (
-          <View style={[styles.centerContainer, { justifyContent: 'flex-start', paddingTop: 40 }]}>
-            <Text style={[styles.title, { color: theme.text }]}>Choose Your Challenge</Text>
-            
-            <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl * 3, width: '100%' }} showsVerticalScrollIndicator={false}>
-              <Pressable
-                style={[
-                  styles.gameCardRow,
-                  { 
-                    backgroundColor: gameId === 'random' ? 'rgba(139, 92, 246, 0.1)' : theme.surface,
-                    borderColor: gameId === 'random' ? theme.primary : theme.border,
-                  }
-                ]}
-                onPress={() => setGameId('random')}
-              >
-                <Text style={{ fontSize: 32, marginRight: Spacing.md }}>🎲</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ ...Typography.h3, color: theme.text }}>Any Game</Text>
-                  <Text style={{ ...Typography.body, color: theme.textMuted }}>Pick when you wake up</Text>
-                </View>
-                {gameId === 'random' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
-              </Pressable>
-
-              {GAMES.map((game) => {
-                const isSelected = gameId === game.id;
-                return (
-                  <Pressable
-                    key={game.id}
-                    style={[
-                      styles.gameCardRow,
-                      { 
-                        backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.1)' : theme.surface,
-                        borderColor: isSelected ? theme.primary : theme.border,
-                      }
-                    ]}
-                    onPress={() => setGameId(game.id)}
-                  >
-                    <Text style={{ fontSize: 32, marginRight: Spacing.md }}>{game.icon}</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ ...Typography.h3, color: theme.text }}>{game.title}</Text>
-                    </View>
-                    {isSelected && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-
-            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xl, position: 'absolute', bottom: 40 }]} onPress={handleSetAlarm}>
+            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xl }]} onPress={handleSetAlarm}>
               <Text style={styles.buttonText}>Save My First Alarm</Text>
             </Pressable>
           </View>

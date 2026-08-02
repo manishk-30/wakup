@@ -27,13 +27,15 @@ export default function GameScreen() {
   const [canSkip, setCanSkip] = useState(false);
 
   useEffect(() => {
-    // Generate a unique session ID every time a game starts
-    setSession({
-      id: Date.now().toString(),
-      gameId: gameId as string,
-      alarmId: (alarmId as string) || 'current',
-      startedAt: Date.now(),
-    });
+    // Only initialize session if it doesn't exist to prevent infinite loops
+    if (!session) {
+      setSession({
+        id: Date.now().toString(),
+        gameId: gameId as string,
+        alarmId: (alarmId as string) || 'current',
+        startedAt: Date.now(),
+      });
+    }
 
     if (isPreview === 'true') {
       setCanSkip(true);
@@ -53,7 +55,7 @@ export default function GameScreen() {
       }, 60000); // 60 seconds
       return () => clearTimeout(timer);
     }
-  }, [gameId, isPreview, session?.id]);
+  }, [gameId, isPreview]);
 
   const handleWin = async () => {
     if (session) {

@@ -107,7 +107,7 @@ export default function AddAlarm() {
     </View>
   );
 
-  const renderStep2 = () => (
+  const renderStep3 = () => (
     <View style={styles.stepContainer}>
       <Text style={[styles.title, { color: theme.text }]}>Alarm Details</Text>
       
@@ -145,7 +145,7 @@ export default function AddAlarm() {
         </View>
       </View>
 
-      <View style={styles.section}>
+      <View style={[styles.section, { flex: 1 }]}>
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Sound</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.soundsContainer}>
           {ALARM_SOUNDS.map((sound) => {
@@ -176,14 +176,14 @@ export default function AddAlarm() {
     </View>
   );
 
-  const renderStep3 = () => (
+  const renderStep2 = () => (
     <View style={styles.stepContainer}>
       <Text style={[styles.title, { color: theme.text }]}>Choose Your Challenge</Text>
-      <Text style={[styles.subtitle, { color: theme.textMuted, marginBottom: Spacing.xl }]}>
+      <Text style={[styles.subtitle, { color: theme.textMuted, marginBottom: Spacing.md }]}>
         Win this game to turn off your alarm. If you pick "Any Game", you'll choose each morning.
       </Text>
       
-      <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl * 3 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.md }} showsVerticalScrollIndicator={false}>
         <Pressable
           style={[
             styles.gameCardRow,
@@ -345,8 +345,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   footer: {
-    padding: Spacing.lg,
-    paddingBottom: Spacing.xxl,
+    padding: Spacing.md,
+    paddingBottom: Spacing.xl,
   },
   nextButton: {
     height: UI.buttonHeight,
