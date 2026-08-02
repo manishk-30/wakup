@@ -27,7 +27,7 @@ export default function AddAlarm() {
   defaultTime.setHours(7, 30, 0, 0);
   const [time, setTime] = useState(defaultTime);
   const [label, setLabel] = useState('Wake Up');
-  const [repeatDays, setRepeatDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [soundName, setSoundName] = useState(ALARM_SOUNDS[0].id);
 
   const toggleDay = (index: number) => {

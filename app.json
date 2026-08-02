@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "bundleIdentifier": "com.avish.wakup",
       "supportsTablet": true,
       "infoPlist": {
         "UIBackgroundModes": ["audio"],
