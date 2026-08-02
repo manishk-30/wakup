@@ -70,20 +70,30 @@ export default function AlarmRinging() {
     async function setupAudio() {
       const activeAlarm = await resolveAlarmTime();
 
-      if (params.alarmId) {
-        console.log('[AlarmRinging] AlarmKit is already handling the audio natively');
-        return;
-      }
-
-      await alarmService.configureAudioSession();
-      
-      try {
-        const soundName = activeAlarm?.soundName || ALARM_SOUNDS[0].id;
-        const soundConfig = ALARM_SOUNDS.find(s => s.id === soundName) || ALARM_SOUNDS[0];
+      if (!params.alarmId) {
+        await alarmService.configureAudioSession();
         
-        await alarmService.playForegroundAlarm(soundConfig.file);
-      } catch (e) {
-        console.warn('Failed to load alarm sound. Did you download it?', e);
+        try {
+          const soundName = activeAlarm?.soundName || ALARM_SOUNDS[0].id;
+          const soundConfig = ALARM_SOUNDS.find(s => s.id === soundName) || ALARM_SOUNDS[0];
+          
+          await alarmService.playForegroundAlarm(soundConfig.file);
+        } catch (e) {
+          console.warn('Failed to load alarm sound. Did you download it?', e);
+        }
+      } else {
+        console.log('[AlarmRinging] AlarmKit is already handling the audio natively');
+      }
+      
+      // Auto-route if user pre-selected a specific game
+      if (activeAlarm?.gameId && activeAlarm.gameId !== 'random') {
+        router.push({
+          pathname: '/alarm/games',
+          params: { 
+            gameId: activeAlarm.gameId,
+            alarmId: activeAlarm.id
+          }
+        });
       }
     }
 

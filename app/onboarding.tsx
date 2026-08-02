@@ -9,7 +9,87 @@ import { alarmService } from '../services/alarmService';
 import { Colors, Typography, Spacing, Radii, UI } from '../constants/theme';
 import { Alarm } from '../types/alarm';
 
-const TOTAL_STEPS = 14;
+const TOTAL_STEPS = 15;
+
+const AlarmComparisonAnimation = ({ theme }: { theme: any }) => {
+  const oldAlarms = [
+    { time: '7:00 AM', delay: 0 },
+    { time: '7:05 AM', delay: 800 },
+    { time: '7:10 AM', delay: 1600 },
+    { time: '7:15 AM', delay: 2400 },
+  ];
+  
+  const oldAnimValues = useRef(oldAlarms.map(() => new Animated.Value(0))).current;
+  const newAnimValue = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    oldAlarms.forEach((_, i) => {
+      Animated.timing(oldAnimValues[i], {
+        toValue: 1,
+        duration: 400,
+        delay: oldAlarms[i].delay,
+        useNativeDriver: true,
+        easing: Easing.bounce
+      }).start();
+    });
+
+    Animated.timing(newAnimValue, {
+      toValue: 1,
+      duration: 600,
+      delay: 3500,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.back(1.5))
+    }).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.1, duration: 800, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver: true })
+      ])
+    ).start();
+  }, []);
+
+  return (
+    <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', marginVertical: Spacing.xl }}>
+      <View style={{ flex: 1, alignItems: 'center' }}>
+        <Text style={{ ...Typography.h3, color: theme.textMuted, marginBottom: Spacing.md }}>Other Apps</Text>
+        <View style={{ height: 250, width: '100%', alignItems: 'center' }}>
+          {oldAlarms.map((a, i) => (
+            <Animated.View key={i} style={[styles.comparisonAlarm, { 
+              backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+              borderColor: '#ef4444',
+              opacity: oldAnimValues[i],
+              transform: [{ translateY: oldAnimValues[i].interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }]
+            }]}>
+              <Text style={{ color: '#ef4444', fontWeight: 'bold' }}>{a.time}</Text>
+            </Animated.View>
+          ))}
+        </View>
+      </View>
+      
+      <View style={{ width: 1, backgroundColor: theme.border, height: '100%' }} />
+
+      <View style={{ flex: 1, alignItems: 'center' }}>
+        <Text style={{ ...Typography.h3, color: theme.primary, marginBottom: Spacing.md }}>Wakup</Text>
+        <View style={{ height: 250, width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+          <Animated.View style={[styles.comparisonAlarm, { 
+            backgroundColor: 'rgba(139, 92, 246, 0.15)',
+            borderColor: theme.primary,
+            transform: [
+              { scale: newAnimValue.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] }) },
+              { translateY: newAnimValue.interpolate({ inputRange: [0, 1], outputRange: [-50, 0] }) }
+            ],
+            opacity: newAnimValue
+          }]}>
+            <Text style={{ color: theme.primary, fontWeight: 'bold', fontSize: 18 }}>7:00 AM</Text>
+            <Animated.Text style={{ fontSize: 24, marginTop: 4, transform: [{ scale: pulseAnim }] }}>🎮</Animated.Text>
+          </Animated.View>
+        </View>
+      </View>
+    </View>
+  );
+};
 
 export default function OnboardingScreen() {
   const router = useRouter();
@@ -123,6 +203,16 @@ export default function OnboardingScreen() {
       case 3:
         return (
           <View style={styles.centerContainer}>
+            <Text style={[styles.title, { color: theme.text }]}>The Old Way vs The New Way</Text>
+            <AlarmComparisonAnimation theme={theme} />
+            <Pressable style={[styles.button, { backgroundColor: theme.primary }]} onPress={() => handleNext()}>
+              <Text style={styles.buttonText}>I prefer Wakup</Text>
+            </Pressable>
+          </View>
+        );
+      case 4:
+        return (
+          <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>What if your alarm gave you something to play for?</Text>
             <Text style={[styles.subtitle, { color: theme.textMuted }]}>When your alarm rings, you choose a game and play to turn it off.</Text>
             <View style={styles.visualRow}>
@@ -137,7 +227,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 4:
+      case 5:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>It's simple.</Text>
@@ -158,7 +248,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 5:
+      case 6:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>Choice Is Yours</Text>
@@ -168,7 +258,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 6:
+      case 7:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>How do you usually wake up?</Text>
@@ -188,7 +278,7 @@ export default function OnboardingScreen() {
             </View>
           </View>
         );
-      case 7:
+      case 8:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>What sounds more fun to you?</Text>
@@ -208,7 +298,7 @@ export default function OnboardingScreen() {
             </View>
           </View>
         );
-      case 8:
+      case 9:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>How do you want your mornings to feel?</Text>
@@ -228,7 +318,7 @@ export default function OnboardingScreen() {
             </View>
           </View>
         );
-      case 9:
+      case 10:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>No fixed game.</Text>
@@ -267,7 +357,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 10:
+      case 11:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>One thing stands between you and your morning.</Text>
@@ -278,7 +368,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 11:
+      case 12:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>When should we wake you?</Text>
@@ -316,7 +406,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 12:
+      case 13:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>Your first challenge is waiting.</Text>
@@ -330,7 +420,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 13:
+      case 14:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>One last thing.</Text>
@@ -349,7 +439,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 14:
+      case 15:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.hugeTitle, { color: theme.text }]}>Wake up.{"\n"}Take your chance.{"\n"}Win your morning.</Text>
@@ -551,5 +641,14 @@ const styles = StyleSheet.create({
   alarmPreview: {
     alignItems: 'center',
     marginVertical: Spacing.xxl,
+  },
+  comparisonAlarm: {
+    padding: Spacing.md,
+    borderRadius: Radii.md,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm,
+    width: '80%',
   }
 });

@@ -24,6 +24,7 @@ export default function GameScreen() {
   
   const [gameState, setGameState] = useState<'PLAYING' | 'WON' | 'LOST'>('PLAYING');
   const [session, setSession] = useState<GameSession | null>(null);
+  const [canSkip, setCanSkip] = useState(false);
 
   useEffect(() => {
     // Generate a unique session ID every time a game starts
@@ -35,6 +36,7 @@ export default function GameScreen() {
     });
 
     if (isPreview === 'true') {
+      setCanSkip(true);
       const playPreviewSound = async () => {
         await alarmService.configureAudioSession();
         await alarmService.playForegroundAlarm(ALARM_SOUNDS[0].file);
@@ -44,8 +46,14 @@ export default function GameScreen() {
       return () => {
         alarmService.stopForegroundAlarm();
       };
+    } else {
+      setCanSkip(false);
+      const timer = setTimeout(() => {
+        setCanSkip(true);
+      }, 60000); // 60 seconds
+      return () => clearTimeout(timer);
     }
-  }, [gameId, isPreview]);
+  }, [gameId, isPreview, session?.id]);
 
   const handleWin = async () => {
     if (session) {
@@ -112,16 +120,18 @@ export default function GameScreen() {
       <View style={{ flex: 1 }}>
         {renderGame()}
       </View>
-      <View style={styles.persistentBottomNav}>
-        <Pressable 
-          style={styles.bottomNavButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.bottomNavButtonText}>
-            {isPreview === 'true' ? 'BACK TO SETUP' : 'CHOOSE ANOTHER GAME'}
-          </Text>
-        </Pressable>
-      </View>
+      {canSkip && (
+        <View style={styles.persistentBottomNav}>
+          <Pressable 
+            style={styles.bottomNavButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.bottomNavButtonText}>
+              {isPreview === 'true' ? 'BACK TO SETUP' : 'CHOOSE ANOTHER GAME'}
+            </Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }

@@ -7,6 +7,7 @@ import { storageService } from '../../services/storageService';
 import { alarmService } from '../../services/alarmService';
 import { Alarm } from '../../types/alarm';
 import { ALARM_SOUNDS } from '../../constants/sounds';
+import { GAMES } from '../../types/games';
 
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
@@ -29,6 +30,7 @@ export default function AddAlarm() {
   const [label, setLabel] = useState('Wake Up');
   const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [soundName, setSoundName] = useState(ALARM_SOUNDS[0].id);
+  const [gameId, setGameId] = useState('random');
 
   const toggleDay = (index: number) => {
     if (repeatDays.includes(index)) {
@@ -50,6 +52,7 @@ export default function AddAlarm() {
       enabled: true,
       repeatDays,
       soundName,
+      gameId,
     };
 
     await storageService.addAlarm(newAlarm);
@@ -138,10 +141,52 @@ export default function AddAlarm() {
       </View>
       
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Games</Text>
-        <Text style={[styles.helpText, { color: theme.textMuted }]}>
-          Choose any game when your alarm rings. Win once to stop it.
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Game</Text>
+        <Text style={[styles.helpText, { color: theme.textMuted, marginBottom: Spacing.sm }]}>
+          Win the game to stop the alarm.
         </Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.soundsContainer}>
+          <Pressable
+            style={[
+              styles.soundChip,
+              { 
+                backgroundColor: gameId === 'random' ? 'rgba(139, 92, 246, 0.15)' : theme.surface,
+                borderColor: gameId === 'random' ? theme.primary : theme.border,
+              }
+            ]}
+            onPress={() => setGameId('random')}
+          >
+            <Text style={[
+              styles.soundText,
+              { color: gameId === 'random' ? theme.primary : theme.text }
+            ]}>
+              🎲 Any Game
+            </Text>
+          </Pressable>
+          {GAMES.map((game) => {
+            const isSelected = gameId === game.id;
+            return (
+              <Pressable
+                key={game.id}
+                style={[
+                  styles.soundChip,
+                  { 
+                    backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.15)' : theme.surface,
+                    borderColor: isSelected ? theme.primary : theme.border,
+                  }
+                ]}
+                onPress={() => setGameId(game.id)}
+              >
+                <Text style={[
+                  styles.soundText,
+                  { color: isSelected ? theme.primary : theme.text }
+                ]}>
+                  {game.icon} {game.title}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
       </View>
 
       <Pressable 
