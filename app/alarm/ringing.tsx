@@ -10,7 +10,7 @@ import { ALARM_SOUNDS } from '../../constants/sounds';
 
 export default function AlarmRinging() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ alarmId?: string }>();
+  const params = useLocalSearchParams<{ alarmId?: string, forceList?: string }>();
   
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const [currentAlarmId, setCurrentAlarmId] = useState<string>(params.alarmId || 'current');
@@ -85,8 +85,8 @@ export default function AlarmRinging() {
         console.log('[AlarmRinging] AlarmKit is already handling the audio natively');
       }
       
-      // Auto-route if user pre-selected a specific game
-      if (activeAlarm?.gameId && activeAlarm.gameId !== 'random') {
+      // Auto-route if user pre-selected a specific game, UNLESS they manually backed out to choose another (forceList)
+      if (activeAlarm?.gameId && activeAlarm.gameId !== 'random' && params.forceList !== 'true') {
         router.replace({
           pathname: '/alarm/games',
           params: { 

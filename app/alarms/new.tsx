@@ -145,9 +145,9 @@ export default function AddAlarm() {
         </View>
       </View>
 
-      <View style={[styles.section, { flex: 1 }]}>
+      <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Sound</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.soundsContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.soundsContainer, { alignItems: 'center' }]}>
           {ALARM_SOUNDS.map((sound) => {
             const isSelected = soundName === sound.id;
             return (

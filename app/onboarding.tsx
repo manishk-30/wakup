@@ -514,7 +514,7 @@ export default function OnboardingScreen() {
 
             <View style={[styles.section, { width: '100%' }]}>
               <Text style={[styles.sectionTitle, { color: theme.text }]}>Sound</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.soundsContainer}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.soundsContainer, { alignItems: 'center' }]}>
                 {ALARM_SOUNDS.map((sound) => {
                   const isSelected = soundName === sound.id;
                   return (

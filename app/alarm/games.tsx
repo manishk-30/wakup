@@ -126,7 +126,13 @@ export default function GameScreen() {
         <View style={styles.persistentBottomNav}>
           <Pressable 
             style={styles.bottomNavButton}
-            onPress={() => router.back()}
+            onPress={() => {
+              if (isPreview === 'true') {
+                router.back();
+              } else {
+                router.replace(`/alarm/ringing?alarmId=${alarmId || 'current'}&forceList=true`);
+              }
+            }}
           >
             <Text style={styles.bottomNavButtonText}>
               {isPreview === 'true' ? 'BACK TO SETUP' : 'CHOOSE ANOTHER GAME'}
