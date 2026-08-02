@@ -14,9 +14,11 @@ export default function RootLayout() {
   const appState = useRef(AppState.currentState);
 
   useEffect(() => {
+    // Initialize RevenueCat completely asynchronously and non-blocking
+    subscriptionService.setup().catch(e => console.error("[RevenueCat] Setup Error:", e));
+
     const checkPendingGame = async () => {
       try {
-        await subscriptionService.setup();
         const hasOnboarded = await storageService.hasCompletedOnboarding();
         if (!hasOnboarded) {
           // Add a small delay to ensure router is ready
@@ -29,6 +31,8 @@ export default function RootLayout() {
         console.log('[AlarmKit] Checking pending intent from UserDefaults...');
         const pendingAlarm = await alarmService.getPendingGameAlarm();
         if (pendingAlarm?.alarmId) {
+          console.log(`[AlarmKit] Alarm reached scheduled time (Cold start)`);
+          console.log(`[AlarmKit] Alarm state: pending in UserDefaults`);
           console.log(`[AlarmKit] Received startChallenge from getPendingGameAlarm (reason: ${pendingAlarm.reason})!`);
           console.log(`[AlarmKit] Navigating to Challenge Selection`);
           router.replace({ pathname: '/alarm/ringing', params: { alarmId: pendingAlarm.alarmId } });
@@ -43,6 +47,8 @@ export default function RootLayout() {
 
     // Warm start / Background event listener
     const eventSubscription = alarmService.addListener('onChallengeRequested', (event) => {
+      console.log(`[AlarmKit] Alarm reached scheduled time`);
+      console.log(`[AlarmKit] Alarm state: onChallengeRequested (event delivered)`);
       console.log(`[AlarmKit] Received startChallenge from onChallengeRequested event!`);
       if (event?.alarmId) {
         // Clear UserDefaults so it doesn't trigger again on next mount

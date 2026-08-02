@@ -20,8 +20,18 @@ export const alarmService = {
   },
 
   async scheduleAlarm(alarm: Alarm): Promise<AlarmScheduleResult> {
+    console.log(`[AlarmKit] Scheduling alarm...`);
+    console.log(`[AlarmKit] Alarm ID: ${alarm.id}`);
+    console.log(`[AlarmKit] Alarm date: ${alarm.hour}:${alarm.minute}`);
+    
     if (isNativeModuleAvailable && AlarmKit.default?.scheduleAlarm) {
-      return await AlarmKit.default!.scheduleAlarm(alarm);
+      const result = await AlarmKit.default!.scheduleAlarm(alarm);
+      if (result.success) {
+        console.log(`[AlarmKit] Alarm scheduled successfully`);
+      } else {
+        console.error(`[AlarmKit] Scheduling failed:`, result.error);
+      }
+      return result;
     }
     console.log('[AlarmService] Mock: scheduleAlarm', alarm);
     return { success: true, alarmId: alarm.id };
