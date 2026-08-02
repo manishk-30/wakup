@@ -29,7 +29,7 @@ public class AlarmKitModule: Module {
     }
 
     AsyncFunction("requestAuthorization") { (promise: Promise) in
-      if #available(iOS 16.0, *) {
+      if #available(iOS 26.0, *) {
         Task {
           do {
               let authorized = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Bool, Error>) in
@@ -64,7 +64,7 @@ public class AlarmKitModule: Module {
     }
 
     AsyncFunction("scheduleAlarm") { (options: [String: Any], promise: Promise) in
-      if #available(iOS 16.0, *) {
+      if #available(iOS 26.0, *) {
         Task {
           guard let idString = options["id"] as? String,
                 let id = UUID(uuidString: idString),
@@ -101,12 +101,12 @@ public class AlarmKitModule: Module {
           }
         }
       } else {
-        promise.resolve(["success": false, "error": "AlarmKit requires iOS 16.0"])
+        promise.resolve(["success": false, "error": "AlarmKit requires iOS 26.0"])
       }
     }
 
     AsyncFunction("cancelAlarm") { (idString: String, promise: Promise) in
-      if #available(iOS 16.0, *) {
+      if #available(iOS 26.0, *) {
         Task {
           guard let id = UUID(uuidString: idString) else {
               promise.resolve(false)
