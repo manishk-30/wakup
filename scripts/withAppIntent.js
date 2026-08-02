@@ -70,7 +70,8 @@ struct WakupAppMetadata: AlarmMetadata { }
                         return
                     }
                     let repeatDays = options["repeatDays"] as? [Int] ?? []
-                    let success = try await self.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays)
+                    let soundName = options["soundName"] as? String ?? "alarm.wav"
+                    let success = try await self.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays, soundName: soundName)
                     completion(success, id.uuidString, nil)
                 } catch {
                     completion(false, nil, error.localizedDescription)
@@ -100,7 +101,7 @@ struct WakupAppMetadata: AlarmMetadata { }
         return state == .authorized
     }
     
-    public func schedule(id: UUID, hour: Int, minute: Int, label: String, repeatDays: [Int]) async throws -> Bool {
+    public func schedule(id: UUID, hour: Int, minute: Int, label: String, repeatDays: [Int], soundName: String) async throws -> Bool {
         let weekdays: [Locale.Weekday] = repeatDays.compactMap {
             switch $0 {
             case 0: return .sunday
@@ -124,6 +125,7 @@ struct WakupAppMetadata: AlarmMetadata { }
         
         let alertContent = AlarmPresentation.Alert(
             title: titleResource,
+            sound: .named(soundName),
             stopButton: stopBtn,
             secondaryButton: gameBtn,
             secondaryButtonBehavior: .custom
