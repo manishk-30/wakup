@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, useColorScheme, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, TextInput, useColorScheme, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
+import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
 import { storageService } from '../../services/storageService';
 import { alarmService } from '../../services/alarmService';
 import { Alarm } from '../../types/alarm';
 import { ALARM_SOUNDS } from '../../constants/sounds';
 import { GAMES } from '../../types/games';
+import { Ionicons } from '@expo/vector-icons';
 
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const TOTAL_STEPS = 3;
 
 const generateUUID = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -24,6 +26,9 @@ export default function AddAlarm() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   
+  const [step, setStep] = useState(1);
+  const fadeAnim = useState(new Animated.Value(1))[0];
+
   const defaultTime = new Date();
   defaultTime.setHours(7, 30, 0, 0);
   const [time, setTime] = useState(defaultTime);
@@ -37,6 +42,28 @@ export default function AddAlarm() {
       setRepeatDays(repeatDays.filter(d => d !== index));
     } else {
       setRepeatDays([...repeatDays, index].sort());
+    }
+  };
+
+  const handleNext = () => {
+    if (step < TOTAL_STEPS) {
+      Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
+        setStep(step + 1);
+        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+      });
+    } else {
+      handleSave();
+    }
+  };
+
+  const handleBack = () => {
+    if (step > 1) {
+      Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
+        setStep(step - 1);
+        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+      });
+    } else {
+      router.back();
     }
   };
 
@@ -61,8 +88,9 @@ export default function AddAlarm() {
     router.back();
   };
 
-  return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
+  const renderStep1 = () => (
+    <View style={styles.stepContainer}>
+      <Text style={[styles.title, { color: theme.text }]}>When should we wake you?</Text>
       <View style={styles.timePickerContainer}>
         <DateTimePicker
           value={time}
@@ -73,7 +101,23 @@ export default function AddAlarm() {
           }}
           textColor={theme.text}
           themeVariant={colorScheme === 'dark' ? 'dark' : 'light'}
-          style={{ width: '100%', height: 200 }}
+          style={{ width: '100%', height: 250 }}
+        />
+      </View>
+    </View>
+  );
+
+  const renderStep2 = () => (
+    <View style={styles.stepContainer}>
+      <Text style={[styles.title, { color: theme.text }]}>Alarm Details</Text>
+      
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Label</Text>
+        <TextInput
+          style={[styles.labelInput, { color: theme.text, backgroundColor: theme.surface }]}
+          value={label}
+          onChangeText={setLabel}
+          placeholderTextColor={theme.textMuted}
         />
       </View>
 
@@ -102,16 +146,6 @@ export default function AddAlarm() {
       </View>
 
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Label</Text>
-        <TextInput
-          style={[styles.labelInput, { color: theme.text, backgroundColor: theme.surface }]}
-          value={label}
-          onChangeText={setLabel}
-          placeholderTextColor={theme.textMuted}
-        />
-      </View>
-      
-      <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Sound</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.soundsContainer}>
           {ALARM_SOUNDS.map((sound) => {
@@ -139,99 +173,128 @@ export default function AddAlarm() {
           })}
         </ScrollView>
       </View>
+    </View>
+  );
+
+  const renderStep3 = () => (
+    <View style={styles.stepContainer}>
+      <Text style={[styles.title, { color: theme.text }]}>Choose Your Challenge</Text>
+      <Text style={[styles.subtitle, { color: theme.textMuted, marginBottom: Spacing.xl }]}>
+        Win this game to turn off your alarm. If you pick "Any Game", you'll choose each morning.
+      </Text>
       
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Game</Text>
-        <Text style={[styles.helpText, { color: theme.textMuted, marginBottom: Spacing.sm }]}>
-          Win the game to stop the alarm.
-        </Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.soundsContainer}>
-          <Pressable
-            style={[
-              styles.soundChip,
-              { 
-                backgroundColor: gameId === 'random' ? 'rgba(139, 92, 246, 0.15)' : theme.surface,
-                borderColor: gameId === 'random' ? theme.primary : theme.border,
-              }
-            ]}
-            onPress={() => setGameId('random')}
-          >
-            <Text style={[
-              styles.soundText,
-              { color: gameId === 'random' ? theme.primary : theme.text }
-            ]}>
-              🎲 Any Game
-            </Text>
-          </Pressable>
-          {GAMES.map((game) => {
-            const isSelected = gameId === game.id;
-            return (
-              <Pressable
-                key={game.id}
-                style={[
-                  styles.soundChip,
-                  { 
-                    backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.15)' : theme.surface,
-                    borderColor: isSelected ? theme.primary : theme.border,
-                  }
-                ]}
-                onPress={() => setGameId(game.id)}
-              >
-                <Text style={[
-                  styles.soundText,
-                  { color: isSelected ? theme.primary : theme.text }
-                ]}>
-                  {game.icon} {game.title}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl * 3 }} showsVerticalScrollIndicator={false}>
+        <Pressable
+          style={[
+            styles.gameCardRow,
+            { 
+              backgroundColor: gameId === 'random' ? 'rgba(139, 92, 246, 0.1)' : theme.surface,
+              borderColor: gameId === 'random' ? theme.primary : theme.border,
+            }
+          ]}
+          onPress={() => setGameId('random')}
+        >
+          <Text style={{ fontSize: 32, marginRight: Spacing.md }}>🎲</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={{ ...Typography.h3, color: theme.text }}>Any Game</Text>
+            <Text style={{ ...Typography.body, color: theme.textMuted }}>Pick when you wake up</Text>
+          </View>
+          {gameId === 'random' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+        </Pressable>
+
+        {GAMES.map((game) => {
+          const isSelected = gameId === game.id;
+          return (
+            <Pressable
+              key={game.id}
+              style={[
+                styles.gameCardRow,
+                { 
+                  backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.1)' : theme.surface,
+                  borderColor: isSelected ? theme.primary : theme.border,
+                }
+              ]}
+              onPress={() => setGameId(game.id)}
+            >
+              <Text style={{ fontSize: 32, marginRight: Spacing.md }}>{game.icon}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ ...Typography.h3, color: theme.text }}>{game.title}</Text>
+                <Text style={{ ...Typography.body, color: theme.textMuted }}>{game.description}</Text>
+              </View>
+              {isSelected && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+
+  return (
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={styles.header}>
+        <Pressable onPress={handleBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
+        </Pressable>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Step {step} of {TOTAL_STEPS}</Text>
+        <View style={{ width: 40 }} />
       </View>
 
-      <Pressable 
-        style={[styles.saveButton, { backgroundColor: theme.primary }]}
-        onPress={handleSave}
-      >
-        <Text style={styles.saveButtonText}>Save Alarm</Text>
-      </Pressable>
-    </ScrollView>
+      <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+        {step === 1 && renderStep1()}
+        {step === 2 && renderStep2()}
+        {step === 3 && renderStep3()}
+      </Animated.View>
+
+      <View style={styles.footer}>
+        <Pressable 
+          style={[styles.nextButton, { backgroundColor: theme.primary }]}
+          onPress={handleNext}
+        >
+          <Text style={styles.nextButtonText}>{step === TOTAL_STEPS ? 'Save Alarm' : 'Next'}</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: Spacing.lg,
   },
-  timePickerContainer: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: Spacing.xl,
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 60,
+    paddingBottom: Spacing.md,
   },
-  timeInput: {
-    ...Typography.h1,
-    width: 90,
-    height: 90,
-    textAlign: 'center',
-    borderRadius: Radii.lg,
+  backButton: {
+    padding: Spacing.sm,
   },
-  colon: {
-    ...Typography.h1,
-    marginHorizontal: Spacing.sm,
-  },
-  ampmContainer: {
-    marginLeft: Spacing.lg,
-    gap: Spacing.sm,
-  },
-  ampmButton: {
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    borderRadius: Radii.full,
-  },
-  ampmText: {
+  headerTitle: {
     ...Typography.bodyLarge,
+    fontWeight: '600',
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: Spacing.lg,
+  },
+  stepContainer: {
+    flex: 1,
+    paddingTop: Spacing.xl,
+  },
+  title: {
+    ...Typography.h1,
+    marginBottom: Spacing.md,
+  },
+  subtitle: {
+    ...Typography.bodyLarge,
+  },
+  timePickerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.xxl,
   },
   section: {
     marginBottom: Spacing.xl,
@@ -273,18 +336,25 @@ const styles = StyleSheet.create({
     ...Typography.bodyLarge,
     fontWeight: '600',
   },
-  helpText: {
-    ...Typography.body,
-    lineHeight: 24,
-  },
-  saveButton: {
+  gameCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: Spacing.lg,
     borderRadius: Radii.lg,
-    alignItems: 'center',
-    marginTop: Spacing.md,
-    marginBottom: Spacing.xxl * 2,
+    borderWidth: 1,
+    marginBottom: Spacing.md,
   },
-  saveButtonText: {
+  footer: {
+    padding: Spacing.lg,
+    paddingBottom: Spacing.xxl,
+  },
+  nextButton: {
+    height: UI.buttonHeight,
+    borderRadius: Radii.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nextButtonText: {
     ...Typography.h3,
     color: '#FFF',
   },

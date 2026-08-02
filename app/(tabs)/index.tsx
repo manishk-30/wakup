@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Alarm } from '../../types/alarm';
 import { storageService } from '../../services/storageService';
 import { alarmService } from '../../services/alarmService';
+import { GAMES } from '../../types/games';
 
 export default function Home() {
   const router = useRouter();
@@ -99,6 +100,10 @@ export default function Home() {
         ) : (
           alarms.map((alarm) => {
             const { time, ampm } = formatTime(alarm.hour, alarm.minute);
+            const selectedGame = alarm.gameId && alarm.gameId !== 'random' 
+              ? GAMES.find(g => g.id === alarm.gameId) 
+              : { title: 'Any Game', icon: '🎲' };
+              
             return (
               <Pressable 
                 key={alarm.id} 
@@ -125,6 +130,12 @@ export default function Home() {
                   <Text style={[styles.daysText, { color: theme.textMuted }]}>
                     {getDaysString(alarm.repeatDays)}
                   </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: Spacing.sm }}>
+                    <Text style={{ fontSize: 16, marginRight: 4, opacity: alarm.enabled ? 1 : 0.6 }}>{selectedGame?.icon}</Text>
+                    <Text style={{ ...Typography.body, color: alarm.enabled ? theme.primary : theme.textMuted, fontWeight: '600' }}>
+                      {selectedGame?.title}
+                    </Text>
+                  </View>
                 </View>
                 <View style={styles.actionsColumn}>
                   <Switch 

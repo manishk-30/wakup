@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, Animated, useColorScheme, Easing, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Animated, useColorScheme, Easing, ScrollView, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -8,8 +8,10 @@ import { storageService } from '../services/storageService';
 import { alarmService } from '../services/alarmService';
 import { Colors, Typography, Spacing, Radii, UI } from '../constants/theme';
 import { Alarm } from '../types/alarm';
+import { ALARM_SOUNDS } from '../constants/sounds';
+import { GAMES } from '../types/games';
 
-const TOTAL_STEPS = 15;
+const TOTAL_STEPS = 17;
 
 const AlarmComparisonAnimation = ({ theme }: { theme: any }) => {
   const oldAlarms = [
@@ -107,14 +109,25 @@ export default function OnboardingScreen() {
   const [isFlipping, setIsFlipping] = useState(false);
   const [coinResult, setCoinResult] = useState<string | null>(null);
 
-  // Alarm settings state for step 13
   const [alarmTime, setAlarmTime] = useState(new Date(new Date().setHours(7, 30, 0, 0)));
   const [showPicker, setShowPicker] = useState(false);
+  const [label, setLabel] = useState('Wake Up');
+  const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
+  const [soundName, setSoundName] = useState(ALARM_SOUNDS[0].id);
+  const [gameId, setGameId] = useState('random');
+
+  const toggleDay = (index: number) => {
+    if (repeatDays.includes(index)) {
+      setRepeatDays(repeatDays.filter(d => d !== index));
+    } else {
+      setRepeatDays([...repeatDays, index].sort());
+    }
+  };
 
   const handleNext = (nextStepOverride?: number) => {
     Animated.timing(fadeAnim, {
       toValue: 0,
-      duration: 150, // simple smooth fade out
+      duration: 150,
       useNativeDriver: true,
       easing: Easing.inOut(Easing.ease)
     }).start(() => {
@@ -129,7 +142,7 @@ export default function OnboardingScreen() {
       
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 200, // simple smooth fade in
+        duration: 200,
         useNativeDriver: true,
         easing: Easing.inOut(Easing.ease)
       }).start();
@@ -140,7 +153,7 @@ export default function OnboardingScreen() {
     setAnswers(prev => ({ ...prev, [questionKey]: answer }));
     setTimeout(() => {
       handleNext();
-    }, 400); // Small delay so the user can see their selection highlighted
+    }, 400); 
   };
 
   const getOptionStyle = (questionKey: string, answerValue: string) => {
@@ -166,12 +179,12 @@ export default function OnboardingScreen() {
       hour: alarmTime.getHours(),
       minute: alarmTime.getMinutes(),
       enabled: true,
-      label: 'Wake Up',
-      repeatDays: [0, 1, 2, 3, 4, 5, 6], // Everyday default
-      soundName: 'default'
+      label,
+      repeatDays,
+      soundName,
+      gameId
     };
     
-    // Save to storage and schedule natively
     await storageService.addAlarm(newAlarm);
     await alarmService.scheduleAlarm(newAlarm);
     
@@ -401,12 +414,139 @@ export default function OnboardingScreen() {
               </View>
             </View>
 
-            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xxl }]} onPress={handleSetAlarm}>
-              <Text style={styles.buttonText}>Set My First Alarm</Text>
+            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xxl }]} onPress={() => handleNext()}>
+              <Text style={styles.buttonText}>Next</Text>
             </Pressable>
           </View>
         );
       case 13:
+        const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        return (
+          <View style={styles.centerContainer}>
+            <Text style={[styles.title, { color: theme.text }]}>Alarm Details</Text>
+            
+            <View style={[styles.section, { width: '100%', alignItems: 'center' }]}>
+              <Text style={[styles.sectionTitle, { color: theme.text, alignSelf: 'flex-start' }]}>Label</Text>
+              <TextInput
+                style={[styles.labelInput, { color: theme.text, backgroundColor: theme.surface, width: '100%' }]}
+                value={label}
+                onChangeText={setLabel}
+                placeholderTextColor={theme.textMuted}
+              />
+            </View>
+
+            <View style={[styles.section, { width: '100%' }]}>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>Repeat</Text>
+              <View style={styles.daysContainer}>
+                {DAYS.map((day, index) => {
+                  const isSelected = repeatDays.includes(index);
+                  return (
+                    <Pressable
+                      key={index}
+                      style={[
+                        styles.dayCircle,
+                        { backgroundColor: isSelected ? theme.primary : theme.surface }
+                      ]}
+                      onPress={() => toggleDay(index)}
+                    >
+                      <Text style={[
+                        styles.dayText, 
+                        { color: isSelected ? '#FFF' : theme.text }
+                      ]}>{day}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
+            <View style={[styles.section, { width: '100%' }]}>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>Sound</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.soundsContainer}>
+                {ALARM_SOUNDS.map((sound) => {
+                  const isSelected = soundName === sound.id;
+                  return (
+                    <Pressable
+                      key={sound.id}
+                      style={[
+                        styles.soundChip,
+                        { 
+                          backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.15)' : theme.surface,
+                          borderColor: isSelected ? theme.primary : theme.border,
+                        }
+                      ]}
+                      onPress={() => setSoundName(sound.id)}
+                    >
+                      <Text style={[
+                        styles.soundText,
+                        { color: isSelected ? theme.primary : theme.text }
+                      ]}>
+                        {sound.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
+            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xl }]} onPress={() => handleNext()}>
+              <Text style={styles.buttonText}>Next</Text>
+            </Pressable>
+          </View>
+        );
+      case 14:
+        return (
+          <View style={[styles.centerContainer, { justifyContent: 'flex-start', paddingTop: 40 }]}>
+            <Text style={[styles.title, { color: theme.text }]}>Choose Your Challenge</Text>
+            
+            <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl * 3, width: '100%' }} showsVerticalScrollIndicator={false}>
+              <Pressable
+                style={[
+                  styles.gameCardRow,
+                  { 
+                    backgroundColor: gameId === 'random' ? 'rgba(139, 92, 246, 0.1)' : theme.surface,
+                    borderColor: gameId === 'random' ? theme.primary : theme.border,
+                  }
+                ]}
+                onPress={() => setGameId('random')}
+              >
+                <Text style={{ fontSize: 32, marginRight: Spacing.md }}>🎲</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ ...Typography.h3, color: theme.text }}>Any Game</Text>
+                  <Text style={{ ...Typography.body, color: theme.textMuted }}>Pick when you wake up</Text>
+                </View>
+                {gameId === 'random' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+              </Pressable>
+
+              {GAMES.map((game) => {
+                const isSelected = gameId === game.id;
+                return (
+                  <Pressable
+                    key={game.id}
+                    style={[
+                      styles.gameCardRow,
+                      { 
+                        backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.1)' : theme.surface,
+                        borderColor: isSelected ? theme.primary : theme.border,
+                      }
+                    ]}
+                    onPress={() => setGameId(game.id)}
+                  >
+                    <Text style={{ fontSize: 32, marginRight: Spacing.md }}>{game.icon}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ ...Typography.h3, color: theme.text }}>{game.title}</Text>
+                    </View>
+                    {isSelected && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+
+            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xl, position: 'absolute', bottom: 40 }]} onPress={handleSetAlarm}>
+              <Text style={styles.buttonText}>Save My First Alarm</Text>
+            </Pressable>
+          </View>
+        );
+      case 15:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>Your first challenge is waiting.</Text>
@@ -420,7 +560,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 14:
+      case 16:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>One last thing.</Text>
@@ -439,7 +579,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 15:
+      case 17:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.hugeTitle, { color: theme.text }]}>Wake up.{"\n"}Take your chance.{"\n"}Win your morning.</Text>
@@ -650,5 +790,57 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: Spacing.sm,
     width: '80%',
+  },
+  section: {
+    marginBottom: Spacing.xl,
+  },
+  sectionTitle: {
+    ...Typography.h3,
+    marginBottom: Spacing.md,
+  },
+  daysContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  dayCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayText: {
+    ...Typography.bodyLarge,
+  },
+  labelInput: {
+    ...Typography.bodyLarge,
+    padding: Spacing.md,
+    borderRadius: Radii.md,
+  },
+  soundsContainer: {
+    gap: Spacing.sm,
+    paddingRight: Spacing.xl,
+    flexGrow: 0,
+  },
+  soundChip: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: Radii.full,
+    borderWidth: 1,
+    marginRight: Spacing.sm,
+  },
+  soundText: {
+    ...Typography.bodyLarge,
+    fontWeight: '600',
+  },
+  gameCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.lg,
+    borderRadius: Radii.lg,
+    borderWidth: 1,
+    marginBottom: Spacing.md,
+    width: '100%',
   }
 });

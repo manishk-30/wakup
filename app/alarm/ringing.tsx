@@ -87,7 +87,7 @@ export default function AlarmRinging() {
       
       // Auto-route if user pre-selected a specific game
       if (activeAlarm?.gameId && activeAlarm.gameId !== 'random') {
-        router.push({
+        router.replace({
           pathname: '/alarm/games',
           params: { 
             gameId: activeAlarm.gameId,
@@ -106,7 +106,7 @@ export default function AlarmRinging() {
   }, []);
 
   const handleGameSelect = (gameId: string) => {
-    router.push({
+    router.replace({
       pathname: '/alarm/games',
       params: { 
         gameId,
