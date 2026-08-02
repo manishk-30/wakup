@@ -5,6 +5,7 @@ import { useColorScheme, AppState, AppStateStatus } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { alarmService } from '../services/alarmService';
 import { storageService } from '../services/storageService';
+import { subscriptionService } from '../services/subscriptionService';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -15,6 +16,7 @@ export default function RootLayout() {
   useEffect(() => {
     const checkPendingGame = async () => {
       try {
+        await subscriptionService.setup();
         const hasOnboarded = await storageService.hasCompletedOnboarding();
         if (!hasOnboarded) {
           // Add a small delay to ensure router is ready
@@ -92,6 +94,7 @@ export default function RootLayout() {
         <Stack.Screen name="alarm/ringing" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="alarm/games" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'fade' }} />
+        <Stack.Screen name="paywall" options={{ headerShown: false, presentation: 'modal' }} />
       </Stack>
     </>
   );

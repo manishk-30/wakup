@@ -2,11 +2,26 @@ import { View, Text, StyleSheet, useColorScheme, Pressable } from 'react-native'
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
+import { subscriptionService } from '../../services/subscriptionService';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+  
+  const [isPro, setIsPro] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      async function fetchProStatus() {
+        const pro = await subscriptionService.checkProStatus();
+        setIsPro(pro);
+      }
+      fetchProStatus();
+    }, [])
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -15,6 +30,31 @@ export default function SettingsScreen() {
       </View>
       
       <View style={styles.content}>
+        <Pressable 
+          style={[styles.proBanner, { backgroundColor: isPro ? theme.primary + '20' : theme.surface, borderColor: isPro ? theme.primary : theme.border }]}
+          onPress={() => {
+            if (!isPro) {
+              // @ts-ignore - Route types may not be generated yet
+              router.push('/paywall');
+            }
+          }}
+        >
+          <View style={styles.proBannerContent}>
+            <Text style={styles.proBannerIcon}>💎</Text>
+            <View>
+              <Text style={[styles.proBannerTitle, { color: theme.text }]}>Wakup Pro</Text>
+              <Text style={[styles.proBannerSubtitle, { color: theme.textMuted }]}>
+                {isPro ? 'You are a Premium member.' : 'Unlock all games & sounds'}
+              </Text>
+            </View>
+          </View>
+          <View style={[styles.proBadge, { backgroundColor: isPro ? theme.primary : theme.surface, borderColor: theme.border, borderWidth: isPro ? 0 : 1 }]}>
+            <Text style={[styles.proBadgeText, { color: isPro ? '#FFF' : theme.textMuted }]}>
+              {isPro ? 'ACTIVE' : 'UPGRADE'}
+            </Text>
+          </View>
+        </Pressable>
+
         <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <Pressable style={styles.row} onPress={() => router.push('/about')}>
             <Text style={[styles.rowText, { color: theme.text }]}>About Us</Text>
@@ -63,7 +103,40 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    gap: Spacing.lg,
+    marginTop: Spacing.xl,
+  },
+  proBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: Spacing.lg,
+    borderRadius: Radii.lg,
+    borderWidth: 1,
+    marginBottom: Spacing.xl,
+  },
+  proBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  proBannerIcon: {
+    fontSize: 32,
+    marginRight: Spacing.md,
+  },
+  proBannerTitle: {
+    ...Typography.h3,
+    fontWeight: '800',
+  },
+  proBannerSubtitle: {
+    ...Typography.body,
+  },
+  proBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: Radii.sm,
+  },
+  proBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
   },
   card: {
     borderRadius: Radii.lg,
