@@ -24,7 +24,7 @@ export default function GameScreen() {
   
   const [gameState, setGameState] = useState<'PLAYING' | 'WON' | 'LOST'>('PLAYING');
   const [session, setSession] = useState<GameSession | null>(null);
-  const [canSkip, setCanSkip] = useState(false);
+  const [skipTimeLeft, setSkipTimeLeft] = useState(60);
 
   useEffect(() => {
     // Only initialize session if it doesn't exist to prevent infinite loops
@@ -38,7 +38,7 @@ export default function GameScreen() {
     }
 
     if (isPreview === 'true') {
-      setCanSkip(true);
+      setSkipTimeLeft(0);
       const playPreviewSound = async () => {
         await alarmService.configureAudioSession();
         await alarmService.playForegroundAlarm(ALARM_SOUNDS[0].file);
@@ -49,11 +49,17 @@ export default function GameScreen() {
         alarmService.stopForegroundAlarm();
       };
     } else {
-      setCanSkip(false);
-      const timer = setTimeout(() => {
-        setCanSkip(true);
-      }, 60000); // 60 seconds
-      return () => clearTimeout(timer);
+      setSkipTimeLeft(60);
+      const timer = setInterval(() => {
+        setSkipTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
     }
   }, [gameId, isPreview]);
 
@@ -122,24 +128,30 @@ export default function GameScreen() {
       <View style={{ flex: 1 }}>
         {renderGame()}
       </View>
-      {canSkip && (
-        <View style={styles.persistentBottomNav}>
-          <Pressable 
-            style={styles.bottomNavButton}
-            onPress={() => {
-              if (isPreview === 'true') {
-                router.back();
-              } else {
-                router.replace(`/alarm/ringing?alarmId=${alarmId || 'current'}&forceList=true`);
-              }
-            }}
-          >
-            <Text style={styles.bottomNavButtonText}>
-              {isPreview === 'true' ? 'BACK TO SETUP' : 'CHOOSE ANOTHER GAME'}
-            </Text>
-          </Pressable>
-        </View>
-      )}
+      <View style={styles.persistentBottomNav}>
+        <Pressable 
+          style={[
+            styles.bottomNavButton,
+            skipTimeLeft > 0 ? { opacity: 0.5, backgroundColor: Colors.dark.surface } : {}
+          ]}
+          disabled={skipTimeLeft > 0}
+          onPress={() => {
+            if (isPreview === 'true') {
+              router.back();
+            } else {
+              router.replace(`/alarm/ringing?alarmId=${alarmId || 'current'}&forceList=true`);
+            }
+          }}
+        >
+          <Text style={[styles.bottomNavButtonText, skipTimeLeft > 0 ? { color: Colors.dark.textMuted } : {}]}>
+            {isPreview === 'true' 
+              ? 'BACK TO SETUP' 
+              : skipTimeLeft > 0 
+                ? `CHOOSE ANOTHER GAME (${skipTimeLeft}s)` 
+                : 'CHOOSE ANOTHER GAME'}
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }

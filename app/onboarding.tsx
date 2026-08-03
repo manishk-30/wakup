@@ -422,9 +422,8 @@ export default function OnboardingScreen() {
       case 13:
         return (
           <View style={[styles.centerContainer, { justifyContent: 'flex-start', paddingTop: 40 }]}>
-            <Text style={[styles.title, { color: theme.text }]}>Choose Your Challenge</Text>
-            
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xl, width: '100%' }} showsVerticalScrollIndicator={false}>
+              <Text style={[styles.title, { color: theme.text, marginBottom: Spacing.md }]}>Choose Your Challenge</Text>
               <Pressable
                 style={[
                   styles.gameCardRow,

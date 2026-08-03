@@ -8,20 +8,25 @@ export default function PrivacyScreen() {
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
       <Text style={[styles.header, { color: theme.text }]}>Privacy Policy</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>1. Data that stays on your device</Text>
       <Text style={[styles.paragraph, { color: theme.textMuted }]}>
-        Your privacy is critically important to us. At Wakup, we have a few fundamental principles:
+        The following never leaves your iPhone:
       </Text>
+      
       <Text style={[styles.bullet, { color: theme.textMuted }]}>
-        • We don't ask you for personal information unless we truly need it.
+        <Text style={{ fontWeight: 'bold', color: theme.text }}>• Alarms and wake records. </Text>
+        Alarm times, repeat days, chosen missions, sounds, and your wake-up history are stored locally on your device.
       </Text>
+      
       <Text style={[styles.bullet, { color: theme.textMuted }]}>
-        • All your alarms and schedules are stored locally on your device. We do not upload your sleep schedule to our servers.
+        <Text style={{ fontWeight: 'bold', color: theme.text }}>• Onboarding answers. </Text>
+        Your quiz answers (morning-person, age range, wake times, goals, chosen challenge) are used to set up your first alarm and are stored locally.
       </Text>
+
+      <Text style={[styles.sectionTitle, { color: theme.text, marginTop: Spacing.xl }]}>2. Data that leaves your device</Text>
       <Text style={[styles.bullet, { color: theme.textMuted }]}>
-        • We don't share your personal information with anyone except to comply with the law, develop our products, or protect our rights.
-      </Text>
-      <Text style={[styles.paragraph, { color: theme.textMuted, marginTop: Spacing.lg }]}>
-        If you have any questions about accessing or correcting your personal data, please contact our support team.
+        <Text style={{ fontWeight: 'bold', color: theme.text }}>• Purchases (RevenueCat). </Text>
+        When you view the paywall or subscribe, Apple processes the payment and RevenueCat, our subscription provider, receives purchase receipts, transaction identifiers, and an anonymous app-generated user ID to manage your entitlement. We never see your payment details.
       </Text>
     </ScrollView>
   );
@@ -37,6 +42,12 @@ const styles = StyleSheet.create({
     fontSize: 28,
     marginBottom: Spacing.lg,
     marginTop: Spacing.md,
+  },
+  sectionTitle: {
+    ...Typography.h2,
+    fontSize: 22,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   paragraph: {
     ...Typography.bodyLarge,

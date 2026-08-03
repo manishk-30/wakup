@@ -56,6 +56,14 @@ export default function SettingsScreen() {
         </Pressable>
 
         <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <Pressable style={styles.row} onPress={() => router.push('/practice')}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="game-controller-outline" size={22} color={theme.primary} style={{ marginRight: Spacing.sm }} />
+              <Text style={[styles.rowText, { color: theme.text }]}>Practice Games</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={theme.textMuted} />
+          </Pressable>
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
           <Pressable style={styles.row} onPress={() => router.push('/about')}>
             <Text style={[styles.rowText, { color: theme.text }]}>About Us</Text>
             <Ionicons name="chevron-forward" size={20} color={theme.textMuted} />

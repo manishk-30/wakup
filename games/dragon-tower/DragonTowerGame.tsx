@@ -24,7 +24,7 @@ export default function DragonTowerGame({ onWin, onLose }: GameProps) {
     if (rowIndex !== currentRow) return;
 
     const newTower = [...tower];
-    const isSafe = newTower[rowIndex].dragonIndex !== colIndex;
+    const isSafe = !newTower[rowIndex].dragonIndices.includes(colIndex);
 
     newTower[rowIndex] = {
       ...newTower[rowIndex],
@@ -68,7 +68,7 @@ export default function DragonTowerGame({ onWin, onLose }: GameProps) {
             <View key={originalIdx} style={[styles.row, { opacity: isCurrentRow || isPast || rowObj.revealed ? 1 : 0.5 }]}>
               {[0, 1, 2].map((colIndex) => {
                 const isSelected = rowObj.selected === colIndex;
-                const isSafe = rowObj.dragonIndex !== colIndex;
+                const isSafe = !rowObj.dragonIndices.includes(colIndex);
                 
                 let content = '';
                 let tileColor = Colors.dark.surface;

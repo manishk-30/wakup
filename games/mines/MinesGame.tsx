@@ -37,7 +37,7 @@ export default function MinesGame({ onWin, onLose }: GameProps) {
       const newSafeCount = safeCount + 1;
       setSafeCount(newSafeCount);
       
-      if (newSafeCount === 4) {
+      if (newSafeCount === 5) {
         setGameState('WON');
         setTimeout(onWin, 1000);
       }
@@ -50,7 +50,7 @@ export default function MinesGame({ onWin, onLose }: GameProps) {
         <Text style={styles.headerTitle}>MINES</Text>
         <Text style={styles.headerSubtitle}>
           {gameState === 'PLAYING' 
-            ? `Find ${4 - safeCount} safe tiles` 
+            ? `Find ${5 - safeCount} safe tiles` 
             : gameState === 'WON' ? 'SAFE! YOU WIN 🎉' : 'BOOM! YOU LOST'}
         </Text>
       </View>
@@ -65,8 +65,8 @@ export default function MinesGame({ onWin, onLose }: GameProps) {
                   style={[
                     styles.tile, 
                     { 
-                      backgroundColor: tile.isRevealed ? (tile.isMine ? Colors.dark.danger : Colors.dark.success) : Colors.dark.surface,
-                      borderColor: tile.isRevealed ? (tile.isMine ? Colors.dark.danger : Colors.dark.success) : Colors.dark.border
+                      backgroundColor: tile.isRevealed ? (tile.isMine ? Colors.dark.danger : Colors.dark.success) : 'rgba(255, 255, 255, 0.1)',
+                      borderColor: tile.isRevealed ? (tile.isMine ? Colors.dark.danger : Colors.dark.success) : 'rgba(255, 255, 255, 0.2)'
                     }
                   ]}
                   onPress={() => handleTilePress(tile.id)}

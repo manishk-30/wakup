@@ -178,12 +178,11 @@ export default function AddAlarm() {
 
   const renderStep2 = () => (
     <View style={styles.stepContainer}>
-      <Text style={[styles.title, { color: theme.text }]}>Choose Your Challenge</Text>
-      <Text style={[styles.subtitle, { color: theme.textMuted, marginBottom: Spacing.md }]}>
-        Win this game to turn off your alarm. If you pick "Any Game", you'll choose each morning.
-      </Text>
-      
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.md }} showsVerticalScrollIndicator={false}>
+        <Text style={[styles.title, { color: theme.text }]}>Choose Your Challenge</Text>
+        <Text style={[styles.subtitle, { color: theme.textMuted, marginBottom: Spacing.md }]}>
+          Win this game to turn off your alarm. If you pick "Any Game", you'll choose each morning.
+        </Text>
         <Pressable
           style={[
             styles.gameCardRow,
