@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, useColorScheme, Pressable } from 'react-native';
+import { View, Text, StyleSheet, useColorScheme, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
+import { storageService } from '../../services/storageService';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { subscriptionService } from '../../services/subscriptionService';
@@ -29,7 +30,7 @@ export default function SettingsScreen() {
         <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
       </View>
       
-      <View style={styles.content}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
         <Pressable 
           style={[styles.proBanner, { backgroundColor: isPro ? theme.primary + '20' : theme.surface, borderColor: isPro ? theme.primary : theme.border }]}
           onPress={() => {
@@ -91,7 +92,9 @@ export default function SettingsScreen() {
         </View>
 
         <Text style={[styles.versionText, { color: theme.textMuted }]}>Wakup v1.0.0</Text>
-      </View>
+
+
+      </ScrollView>
     </View>
   );
 }
