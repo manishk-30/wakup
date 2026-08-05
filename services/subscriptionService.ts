@@ -42,10 +42,11 @@ class SubscriptionService {
   async getOfferings() {
     try {
       const offerings = await Purchases.getOfferings();
-      if (offerings.current !== null) {
-        return offerings.current.availablePackages;
+      if (!offerings?.current?.availablePackages) {
+        console.log("[SubscriptionService] No RevenueCat offerings available");
+        return [];
       }
-      return [];
+      return offerings.current.availablePackages;
     } catch (e) {
       console.error('[SubscriptionService] Error fetching offerings:', e);
       return [];
