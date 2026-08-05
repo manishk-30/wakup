@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radii, UI } from '../constants/theme';
 import { subscriptionService } from '../services/subscriptionService';
 import { PurchasesPackage } from 'react-native-purchases';
+import { useProStatus } from '../hooks/useProStatus';
 
 // Mock data in case Apple App Store Connect isn't fully configured yet by the user
 const MOCK_PACKAGES: any[] = [
@@ -40,6 +41,8 @@ export default function PaywallScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+
+  const { isPro } = useProStatus();
 
   const [packages, setPackages] = useState<PurchasesPackage[] | any[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
@@ -159,49 +162,60 @@ export default function PaywallScreen() {
         </View>
 
         <View style={styles.packagesContainer}>
-          {packages.map((pkg) => {
-            const isSelected = selectedPackage === pkg.identifier;
-            return (
-              <Pressable
-                key={pkg.identifier}
-                style={[
-                  styles.packageCard,
-                  { backgroundColor: theme.surface, borderColor: isSelected ? theme.primary : theme.border },
-                  isSelected && styles.packageCardSelected
-                ]}
-                onPress={() => setSelectedPackage(pkg.identifier)}
-              >
-                <View style={styles.packageInfo}>
-                  <Text style={[styles.packageTitle, { color: theme.text }]}>
-                    {pkg.packageType === 'ANNUAL' ? 'Yearly' : 'Monthly'}
+          {isPro ? (
+            <View style={[styles.packageCard, { backgroundColor: theme.surface, borderColor: theme.primary, alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.xxl }]}>
+              <View>
+                <Text style={{ ...Typography.h3, color: theme.primary, fontWeight: '800', textAlign: 'center', marginBottom: Spacing.sm }}>You're already Pro! 🎉</Text>
+                <Text style={{ ...Typography.body, color: theme.textMuted, textAlign: 'center' }}>Thank you for subscribing.</Text>
+              </View>
+            </View>
+          ) : (
+            packages.map((pkg) => {
+              const isSelected = selectedPackage === pkg.identifier;
+              return (
+                <Pressable
+                  key={pkg.identifier}
+                  style={[
+                    styles.packageCard,
+                    { backgroundColor: theme.surface, borderColor: isSelected ? theme.primary : theme.border },
+                    isSelected && styles.packageCardSelected
+                  ]}
+                  onPress={() => setSelectedPackage(pkg.identifier)}
+                >
+                  <View style={styles.packageInfo}>
+                    <Text style={[styles.packageTitle, { color: theme.text }]}>
+                      {pkg.packageType === 'ANNUAL' ? 'Yearly' : 'Monthly'}
+                    </Text>
+                    {pkg.packageType === 'ANNUAL' && (
+                      <View style={[styles.badge, { backgroundColor: theme.primary }]}>
+                        <Text style={styles.badgeText}>BEST VALUE</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={[styles.packagePrice, { color: theme.text }]}>
+                    {pkg.product.priceString}
                   </Text>
-                  {pkg.packageType === 'ANNUAL' && (
-                    <View style={[styles.badge, { backgroundColor: theme.primary }]}>
-                      <Text style={styles.badgeText}>BEST VALUE</Text>
-                    </View>
-                  )}
-                </View>
-                <Text style={[styles.packagePrice, { color: theme.text }]}>
-                  {pkg.product.priceString}
-                </Text>
-              </Pressable>
-            );
-          })}
+                </Pressable>
+              );
+            })
+          )}
         </View>
       </ScrollView>
 
       <View style={[styles.footer, { backgroundColor: theme.background }]}>
-        <Pressable 
-          style={[styles.purchaseButton, { backgroundColor: theme.primary, opacity: isPurchasing ? 0.7 : 1 }]}
-          onPress={handlePurchase}
-          disabled={isPurchasing}
-        >
-          {isPurchasing ? (
-            <ActivityIndicator color="#FFF" />
-          ) : (
-            <Text style={styles.purchaseButtonText}>Continue</Text>
-          )}
-        </Pressable>
+        {!isPro && (
+          <Pressable 
+            style={[styles.purchaseButton, { backgroundColor: theme.primary, opacity: isPurchasing ? 0.7 : 1 }]}
+            onPress={handlePurchase}
+            disabled={isPurchasing}
+          >
+            {isPurchasing ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <Text style={styles.purchaseButtonText}>Continue</Text>
+            )}
+          </Pressable>
+        )}
         <View style={styles.footerLinks}>
           <Pressable onPress={handleRestore}><Text style={[styles.footerLinkText, { color: theme.textMuted }]}>Restore Purchases</Text></Pressable>
           <Text style={{ color: theme.textMuted }}> • </Text>

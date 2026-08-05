@@ -6,23 +6,14 @@ import { storageService } from '../../services/storageService';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { subscriptionService } from '../../services/subscriptionService';
+import { useProStatus } from '../../hooks/useProStatus';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   
-  const [isPro, setIsPro] = useState(false);
-
-  useFocusEffect(
-    useCallback(() => {
-      async function fetchProStatus() {
-        const pro = await subscriptionService.checkProStatus();
-        setIsPro(pro);
-      }
-      fetchProStatus();
-    }, [])
-  );
+  const { isPro } = useProStatus();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -45,13 +36,13 @@ export default function SettingsScreen() {
             <View>
               <Text style={[styles.proBannerTitle, { color: theme.text }]}>Wakup Pro</Text>
               <Text style={[styles.proBannerSubtitle, { color: theme.textMuted }]}>
-                {isPro ? 'You are a Premium member.' : 'Unlock all games & sounds'}
+                {isPro ? 'Active subscription' : 'Upgrade to Pro'}
               </Text>
             </View>
           </View>
           <View style={[styles.proBadge, { backgroundColor: isPro ? theme.primary : theme.surface, borderColor: theme.border, borderWidth: isPro ? 0 : 1 }]}>
             <Text style={[styles.proBadgeText, { color: isPro ? '#FFF' : theme.textMuted }]}>
-              {isPro ? 'ACTIVE' : 'UPGRADE'}
+              {isPro ? '⭐ PRO' : 'FREE'}
             </Text>
           </View>
         </Pressable>
