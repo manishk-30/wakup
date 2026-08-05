@@ -42,14 +42,26 @@ class SubscriptionService {
 
   async getOfferings() {
     try {
-      console.log('[SubscriptionService] Fetching offerings');
+      console.log('[SubscriptionService] Fetching offering: paywall');
       const offerings = await Purchases.getOfferings();
-      if (!offerings?.current?.availablePackages) {
+      
+      const paywallOffering = offerings?.all['paywall'];
+
+      if (!paywallOffering?.availablePackages) {
         console.log("[SubscriptionService] No RevenueCat offerings available");
         return [];
       }
-      console.log('[SubscriptionService] Offering loaded');
-      return offerings.current.availablePackages;
+      
+      console.log('[SubscriptionService] Paywall offering loaded');
+      const packages = paywallOffering.availablePackages;
+      
+      const hasMonthly = packages.some(p => p.packageType === 'MONTHLY' || p.identifier === '$rc_monthly');
+      const hasYearly = packages.some(p => p.packageType === 'ANNUAL' || p.identifier === '$rc_annual');
+      
+      if (hasMonthly) console.log('[SubscriptionService] Monthly package loaded');
+      if (hasYearly) console.log('[SubscriptionService] Yearly package loaded');
+      
+      return packages;
     } catch (e) {
       console.error('[SubscriptionService] Error fetching offerings:', e);
       return [];
