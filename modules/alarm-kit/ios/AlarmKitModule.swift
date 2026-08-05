@@ -66,12 +66,25 @@ public class AlarmKitModule: Module {
     AsyncFunction("scheduleAlarm") { (options: [String: Any], promise: Promise) in
       if #available(iOS 26.0, *) {
         Task {
-          guard let idString = options["id"] as? String,
-                let id = UUID(uuidString: idString),
-                let hour = options["hour"] as? Int,
-                let minute = options["minute"] as? Int,
-                let label = options["label"] as? String else {
-            promise.resolve(["success": false, "error": "Invalid arguments"])
+          print("[AlarmKit] Received options from JS: \(options)")
+          
+          guard let idString = options["id"] as? String else {
+            promise.resolve(["success": false, "error": "Invalid argument: 'id' must be a String (got \(String(describing: options["id"])))"])
+            return
+          }
+          
+          guard let hour = options["hour"] as? Int else {
+            promise.resolve(["success": false, "error": "Invalid argument: 'hour' must be an Int (got \(String(describing: options["hour"])))"])
+            return
+          }
+          
+          guard let minute = options["minute"] as? Int else {
+            promise.resolve(["success": false, "error": "Invalid argument: 'minute' must be an Int (got \(String(describing: options["minute"])))"])
+            return
+          }
+          
+          guard let label = options["label"] as? String else {
+            promise.resolve(["success": false, "error": "Invalid argument: 'label' must be a String (got \(String(describing: options["label"])))"])
             return
           }
           
@@ -108,10 +121,8 @@ public class AlarmKitModule: Module {
     AsyncFunction("cancelAlarm") { (idString: String, promise: Promise) in
       if #available(iOS 26.0, *) {
         Task {
-          guard let id = UUID(uuidString: idString) else {
-              promise.resolve(false)
-              return
-          }
+          print("[AlarmKit] Received cancel request for JS ID: \(idString)")
+
           do {
               let success = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Bool, Error>) in
                   NotificationCenter.default.post(
