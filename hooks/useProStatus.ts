@@ -26,8 +26,8 @@ export function useProStatus() {
 
     const unsubscribe = subscriptionService.addListener((info: CustomerInfo) => {
       setCustomerInfo(info);
-      // Explicitly check for the 'premium' entitlement configured in RevenueCat
-      const proStatus = typeof info.entitlements.active['premium'] !== 'undefined';
+      // Explicitly check for the 'Pro' entitlement configured in RevenueCat
+      const proStatus = typeof info.entitlements.active['Pro'] !== 'undefined';
       setIsPro(proStatus);
     });
 

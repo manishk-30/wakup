@@ -58,8 +58,8 @@ class SubscriptionService {
     console.log('[SubscriptionService] Checking Pro status');
     try {
       const customerInfo = await Purchases.getCustomerInfo();
-      // Using 'premium' entitlement as explicitly configured in RevenueCat
-      const isActive = typeof customerInfo.entitlements.active['premium'] !== 'undefined';
+      // Using 'Pro' entitlement as explicitly configured in RevenueCat
+      const isActive = typeof customerInfo.entitlements.active['Pro'] !== 'undefined';
       console.log(`[SubscriptionService] Pro status: ${isActive}`);
       return isActive;
     } catch (e) {
@@ -110,7 +110,7 @@ class SubscriptionService {
       
       this.notifyListeners(customerInfo);
       
-      const isPremium = typeof customerInfo.entitlements.active['premium'] !== 'undefined';
+      const isPremium = typeof customerInfo.entitlements.active['Pro'] !== 'undefined';
       if (isPremium) {
         console.log('[SubscriptionService] Premium entitlement active: true');
       }
