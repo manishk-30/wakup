@@ -9,6 +9,7 @@ import { PurchasesPackage } from 'react-native-purchases';
 // Mock data in case Apple App Store Connect isn't fully configured yet by the user
 const MOCK_PACKAGES: any[] = [
   {
+    isMock: true,
     identifier: '$rc_annual',
     packageType: 'ANNUAL',
     product: {
@@ -21,6 +22,7 @@ const MOCK_PACKAGES: any[] = [
     },
   },
   {
+    isMock: true,
     identifier: '$rc_monthly',
     packageType: 'MONTHLY',
     product: {
@@ -69,7 +71,7 @@ export default function PaywallScreen() {
     const pkg = packages.find(p => p.identifier === selectedPackage);
     
     // If it's a mock package, just simulate success
-    if (pkg && !pkg.product.subscriptionPeriod) {
+    if (pkg && (pkg as any).isMock) {
       setTimeout(() => {
         setIsPurchasing(false);
         Alert.alert("Success!", "Mock purchase complete. (You are using fake data because Apple Developer isn't linked yet).");
@@ -79,11 +81,16 @@ export default function PaywallScreen() {
     }
 
     if (pkg) {
-      const { success, error } = await subscriptionService.purchasePackage(pkg as PurchasesPackage);
+      const { success, customerInfo, error } = await subscriptionService.purchasePackage(pkg as PurchasesPackage);
       setIsPurchasing(false);
       if (success) {
-        Alert.alert("Welcome to Pro!", "Thank you for upgrading.");
-        router.back();
+        const isPremium = typeof customerInfo?.entitlements.active['premium'] !== 'undefined' || typeof customerInfo?.entitlements.active['pro'] !== 'undefined';
+        if (isPremium) {
+          Alert.alert("Welcome to Pro!", "Thank you for upgrading.");
+          router.back();
+        } else {
+          Alert.alert("Purchase Complete", "But the premium entitlement was not unlocked. Please contact support.");
+        }
       } else {
         if (error !== 'User cancelled') {
           Alert.alert("Purchase Failed", error || "Unknown error occurred.");
@@ -94,11 +101,17 @@ export default function PaywallScreen() {
 
   const handleRestore = async () => {
     setIsPurchasing(true);
-    const { success, error } = await subscriptionService.restorePurchases();
+    const { success, customerInfo, error } = await subscriptionService.restorePurchases();
     setIsPurchasing(false);
     
     if (success) {
-      Alert.alert("Restored", "Your purchases have been restored.");
+      const isPremium = typeof customerInfo?.entitlements.active['premium'] !== 'undefined' || typeof customerInfo?.entitlements.active['pro'] !== 'undefined';
+      if (isPremium) {
+        Alert.alert("Restored", "Your purchases have been restored.");
+        router.back();
+      } else {
+        Alert.alert("Restored", "No active premium subscription found.");
+      }
     } else {
       Alert.alert("Restore Failed", error || "Could not restore purchases.");
     }

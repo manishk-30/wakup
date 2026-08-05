@@ -31,8 +31,9 @@ class SubscriptionService {
   async checkProStatus(): Promise<boolean> {
     try {
       const customerInfo = await Purchases.getCustomerInfo();
-      // Check if the user has the 'pro' entitlement active
-      return typeof customerInfo.entitlements.active['pro'] !== 'undefined';
+      // Check if the user has the 'premium' (or legacy 'pro') entitlement active
+      return typeof customerInfo.entitlements.active['premium'] !== 'undefined' || 
+             typeof customerInfo.entitlements.active['pro'] !== 'undefined';
     } catch (e) {
       console.error('[SubscriptionService] Error checking Pro status:', e);
       return false;
@@ -41,11 +42,13 @@ class SubscriptionService {
 
   async getOfferings() {
     try {
+      console.log('[SubscriptionService] Fetching offerings');
       const offerings = await Purchases.getOfferings();
       if (!offerings?.current?.availablePackages) {
         console.log("[SubscriptionService] No RevenueCat offerings available");
         return [];
       }
+      console.log('[SubscriptionService] Offering loaded');
       return offerings.current.availablePackages;
     } catch (e) {
       console.error('[SubscriptionService] Error fetching offerings:', e);
@@ -55,7 +58,15 @@ class SubscriptionService {
 
   async purchasePackage(pkg: PurchasesPackage): Promise<{ success: boolean; customerInfo?: CustomerInfo; error?: string }> {
     try {
+      console.log(`[SubscriptionService] Purchasing package: ${pkg.identifier}`);
       const { customerInfo } = await Purchases.purchasePackage(pkg);
+      console.log('[SubscriptionService] Purchase successful');
+      
+      const isPremium = typeof customerInfo.entitlements.active['premium'] !== 'undefined' || typeof customerInfo.entitlements.active['pro'] !== 'undefined';
+      if (isPremium) {
+        console.log('[SubscriptionService] Premium entitlement active: true');
+      }
+      
       return { success: true, customerInfo };
     } catch (e: any) {
       if (!e.userCancelled) {
@@ -66,10 +77,12 @@ class SubscriptionService {
     }
   }
 
-  async restorePurchases(): Promise<{ success: boolean; error?: string }> {
+  async restorePurchases(): Promise<{ success: boolean; customerInfo?: CustomerInfo; error?: string }> {
     try {
+      console.log('[SubscriptionService] Restoring purchases');
       const customerInfo = await Purchases.restorePurchases();
-      return { success: true };
+      console.log('[SubscriptionService] Restore successful');
+      return { success: true, customerInfo };
     } catch (e: any) {
       return { success: false, error: e.message };
     }
