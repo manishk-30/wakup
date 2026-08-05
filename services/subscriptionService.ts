@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import Purchases, { LOG_LEVEL, PurchasesPackage, CustomerInfo } from 'react-native-purchases';
 
 // Your RevenueCat API Key
-const API_KEY_APPLE = 'appl_DyRLaIiMtLaexRMbeKJiQpKlzcg';
+const API_KEY_APPLE = 'appl_FOrEjBfhifvAwBWcqPfGKrOYWdB';
 // const API_KEY_GOOGLE = 'goog_...'; // For future Android release
 
 class SubscriptionService {
