@@ -11,6 +11,14 @@ import { Alarm } from '../types/alarm';
 import { ALARM_SOUNDS } from '../constants/sounds';
 import { GAMES } from '../types/games';
 
+const generateUUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 const TOTAL_STEPS = 15;
 
 const AlarmComparisonAnimation = ({ theme }: { theme: any }) => {
@@ -201,7 +209,7 @@ export default function OnboardingScreen() {
 
   const handleSetAlarm = async () => {
     const newAlarm: Alarm = {
-      id: Date.now().toString(),
+      id: generateUUID(),
       hour: alarmTime.getHours(),
       minute: alarmTime.getMinutes(),
       enabled: true,

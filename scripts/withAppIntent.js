@@ -81,9 +81,14 @@ struct WakupAppMetadata: AlarmMetadata { }
         NotificationCenter.default.addObserver(forName: NSNotification.Name("WakupCancelAlarm"), object: nil, queue: nil) { [weak self] notification in
             guard let self = self,
                   let userInfo = notification.userInfo,
-                  let idString = userInfo["id"] as? String,
-                  let id = UUID(uuidString: idString),
                   let completion = userInfo["completion"] as? (Bool) -> Void else { return }
+                  
+            guard let idString = userInfo["id"] as? String,
+                  let id = UUID(uuidString: idString) else {
+                completion(false)
+                return
+            }
+            
             Task {
                 do {
                     try self.cancel(id: id)
