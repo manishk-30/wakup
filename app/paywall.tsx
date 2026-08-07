@@ -137,7 +137,7 @@ export default function PaywallScreen() {
       const { success, customerInfo, error } = await subscriptionService.purchasePackage(pkg as PurchasesPackage);
       setIsPurchasing(false);
       if (success) {
-        const isPremium = typeof customerInfo?.entitlements.active['pro'] !== 'undefined';
+        const isPremium = typeof customerInfo?.entitlements.active['Pro'] !== 'undefined';
         if (isPremium) {
           if (router.canGoBack()) {
             router.back();
@@ -161,7 +161,7 @@ export default function PaywallScreen() {
     setIsPurchasing(false);
     
     if (success) {
-      const isPremium = typeof customerInfo?.entitlements.active['pro'] !== 'undefined';
+      const isPremium = typeof customerInfo?.entitlements.active['Pro'] !== 'undefined';
       if (isPremium) {
         Alert.alert("Restored", "Your purchases have been restored.");
         if (router.canGoBack()) {

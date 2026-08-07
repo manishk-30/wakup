@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import Purchases, { LOG_LEVEL, PurchasesPackage, CustomerInfo } from 'react-native-purchases';
+import Purchases, { LOG_LEVEL, PurchasesPackage, CustomerInfo, PURCHASES_ERROR_CODE } from 'react-native-purchases';
 
 // Your RevenueCat API Key
 const API_KEY_APPLE = 'appl_FOrEjBfhifvAwBWcqPfGKrOYWdB';
@@ -127,15 +127,33 @@ class SubscriptionService {
 
   async restorePurchases(): Promise<{ success: boolean; customerInfo?: CustomerInfo; error?: string }> {
     try {
+      await this.setup();
       console.log('[SubscriptionService] Restoring purchases');
       const customerInfo = await Purchases.restorePurchases();
       console.log('[SubscriptionService] Restore purchases successful');
+      console.log(customerInfo.entitlements.active);
+      console.log(customerInfo.activeSubscriptions);
       
       this.notifyListeners(customerInfo);
       
       return { success: true, customerInfo };
     } catch (e: any) {
-      return { success: false, error: e.message };
+      console.error('[SubscriptionService] Restore purchases failed:', {
+        code: e.code,
+        message: e.message,
+        userInfo: e.userInfo
+      });
+      
+      let errorMessage = e.message;
+      if (
+        e.code === PURCHASES_ERROR_CODE.STORE_PROBLEM_ERROR || 
+        e.code === PURCHASES_ERROR_CODE.NETWORK_ERROR ||
+        e.code === PURCHASES_ERROR_CODE.UNKNOWN_BACKEND_ERROR
+      ) {
+        errorMessage = "Unable to contact the App Store. Please try Restore Purchases again in a few moments.";
+      }
+      
+      return { success: false, error: errorMessage };
     }
   }
 }

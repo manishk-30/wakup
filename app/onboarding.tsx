@@ -298,7 +298,7 @@ export default function OnboardingScreen() {
     const { success, customerInfo, error } = await subscriptionService.restorePurchases();
     setIsPurchasing(false);
     if (success) {
-      const isPremium = typeof customerInfo?.entitlements.active['pro'] !== 'undefined';
+      const isPremium = typeof customerInfo?.entitlements.active['Pro'] !== 'undefined';
       if (isPremium) {
         Alert.alert("Restored", "Your purchases have been restored.");
         finishOnboarding();
