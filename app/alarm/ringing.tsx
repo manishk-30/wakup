@@ -70,19 +70,15 @@ export default function AlarmRinging() {
     async function setupAudio() {
       const activeAlarm = await resolveAlarmTime();
 
-      if (!params.alarmId) {
-        await alarmService.configureAudioSession();
+      await alarmService.configureAudioSession();
+      
+      try {
+        const soundName = activeAlarm?.soundName || ALARM_SOUNDS[0].id;
+        const soundConfig = ALARM_SOUNDS.find(s => s.id === soundName) || ALARM_SOUNDS[0];
         
-        try {
-          const soundName = activeAlarm?.soundName || ALARM_SOUNDS[0].id;
-          const soundConfig = ALARM_SOUNDS.find(s => s.id === soundName) || ALARM_SOUNDS[0];
-          
-          await alarmService.playForegroundAlarm(soundConfig.file);
-        } catch (e) {
-          console.warn('Failed to load alarm sound. Did you download it?', e);
-        }
-      } else {
-        console.log('[AlarmRinging] AlarmKit is already handling the audio natively');
+        await alarmService.playForegroundAlarm(soundConfig.file);
+      } catch (e) {
+        console.warn('Failed to load alarm sound. Did you download it?', e);
       }
       
       // Auto-route if user pre-selected a specific game, UNLESS they manually backed out to choose another (forceList)
@@ -98,11 +94,6 @@ export default function AlarmRinging() {
     }
 
     setupAudio();
-
-    // Stop and unload the sound when they leave this screen entirely just in case
-    return () => {
-      alarmService.stopForegroundAlarm();
-    };
   }, []);
 
   const handleGameSelect = (gameId: string) => {

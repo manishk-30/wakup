@@ -79,6 +79,7 @@ export const alarmService = {
   
   async playForegroundAlarm(file: any): Promise<void> {
     try {
+      await this.stopForegroundAlarm();
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
         staysActiveInBackground: true,
