@@ -139,11 +139,7 @@ export default function PaywallScreen() {
       if (success) {
         const isPremium = typeof customerInfo?.entitlements.active['Pro'] !== 'undefined';
         if (isPremium) {
-          if (router.canGoBack()) {
-            router.back();
-          } else {
-            router.replace('/');
-          }
+          router.replace('/');
         } else {
           Alert.alert("Purchase Complete", "But the premium entitlement was not unlocked.");
         }
@@ -164,11 +160,7 @@ export default function PaywallScreen() {
       const isPremium = typeof customerInfo?.entitlements.active['Pro'] !== 'undefined';
       if (isPremium) {
         Alert.alert("Restored", "Your purchases have been restored.");
-        if (router.canGoBack()) {
-          router.back();
-        } else {
-          router.replace('/');
-        }
+        router.replace('/');
       } else {
         Alert.alert("Restored", "No active premium subscription found.");
       }
