@@ -187,6 +187,14 @@ export default function OnboardingScreen() {
       }
     }
     loadOfferings();
+
+    async function loadSavedStep() {
+      const savedStep = await storageService.getOnboardingStep();
+      if (savedStep > 1 && savedStep <= TOTAL_STEPS) {
+        setStep(savedStep);
+      }
+    }
+    loadSavedStep();
   }, []);
 
   const mascotTransform = { transform: [{ translateY: floatAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -10] }) }] };
@@ -221,6 +229,7 @@ export default function OnboardingScreen() {
       }
 
       setStep(nextStep);
+      storageService.saveOnboardingStep(nextStep);
 
       slideAnim.setValue(50);
       Animated.parallel([
@@ -850,7 +859,7 @@ export default function OnboardingScreen() {
             </View>
 
             <Pressable style={[styles.pwButton, { backgroundColor: theme.primary }]} onPress={() => handleNext()}>
-              <Text style={styles.pwButtonText}>Continue ➔</Text>
+              <Text style={styles.pwButtonText}>Try it for free</Text>
             </Pressable>
           </ScrollView>
         );
@@ -890,7 +899,7 @@ export default function OnboardingScreen() {
                       <View style={styles.timelineRow}>
                         <Text style={styles.timelineIcon}>🔔</Text>
                         <View style={styles.timelineContent}>
-                          <Text style={styles.timelineTitle}>2 DAYS</Text>
+                          <Text style={styles.timelineTitle}>DAY 2</Text>
                           <Text style={styles.timelineDesc}>We'll remind you before your trial ends.</Text>
                         </View>
                       </View>
@@ -899,7 +908,7 @@ export default function OnboardingScreen() {
                         <Text style={styles.timelineIcon}>💛</Text>
                         <View style={styles.timelineContent}>
                           <Text style={styles.timelineTitle}>DAY 3</Text>
-                          <Text style={styles.timelineDesc}>Continue with Pro or cancel anytime.</Text>
+                          <Text style={styles.timelineDesc}>Your subscription renews automatically unless cancelled.</Text>
                         </View>
                       </View>
                     </View>
@@ -940,7 +949,7 @@ export default function OnboardingScreen() {
                 onPress={isPro ? finishOnboarding : handlePurchase}
                 disabled={isPurchasing}
               >
-                <Text style={styles.pwButtonText}>{isPro ? "Finish" : "🌅 Start My Free Trial"}</Text>
+                <Text style={styles.pwButtonText}>{isPro ? "Finish" : "🌅 Start 3-Day Free Trial"}</Text>
               </Pressable>
 
               {!isPro && (

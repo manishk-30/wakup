@@ -127,6 +127,7 @@ export const storageService = {
   async completeOnboarding(): Promise<void> {
     try {
       await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+      await AsyncStorage.removeItem('@wakup_onboarding_step');
     } catch (e) {
       console.error('Failed to complete onboarding', e);
     }
@@ -149,12 +150,30 @@ export const storageService = {
     }
   },
 
+  async saveOnboardingStep(step: number): Promise<void> {
+    try {
+      await AsyncStorage.setItem('@wakup_onboarding_step', step.toString());
+    } catch (e) {
+      console.error('Failed to save onboarding step', e);
+    }
+  },
+
+  async getOnboardingStep(): Promise<number> {
+    try {
+      const data = await AsyncStorage.getItem('@wakup_onboarding_step');
+      return data ? parseInt(data, 10) : 1;
+    } catch (e) {
+      return 1;
+    }
+  },
+
   // Used for debugging/testing
   async clearOnboarding(): Promise<void> {
     try {
       await AsyncStorage.removeItem(ONBOARDING_KEY);
       await AsyncStorage.removeItem(ONBOARDING_ANSWERS_KEY);
       await AsyncStorage.removeItem(COMMITMENT_KEY);
+      await AsyncStorage.removeItem('@wakup_onboarding_step');
     } catch (e) {
       console.error('Failed to clear onboarding', e);
     }
