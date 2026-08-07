@@ -1180,8 +1180,10 @@ const styles = StyleSheet.create({
   },
   labelInput: {
     ...Typography.bodyLarge,
-    padding: Spacing.md,
+    paddingHorizontal: Spacing.md,
     borderRadius: Radii.md,
+    width: '100%',
+    height: 56,
     borderWidth: 1,
     borderColor: 'rgba(150, 150, 150, 0.2)',
   },
