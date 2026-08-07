@@ -40,9 +40,25 @@ export default function AlarmRinging() {
         let activeAlarm = alarms.find(a => a.id === currentAlarmId);
         
         if (!activeAlarm) {
-          activeAlarm = alarms.find(a => 
-            a.enabled && a.hour === now.getHours() && a.minute === now.getMinutes()
-          );
+          // Find the most recently triggered enabled alarm within the last hour
+          const recentAlarms = alarms.filter(a => a.enabled).map(a => {
+            const alarmDate = new Date(now);
+            alarmDate.setHours(a.hour, a.minute, 0, 0);
+            let diff = now.getTime() - alarmDate.getTime();
+            
+            // If the alarm was set for late night and it's now past midnight
+            if (diff < -12 * 60 * 60 * 1000) {
+              alarmDate.setDate(alarmDate.getDate() - 1);
+              diff = now.getTime() - alarmDate.getTime();
+            }
+            
+            return { alarm: a, diff };
+          }).filter(item => item.diff >= 0 && item.diff < 60 * 60 * 1000); // Within last 60 minutes
+          
+          if (recentAlarms.length > 0) {
+            recentAlarms.sort((a, b) => a.diff - b.diff);
+            activeAlarm = recentAlarms[0].alarm;
+          }
         }
         
         if (activeAlarm) {
@@ -58,7 +74,13 @@ export default function AlarmRinging() {
           setAlarmTime(timeStr);
           return activeAlarm;
         } else {
-          setAlarmTime('Unknown');
+          // Fallback to current time if we can't determine the alarm
+          let h = now.getHours();
+          const ampm = h >= 12 ? 'PM' : 'AM';
+          h = h % 12;
+          h = h ? h : 12;
+          const m = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes();
+          setAlarmTime(`${h}:${m} ${ampm}`);
           return null;
         }
       } catch (e) {

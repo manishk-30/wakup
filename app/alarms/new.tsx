@@ -34,6 +34,7 @@ export default function AddAlarm() {
   defaultTime.setHours(7, 30, 0, 0);
   const [time, setTime] = useState(defaultTime);
   const [label, setLabel] = useState('Wake Up');
+  const [isLabelFocused, setIsLabelFocused] = useState(false);
   const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [soundName, setSoundName] = soundSelectionStore.useSound(ALARM_SOUNDS[0].id);
   const [gameId, setGameId] = useState('random');
@@ -115,9 +116,16 @@ export default function AddAlarm() {
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Label</Text>
         <TextInput
-          style={[styles.labelInput, { color: theme.text, backgroundColor: theme.surface }]}
+          style={[styles.labelInput, { 
+            color: theme.text, 
+            backgroundColor: isLabelFocused ? 'rgba(255, 176, 0, 0.05)' : theme.surface,
+            borderWidth: 1,
+            borderColor: isLabelFocused ? theme.primary : theme.border
+          }]}
           value={label}
           onChangeText={setLabel}
+          onFocus={() => setIsLabelFocused(true)}
+          onBlur={() => setIsLabelFocused(false)}
           placeholderTextColor={theme.textMuted}
         />
       </View>

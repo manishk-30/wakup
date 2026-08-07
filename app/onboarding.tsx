@@ -204,6 +204,7 @@ export default function OnboardingScreen() {
   const [alarmTime, setAlarmTime] = useState(new Date(new Date().setHours(7, 30, 0, 0)));
   const [showPicker, setShowPicker] = useState(false);
   const [label, setLabel] = useState('Wake Up');
+  const [isLabelFocused, setIsLabelFocused] = useState(false);
   const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [soundName, setSoundName] = soundSelectionStore.useSound(ALARM_SOUNDS[0].id);
   const [gameId, setGameId] = useState('random');
@@ -634,9 +635,16 @@ export default function OnboardingScreen() {
             <View style={[styles.section, { width: '100%', alignItems: 'center' }]}>
               <Text style={[styles.sectionTitle, { color: theme.text, alignSelf: 'flex-start' }]}>Label</Text>
               <TextInput
-                style={[styles.labelInput, { color: theme.text, backgroundColor: theme.surface, width: '100%' }]}
+                style={[styles.labelInput, { 
+                  color: theme.text, 
+                  backgroundColor: isLabelFocused ? 'rgba(255, 176, 0, 0.05)' : theme.surface,
+                  borderWidth: 1,
+                  borderColor: isLabelFocused ? theme.primary : theme.border
+                }]}
                 value={label}
                 onChangeText={setLabel}
+                onFocus={() => setIsLabelFocused(true)}
+                onBlur={() => setIsLabelFocused(false)}
                 placeholderTextColor={theme.textMuted}
               />
             </View>
