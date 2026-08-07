@@ -52,7 +52,7 @@ export default function DragonTowerGame({ onWin, onLose }: GameProps) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>DRAGON TOWER</Text>
         <Text style={styles.headerSubtitle}>
-          {gameState === 'PLAYING' ? 'Pick safe tiles to climb and stop alarm' : gameState === 'WON' ? 'TOWER COMPLETE 🎉' : 'THE DRAGON GOT YOU'}
+          {gameState === 'PLAYING' ? 'Tap and pick safe tile to climb' : gameState === 'WON' ? 'TOWER COMPLETE 🎉' : 'THE DRAGON GOT YOU'}
         </Text>
       </View>
 
@@ -71,27 +71,24 @@ export default function DragonTowerGame({ onWin, onLose }: GameProps) {
                 const isSafe = !rowObj.dragonIndices.includes(colIndex);
                 
                 let content = '';
-                let tileColor = Colors.dark.surface;
-                let borderColor = Colors.dark.border;
+                let tileColor = '#0B1A3A';
+                let borderWidth = 0;
                 
                 if (rowObj.revealed && isSelected) {
                   content = isSafe ? '🥚' : '🐉';
                   tileColor = isSafe ? Colors.dark.success : Colors.dark.danger;
-                  borderColor = tileColor;
                 } else if (gameState === 'LOST' && isSafe && rowObj.revealed === false) {
                   // Show where the safe path was on lose
                   content = '🥚';
-                  tileColor = 'rgba(52, 211, 153, 0.15)'; // faded success
-                  borderColor = 'rgba(52, 211, 153, 0.3)';
+                  tileColor = Colors.dark.success;
                 } else if (isCurrentRow) {
-                  tileColor = Colors.dark.primaryMuted;
-                  borderColor = Colors.dark.primary;
+                  tileColor = '#8A2BE2'; // Purple for active row
                 }
 
                 return (
                   <Pressable
                     key={colIndex}
-                    style={[styles.tile, { backgroundColor: tileColor, borderColor }]}
+                    style={[styles.tile, { backgroundColor: tileColor, borderWidth }]}
                     onPress={() => handleTilePress(originalIdx, colIndex)}
                   >
                     <Text style={styles.tileText}>{content}</Text>
@@ -136,17 +133,17 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   board: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: '#FFFFFF',
     padding: Spacing.md,
     borderRadius: Radii.lg,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
+    borderWidth: 2,
+    borderColor: '#000000',
     gap: Spacing.sm,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 10,
   },
   row: {
     flexDirection: 'row',
@@ -161,7 +158,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
   },

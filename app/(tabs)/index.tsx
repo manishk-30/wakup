@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Switch, useColorScheme, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Switch, useColorScheme, Alert, Modal, Image } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,19 +13,42 @@ export default function Home() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   const [alarms, setAlarms] = useState<Alarm[]>([]);
+  const [commitmentData, setCommitmentData] = useState<{reason: string; signatureImage: string; signedAt: number} | null>(null);
+  const [showCommitmentModal, setShowCommitmentModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{type: 'delete' | 'toggle', alarm: Alarm} | null>(null);
 
-  const loadAlarms = async () => {
+  const loadData = async () => {
     const data = await storageService.getAlarms();
     setAlarms(data);
+    const commitment = await storageService.getCommitment();
+    setCommitmentData(commitment);
   };
 
   useFocusEffect(
     useCallback(() => {
-      loadAlarms();
+      loadData();
     }, [])
   );
 
-  const toggleAlarm = async (alarm: Alarm) => {
+  const interceptAction = (type: 'delete' | 'toggle', alarm: Alarm) => {
+    if (!commitmentData) return false;
+    
+    let activeAlarmsAfterAction = 0;
+    if (type === 'delete') {
+      activeAlarmsAfterAction = alarms.filter(a => a.id !== alarm.id && a.enabled).length;
+    } else {
+      activeAlarmsAfterAction = alarms.filter(a => (a.id === alarm.id ? !alarm.enabled : a.enabled)).length;
+    }
+
+    if (activeAlarmsAfterAction === 0 && (type === 'delete' || alarm.enabled)) {
+      setPendingAction({ type, alarm });
+      setShowCommitmentModal(true);
+      return true;
+    }
+    return false;
+  };
+
+  const executeToggle = async (alarm: Alarm) => {
     const updatedAlarm = { ...alarm, enabled: !alarm.enabled };
     await storageService.updateAlarm(updatedAlarm);
     
@@ -38,7 +61,20 @@ export default function Home() {
     setAlarms(alarms.map(a => (a.id === alarm.id ? updatedAlarm : a)));
   };
 
+  const toggleAlarm = async (alarm: Alarm) => {
+    if (interceptAction('toggle', alarm)) return;
+    executeToggle(alarm);
+  };
+
+  const executeDelete = async (alarm: Alarm) => {
+    await alarmService.cancelAlarm(alarm.id);
+    await storageService.deleteAlarm(alarm.id);
+    setAlarms(alarms.filter(a => a.id !== alarm.id));
+  };
+
   const deleteAlarm = (alarm: Alarm) => {
+    if (interceptAction('delete', alarm)) return;
+
     Alert.alert(
       "Delete Alarm",
       "Are you sure you want to delete this alarm?",
@@ -47,11 +83,7 @@ export default function Home() {
         { 
           text: "Delete", 
           style: "destructive",
-          onPress: async () => {
-            await alarmService.cancelAlarm(alarm.id);
-            await storageService.deleteAlarm(alarm.id);
-            setAlarms(alarms.filter(a => a.id !== alarm.id));
-          }
+          onPress: () => executeDelete(alarm)
         }
       ]
     );
@@ -155,7 +187,62 @@ export default function Home() {
         )}
       </ScrollView>
       
+      <Modal
+        visible={showCommitmentModal}
+        transparent
+        animationType="fade"
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: Spacing.xl }}>
+          <View style={{ width: '100%', backgroundColor: theme.surface, borderRadius: Radii.xl, padding: Spacing.xl, alignItems: 'center' }}>
+            <Text style={{ fontSize: 40, marginBottom: Spacing.md }}>🥺</Text>
+            <Text style={{ ...Typography.h2, color: theme.text, textAlign: 'center', marginBottom: Spacing.sm }}>
+              You promised yourself one real chance.
+            </Text>
+            <Text style={{ ...Typography.body, color: theme.textMuted, textAlign: 'center', marginBottom: Spacing.xl }}>
+              Are you sure you want to turn off your last alarm?
+            </Text>
 
+            <View style={{ width: '100%', backgroundColor: theme.background, padding: Spacing.md, borderRadius: Radii.lg, borderWidth: 1, borderColor: theme.border, marginBottom: Spacing.xl }}>
+               <Text style={{ ...Typography.bodyLarge, color: theme.text, textAlign: 'center' }}>
+                 "I am committing to my future self right now.{"\n\n"}
+                 I will wake up, beat the alarm, and win the morning.{"\n\n"}
+                 My goals are worth more than sleep."
+               </Text>
+               <View style={{ height: 100, width: '100%', marginTop: Spacing.md, backgroundColor: '#fff', borderRadius: Radii.sm, overflow: 'hidden' }}>
+                 {commitmentData?.signatureImage && (
+                   <Image source={{ uri: commitmentData.signatureImage }} style={{ flex: 1 }} resizeMode="contain" />
+                 )}
+               </View>
+            </View>
+
+            <Pressable 
+              style={[styles.button, { backgroundColor: theme.primary, width: '100%', marginBottom: Spacing.md }]} 
+              onPress={() => {
+                setShowCommitmentModal(false);
+                setPendingAction(null);
+              }}
+            >
+              <Text style={styles.buttonText}>Keep My Alarm</Text>
+            </Pressable>
+            
+            <Pressable 
+              style={{ padding: Spacing.sm }}
+              onPress={() => {
+                setShowCommitmentModal(false);
+                if (pendingAction) {
+                  if (pendingAction.type === 'toggle') {
+                    executeToggle(pendingAction.alarm);
+                  } else {
+                    executeDelete(pendingAction.alarm);
+                  }
+                }
+              }}
+            >
+              <Text style={{ ...Typography.body, color: Colors.dark.danger || '#ef4444' }}>Delete Anyway</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -180,6 +267,24 @@ const styles = StyleSheet.create({
     ...Typography.h1,
     fontSize: 36,
   },
+  button: {
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: Radii.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  buttonText: {
+    ...Typography.bodyLarge,
+    color: '#FFF',
+    fontWeight: '700',
+  },
   addButton: {
     width: 48,
     height: 48,
@@ -195,7 +300,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: 28,
     fontWeight: '300',
-    color: '#FFF',
+    color: '#000000',
     lineHeight: 32,
   },
   scrollContent: {
@@ -270,7 +375,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   deleteButton: {
-    padding: Spacing.xs,
-    opacity: 0.8,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 });

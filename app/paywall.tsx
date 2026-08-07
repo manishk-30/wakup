@@ -1,13 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert, useColorScheme } from 'react-native';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing, Dimensions, ActivityIndicator, Alert, NativeSyntheticEvent, NativeScrollEvent, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radii, UI } from '../constants/theme';
+import { Image } from 'expo-image';
+import * as Haptics from 'expo-haptics';
 import { subscriptionService } from '../services/subscriptionService';
 import { PurchasesPackage } from 'react-native-purchases';
 import { useProStatus } from '../hooks/useProStatus';
 
-// Mock data in case Apple App Store Connect isn't fully configured yet by the user
+import { useColorScheme } from 'react-native';
+import { Colors, Spacing, Radii } from '../constants/theme';
+
+const { width, height } = Dimensions.get('window');
+
 const MOCK_PACKAGES: any[] = [
   {
     isMock: true,
@@ -15,11 +20,7 @@ const MOCK_PACKAGES: any[] = [
     packageType: 'ANNUAL',
     product: {
       identifier: 'wakup_yearly',
-      description: 'Annual Pro Subscription',
-      title: 'Wakup Pro (1 Year)',
-      priceString: '$29.99',
-      currencyCode: 'USD',
-      price: 29.99,
+      priceString: '₹2499',
     },
   },
   {
@@ -28,44 +29,94 @@ const MOCK_PACKAGES: any[] = [
     packageType: 'MONTHLY',
     product: {
       identifier: 'wakup_monthly',
-      description: 'Monthly Pro Subscription',
-      title: 'Wakup Pro (1 Month)',
-      priceString: '$4.99',
-      currencyCode: 'USD',
-      price: 4.99,
+      priceString: '₹499',
     },
   },
 ];
 
 export default function PaywallScreen() {
-  const router = useRouter();
   const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+  const themeColors = colorScheme === 'dark' ? Colors.dark : Colors.light;
+  
+  const Theme = {
+    background: themeColors.background,
+    primary: themeColors.primary,
+    secondary: themeColors.primaryMuted,
+    navy: themeColors.text,
+    gray: themeColors.surface,
+    radius: Radii.xl,
+    padding: Spacing.xl,
+  };
 
+  const router = useRouter();
   const { isPro } = useProStatus();
+  const styles = useMemo(() => createStyles(Theme), [Theme]);
 
   const [packages, setPackages] = useState<PurchasesPackage[] | any[]>([]);
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<string>('$rc_annual');
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  // Animations
+  const floatAnim = useRef(new Animated.Value(0)).current;
+  const ctaScale = useRef(new Animated.Value(1)).current;
+  const yearCardScale = useRef(new Animated.Value(1)).current;
+  const monthCardScale = useRef(new Animated.Value(1)).current;
+
+  // Initial Data Load
   useEffect(() => {
     async function loadOfferings() {
       setIsLoading(true);
       const offerings = await subscriptionService.getOfferings();
       if (offerings.length > 0) {
         setPackages(offerings);
-        setSelectedPackage(offerings[0].identifier);
+        // Default to annual
+        const annual = offerings.find((p: any) => p.packageType === 'ANNUAL');
+        if (annual) setSelectedPackage(annual.identifier);
       } else {
-        // Fallback to mock data if Apple setup isn't finished yet
-        console.log('[Paywall] No offerings found, using MOCK data for UI demonstration');
         setPackages(MOCK_PACKAGES);
-        setSelectedPackage(MOCK_PACKAGES[0].identifier);
       }
       setIsLoading(false);
     }
     loadOfferings();
+
+    // Floating Mascot Animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, { toValue: 1, duration: 2000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(floatAnim, { toValue: 0, duration: 2000, easing: Easing.inOut(Easing.sin), useNativeDriver: true })
+      ])
+    ).start();
   }, []);
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const step = Math.round(offsetX / width);
+    if (step !== currentStep) {
+      setCurrentStep(step);
+      Haptics.selectionAsync();
+    }
+  };
+
+  const handleNextStep = () => {
+    if (currentStep < 2) {
+      scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * width, animated: true });
+    }
+  };
+
+  const handleSelectPackage = (pkgIdentifier: string, type: 'year' | 'month') => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setSelectedPackage(pkgIdentifier);
+    const targetScale = type === 'year' ? yearCardScale : monthCardScale;
+    
+    Animated.sequence([
+      Animated.spring(targetScale, { toValue: 1.03, useNativeDriver: true, speed: 20 }),
+      Animated.spring(targetScale, { toValue: 1, useNativeDriver: true, speed: 20 })
+    ]).start();
+  };
 
   const handlePurchase = async () => {
     if (!selectedPackage) return;
@@ -73,11 +124,10 @@ export default function PaywallScreen() {
     setIsPurchasing(true);
     const pkg = packages.find(p => p.identifier === selectedPackage);
     
-    // If it's a mock package, just simulate success
     if (pkg && (pkg as any).isMock) {
       setTimeout(() => {
         setIsPurchasing(false);
-        Alert.alert("Success!", "Mock purchase complete. (You are using fake data because Apple Developer isn't linked yet).");
+        Alert.alert("Success!", "Mock purchase complete.");
         router.back();
       }, 1500);
       return;
@@ -87,12 +137,15 @@ export default function PaywallScreen() {
       const { success, customerInfo, error } = await subscriptionService.purchasePackage(pkg as PurchasesPackage);
       setIsPurchasing(false);
       if (success) {
-        const isPremium = typeof customerInfo?.entitlements.active['premium'] !== 'undefined' || typeof customerInfo?.entitlements.active['pro'] !== 'undefined';
+        const isPremium = typeof customerInfo?.entitlements.active['pro'] !== 'undefined';
         if (isPremium) {
-          Alert.alert("Welcome to Pro!", "Thank you for upgrading.");
-          router.back();
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace('/');
+          }
         } else {
-          Alert.alert("Purchase Complete", "But the premium entitlement was not unlocked. Please contact support.");
+          Alert.alert("Purchase Complete", "But the premium entitlement was not unlocked.");
         }
       } else {
         if (error !== 'User cancelled') {
@@ -108,10 +161,14 @@ export default function PaywallScreen() {
     setIsPurchasing(false);
     
     if (success) {
-      const isPremium = typeof customerInfo?.entitlements.active['premium'] !== 'undefined' || typeof customerInfo?.entitlements.active['pro'] !== 'undefined';
+      const isPremium = typeof customerInfo?.entitlements.active['pro'] !== 'undefined';
       if (isPremium) {
         Alert.alert("Restored", "Your purchases have been restored.");
-        router.back();
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace('/');
+        }
       } else {
         Alert.alert("Restored", "No active premium subscription found.");
       }
@@ -120,231 +177,525 @@ export default function PaywallScreen() {
     }
   };
 
+  const animateCTAPressIn = () => {
+    Animated.spring(ctaScale, { toValue: 0.97, useNativeDriver: true, speed: 20 }).start();
+  };
+
+  const animateCTAPressOut = () => {
+    Animated.spring(ctaScale, { toValue: 1, useNativeDriver: true, speed: 20, bounciness: 10 }).start();
+  };
+
+  const mascotTransform = { transform: [{ translateY: floatAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -10] }) }] };
+
+  const getPrice = (type: 'ANNUAL' | 'MONTHLY') => {
+    const pkg = packages.find(p => p.packageType === type || p.identifier.includes(type.toLowerCase()));
+    if (pkg) {
+      return pkg.product.priceString;
+    }
+    return type === 'ANNUAL' ? '₹2499' : '₹499';
+  };
+
   if (isLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center' }]}>
-        <ActivityIndicator size="large" color={theme.primary} />
+      <View style={[styles.container, { justifyContent: 'center' }]}>
+        <ActivityIndicator size="large" color={Theme.primary} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.closeButton}>
-          <Ionicons name="close" size={28} color={theme.textMuted} />
-        </Pressable>
-      </View>
+    <View style={styles.container}>
+      <Pressable onPress={() => {
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace('/');
+        }
+      }} style={styles.closeBtn}>
+        <Ionicons name="close" size={28} color={Theme.navy} />
+      </Pressable>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.heroSection}>
-          <Text style={styles.heroIcon}>💎</Text>
-          <Text style={[styles.title, { color: theme.text }]}>Wakup <Text style={{ color: theme.primary }}>Pro</Text></Text>
-          <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-            Unlock the ultimate wake-up experience and never oversleep again.
-          </Text>
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        bounces={false}
+      >
+        {/* SCREEN 1 */}
+        <View style={styles.screen}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+            <View style={styles.header}>
+              <Text style={styles.headline}>Wake up feeling in control.</Text>
+              <Text style={styles.subtitle}>Tomorrow's version of you starts with one better morning.</Text>
+            </View>
+
+            <View style={styles.illustrationArea}>
+              <Animated.View style={mascotTransform}>
+                <Image source={require('../assets/images/mascot_happy.png')} style={styles.mascotImage} contentFit="contain" />
+              </Animated.View>
+            </View>
+
+            <View style={styles.contentArea}>
+              <View style={styles.benefitCard}>
+                <Text style={styles.benefitIcon}>☀️</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.benefitTitle}>Beat the Snooze Button</Text>
+                  <Text style={styles.benefitDesc}>Wake up by completing fun challenges.</Text>
+                </View>
+              </View>
+              <View style={styles.benefitCard}>
+                <Text style={styles.benefitIcon}>🎯</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.benefitTitle}>Stay Consistent</Text>
+                  <Text style={styles.benefitDesc}>Build a routine you'll actually enjoy.</Text>
+                </View>
+              </View>
+              <View style={styles.benefitCard}>
+                <Text style={styles.benefitIcon}>🌅</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.benefitTitle}>Start Every Morning Better</Text>
+                  <Text style={styles.benefitDesc}>Small improvements every single day.</Text>
+                </View>
+              </View>
+            </View>
+          </ScrollView>
         </View>
 
-        <View style={styles.featuresList}>
-          {[
-            { icon: 'game-controller', text: 'Unlimited access to all mini-games' },
-            { icon: 'musical-notes', text: 'Premium alarm sounds & music' },
-            { icon: 'stats-chart', text: 'Detailed sleep & wake-up analytics' },
-            { icon: 'cloud-done', text: 'Cloud sync across all your devices' }
-          ].map((feature, idx) => (
-            <View key={idx} style={styles.featureItem}>
-              <View style={[styles.featureIconBox, { backgroundColor: theme.primary + '20' }]}>
-                <Ionicons name={feature.icon as any} size={20} color={theme.primary} />
-              </View>
-              <Text style={[styles.featureText, { color: theme.text }]}>{feature.text}</Text>
+        {/* SCREEN 2 */}
+        <View style={styles.screen}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+            <View style={styles.header}>
+              <Text style={styles.headline}>Everything you need for better mornings.</Text>
             </View>
-          ))}
+
+            <View style={styles.illustrationArea}>
+              <Animated.View style={mascotTransform}>
+                <Image source={require('../assets/images/mascot_confident.png')} style={styles.mascotImage} contentFit="contain" />
+              </Animated.View>
+            </View>
+
+            <View style={styles.contentArea}>
+              <View style={[styles.premiumCard, { marginBottom: 16 }]}>
+                <Text style={styles.premiumCardTitle}>☀️ Unlimited Smart Alarms</Text>
+                <Text style={styles.premiumCardDesc}>Never miss an important morning.</Text>
+              </View>
+              <View style={[styles.premiumCard, { marginBottom: 16 }]}>
+                <Text style={styles.premiumCardTitle}>🎮 All Wake-up Games</Text>
+                <Text style={styles.premiumCardDesc}>Blackjack, Dragon Tower, Dice, Roulette, Higher/Lower, Mines. All future games included.</Text>
+              </View>
+              
+              <View style={styles.ratingCard}>
+                <Text style={styles.stars}>★★★★★</Text>
+                <Text style={styles.ratingTitle}>4.9 Rating</Text>
+                <Text style={styles.ratingDesc}>Thousands of mornings improved.</Text>
+              </View>
+            </View>
+          </ScrollView>
         </View>
 
-        <View style={styles.packagesContainer}>
-          {isPro ? (
-            <View style={[styles.packageCard, { backgroundColor: theme.surface, borderColor: theme.primary, alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.xxl }]}>
-              <View>
-                <Text style={{ ...Typography.h3, color: theme.primary, fontWeight: '800', textAlign: 'center', marginBottom: Spacing.sm }}>You're already Pro! 🎉</Text>
-                <Text style={{ ...Typography.body, color: theme.textMuted, textAlign: 'center' }}>Thank you for subscribing.</Text>
-              </View>
+        {/* SCREEN 3 */}
+        <View style={styles.screen}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+            <View style={styles.header}>
+              <Text style={styles.headline}>Start your 3-day free trial.</Text>
+              <Text style={styles.subtitle}>Wake up better. Cancel anytime.</Text>
             </View>
-          ) : (
-            packages.map((pkg) => {
-              const isSelected = selectedPackage === pkg.identifier;
-              return (
-                <Pressable
-                  key={pkg.identifier}
-                  style={[
-                    styles.packageCard,
-                    { backgroundColor: theme.surface, borderColor: isSelected ? theme.primary : theme.border },
-                    isSelected && styles.packageCardSelected
-                  ]}
-                  onPress={() => setSelectedPackage(pkg.identifier)}
-                >
-                  <View style={styles.packageInfo}>
-                    <Text style={[styles.packageTitle, { color: theme.text }]}>
-                      {pkg.packageType === 'ANNUAL' ? 'Yearly' : 'Monthly'}
-                    </Text>
-                    {pkg.packageType === 'ANNUAL' && (
-                      <View style={[styles.badge, { backgroundColor: theme.primary }]}>
-                        <Text style={styles.badgeText}>BEST VALUE</Text>
+
+            <View style={[styles.illustrationArea, { height: 160 }]}>
+              <Animated.View style={mascotTransform}>
+                <Image source={require('../assets/images/mascot_peace.png')} style={styles.mascotImage} contentFit="contain" />
+              </Animated.View>
+            </View>
+
+            <View style={styles.contentArea}>
+              {isPro ? (
+                <View style={[styles.premiumCard, { alignItems: 'center', paddingVertical: 40 }]}>
+                  <Text style={{ fontSize: 40, marginBottom: 16 }}>⭐</Text>
+                  <Text style={[styles.premiumCardTitle, { textAlign: 'center' }]}>You're already a Wakup Pro member.</Text>
+                  <Text style={[styles.premiumCardDesc, { textAlign: 'center', marginTop: 8 }]}>Enjoy every morning.</Text>
+                </View>
+              ) : (
+                <>
+                  <View style={styles.timeline}>
+                    <View style={styles.timelineRow}>
+                      <Text style={styles.timelineIcon}>☀️</Text>
+                      <View style={styles.timelineContent}>
+                        <Text style={styles.timelineTitle}>TODAY</Text>
+                        <Text style={styles.timelineDesc}>Unlock every Pro feature</Text>
                       </View>
-                    )}
+                    </View>
+                    <View style={styles.timelineLine} />
+                    <View style={styles.timelineRow}>
+                      <Text style={styles.timelineIcon}>🔔</Text>
+                      <View style={styles.timelineContent}>
+                        <Text style={styles.timelineTitle}>2 DAYS</Text>
+                        <Text style={styles.timelineDesc}>We'll remind you before your trial ends.</Text>
+                      </View>
+                    </View>
+                    <View style={styles.timelineLine} />
+                    <View style={styles.timelineRow}>
+                      <Text style={styles.timelineIcon}>💛</Text>
+                      <View style={styles.timelineContent}>
+                        <Text style={styles.timelineTitle}>DAY 3</Text>
+                        <Text style={styles.timelineDesc}>Continue with Pro or cancel anytime.</Text>
+                      </View>
+                    </View>
                   </View>
-                  <Text style={[styles.packagePrice, { color: theme.text }]}>
-                    {pkg.product.priceString}
-                  </Text>
-                </Pressable>
-              );
-            })
-          )}
+
+                  <View style={styles.pricingContainer}>
+                    {packages.map(pkg => {
+                      const isYear = pkg.packageType === 'ANNUAL';
+                      const isSelected = selectedPackage === pkg.identifier;
+                      const scaleAnim = isYear ? yearCardScale : monthCardScale;
+                      
+                      return (
+                        <Animated.View key={pkg.identifier} style={{ transform: [{ scale: scaleAnim }], width: '48%' }}>
+                          <Pressable 
+                            style={[styles.pricingCard, isSelected && styles.pricingCardSelected]}
+                            onPress={() => handleSelectPackage(pkg.identifier, isYear ? 'year' : 'month')}
+                          >
+                            {isYear && <View style={styles.bestValueBadge}><Text style={styles.badgeText}>🔥 BEST VALUE</Text></View>}
+                            {isSelected && <View style={styles.checkIcon}><Ionicons name="checkmark-circle" size={24} color={Theme.primary} /></View>}
+                            
+                            <Text style={styles.planName}>{isYear ? 'Yearly' : 'Monthly'}</Text>
+                            <Text style={styles.planPrice}>{pkg.product.priceString}/{isYear ? 'year' : 'month'}</Text>
+                            {isYear && <Text style={styles.planSavings}>Save over 70%</Text>}
+                          </Pressable>
+                        </Animated.View>
+                      );
+                    })}
+                  </View>
+                </>
+              )}
+            </View>
+          </ScrollView>
         </View>
       </ScrollView>
 
-      <View style={[styles.footer, { backgroundColor: theme.background }]}>
-        {!isPro && (
-          <Pressable 
-            style={[styles.purchaseButton, { backgroundColor: theme.primary, opacity: isPurchasing ? 0.7 : 1 }]}
-            onPress={handlePurchase}
-            disabled={isPurchasing}
-          >
+      {/* FOOTER & CTA */}
+      <View style={styles.footerArea}>
+
+        <Pressable 
+          onPressIn={animateCTAPressIn}
+          onPressOut={animateCTAPressOut}
+          onPress={currentStep === 2 || isPro ? handlePurchase : handleNextStep}
+          disabled={isPurchasing}
+        >
+          <Animated.View style={[styles.ctaButton, { transform: [{ scale: ctaScale }], opacity: isPurchasing ? 0.7 : 1 }]}>
             {isPurchasing ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text style={styles.purchaseButtonText}>Continue</Text>
+              <Text style={styles.ctaText}>
+                {isPro ? "Continue" : (currentStep === 2 ? "🌅 Start My Free Trial" : "Continue →")}
+              </Text>
             )}
-          </Pressable>
+          </Animated.View>
+        </Pressable>
+
+        {currentStep === 2 && !isPro && (
+          <Text style={styles.trialInfoText}>3 days free, then {getPrice('ANNUAL')}/year</Text>
         )}
-        <View style={styles.footerLinks}>
-          <Pressable onPress={handleRestore}><Text style={[styles.footerLinkText, { color: theme.textMuted }]}>Restore Purchases</Text></Pressable>
-          <Text style={{ color: theme.textMuted }}> • </Text>
-          <Pressable><Text style={[styles.footerLinkText, { color: theme.textMuted }]}>Terms</Text></Pressable>
-          <Text style={{ color: theme.textMuted }}> • </Text>
-          <Pressable><Text style={[styles.footerLinkText, { color: theme.textMuted }]}>Privacy</Text></Pressable>
-        </View>
+
+        {currentStep === 2 && (
+          <View style={styles.footerLinksRow}>
+            <Pressable onPress={handleRestore}><Text style={styles.footerLink}>Restore Purchases</Text></Pressable>
+            <Text style={styles.footerLinkDot}> • </Text>
+            <Pressable onPress={() => router.push('/privacy')}><Text style={styles.footerLink}>Privacy Policy</Text></Pressable>
+            <Text style={styles.footerLinkDot}> • </Text>
+            <Pressable onPress={() => router.push('/terms')}><Text style={styles.footerLink}>Terms</Text></Pressable>
+          </View>
+        )}
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Theme: any) => StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Theme.background,
+  },
+  closeBtn: {
+    position: 'absolute',
+    top: 60,
+    right: 24,
+    zIndex: 10,
+    padding: 8,
+  },
+  screen: {
+    width: width,
+    flex: 1,
+    paddingHorizontal: Theme.padding,
+    paddingTop: 80,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    padding: Spacing.lg,
-    paddingTop: Spacing.xl, // safe area padding handled by modal usually, but adding a bit extra
+    marginBottom: 24,
   },
-  closeButton: {
-    padding: Spacing.sm,
+  tag: {
+    backgroundColor: Theme.gray,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 16,
   },
-  scrollContent: {
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: 100,
+  tagText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: Theme.navy,
+    letterSpacing: 1,
   },
-  heroSection: {
-    alignItems: 'center',
-    marginBottom: Spacing.xxl,
-  },
-  heroIcon: {
-    fontSize: 64,
-    marginBottom: Spacing.md,
-  },
-  title: {
-    ...Typography.h1,
-    fontSize: 40,
-    marginBottom: Spacing.sm,
-    textAlign: 'center',
+  headline: {
+    fontSize: 34,
+    fontWeight: '800',
+    color: Theme.navy,
+    lineHeight: 40,
+    fontFamily: 'System',
+    marginBottom: 8,
   },
   subtitle: {
-    ...Typography.bodyLarge,
-    textAlign: 'center',
-    paddingHorizontal: Spacing.md,
+    fontSize: 16,
+    color: '#6B7280',
     lineHeight: 24,
   },
-  featuresList: {
-    marginBottom: Spacing.xxl,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  featureIconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  illustrationArea: {
+    height: 220,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: Spacing.md,
+    marginBottom: 24,
   },
-  featureText: {
-    ...Typography.h3,
+  mascotImage: {
+    width: 200,
+    height: 200,
+  },
+  contentArea: {
     flex: 1,
   },
-  packagesContainer: {
-    gap: Spacing.md,
+  benefitCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Theme.gray,
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 12,
   },
-  packageCard: {
+  benefitIcon: {
+    fontSize: 24,
+    marginRight: 16,
+  },
+  benefitTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Theme.navy,
+    marginBottom: 4,
+  },
+  benefitDesc: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  premiumCard: {
+    backgroundColor: Theme.background,
+    padding: 20,
+    borderRadius: 20,
+    shadowColor: Theme.navy,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: Theme.gray,
+  },
+  premiumCardTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: Theme.navy,
+    marginBottom: 6,
+  },
+  premiumCardDesc: {
+    fontSize: 14,
+    color: '#6B7280',
+    lineHeight: 20,
+  },
+  ratingCard: {
+    backgroundColor: 'rgba(255, 176, 0, 0.05)',
+    padding: 20,
+    borderRadius: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 176, 0, 0.1)',
+  },
+  stars: {
+    fontSize: 20,
+    color: Theme.primary,
+    marginBottom: 8,
+    letterSpacing: 2,
+  },
+  ratingTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: Theme.navy,
+  },
+  ratingDesc: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 4,
+  },
+  timeline: {
+    marginBottom: 24,
+  },
+  timelineRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  timelineIcon: {
+    fontSize: 20,
+    marginRight: 16,
+    marginTop: 2,
+  },
+  timelineContent: {
+    flex: 1,
+  },
+  timelineTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: Theme.navy,
+    marginBottom: 4,
+  },
+  timelineDesc: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  timelineLine: {
+    width: 2,
+    height: 24,
+    backgroundColor: Theme.gray,
+    marginLeft: 11,
+    marginVertical: 4,
+  },
+  pricingContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: Spacing.lg,
+  },
+  pricingCard: {
+    backgroundColor: Theme.gray,
+    padding: 16,
+    borderRadius: 20,
     borderWidth: 2,
-    borderRadius: Radii.lg,
-  },
-  packageCardSelected: {
-    backgroundColor: 'rgba(139, 92, 246, 0.1)', // Subtle primary tint
-  },
-  packageInfo: {
-    flexDirection: 'row',
+    borderColor: 'transparent',
     alignItems: 'center',
-    gap: Spacing.sm,
+    position: 'relative',
+    height: 140,
+    justifyContent: 'center',
   },
-  packageTitle: {
-    ...Typography.h3,
-    fontWeight: '700',
+  pricingCardSelected: {
+    backgroundColor: '#FFF8E6',
+    borderColor: Theme.primary,
+    shadowColor: Theme.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 3,
   },
-  badge: {
-    paddingHorizontal: Spacing.sm,
+  bestValueBadge: {
+    position: 'absolute',
+    top: -12,
+    backgroundColor: '#FF3B30',
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: Radii.sm,
+    borderRadius: 12,
   },
   badgeText: {
     color: '#FFF',
     fontSize: 10,
     fontWeight: '900',
   },
-  packagePrice: {
-    ...Typography.h3,
+  checkIcon: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
   },
-  footer: {
-    padding: Spacing.xl,
-    paddingBottom: Spacing.xxl,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.05)',
+  planName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Theme.navy,
+    marginBottom: 8,
   },
-  purchaseButton: {
-    height: UI.buttonHeight,
-    borderRadius: Radii.full,
+  planPrice: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: Theme.navy,
+  },
+  planSavings: {
+    fontSize: 12,
+    color: Theme.primary,
+    fontWeight: '600',
+    marginTop: 8,
+  },
+  footerArea: {
+    paddingHorizontal: Theme.padding,
+    paddingBottom: 40,
+    backgroundColor: Theme.background,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  progressDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Theme.gray,
+    marginRight: 6,
+  },
+  progressDotActive: {
+    width: 24,
+    backgroundColor: Theme.primary,
+  },
+  progressText: {
+    marginLeft: 'auto',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#6B7280',
+  },
+  ctaButton: {
+    backgroundColor: Theme.primary,
+    height: 56,
+    borderRadius: Theme.radius,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.lg,
+    shadowColor: Theme.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 5,
   },
-  purchaseButtonText: {
-    ...Typography.bodyLarge,
-    color: '#FFF',
+  ctaText: {
+    fontSize: 18,
     fontWeight: '800',
+    color: '#FFF',
   },
-  footerLinks: {
+  trialInfoText: {
+    textAlign: 'center',
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 16,
+  },
+  footerLinksRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
+    marginTop: 20,
   },
-  footerLinkText: {
+  footerLink: {
     fontSize: 12,
+    color: '#9CA3AF',
   },
+  footerLinkDot: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginHorizontal: 8,
+  }
 });

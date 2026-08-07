@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: '#FFF',
+    borderTopColor: '#8A2BE2',
   },
   resultContainer: {
     height: 60,

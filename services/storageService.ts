@@ -5,6 +5,7 @@ const ALARMS_KEY = '@wakup_alarms';
 const STREAKS_KEY = '@wakup_streaks';
 const ONBOARDING_KEY = '@wakup_onboarding';
 const ONBOARDING_ANSWERS_KEY = '@wakup_onboarding_answers';
+const COMMITMENT_KEY = '@wakup_commitment';
 
 export const storageService = {
   async getAlarms(): Promise<Alarm[]> {
@@ -153,8 +154,31 @@ export const storageService = {
     try {
       await AsyncStorage.removeItem(ONBOARDING_KEY);
       await AsyncStorage.removeItem(ONBOARDING_ANSWERS_KEY);
+      await AsyncStorage.removeItem(COMMITMENT_KEY);
     } catch (e) {
       console.error('Failed to clear onboarding', e);
+    }
+  },
+
+  async saveCommitment(reason: string, signatureImageBase64: string): Promise<void> {
+    try {
+      const data = {
+        reason,
+        signatureImage: signatureImageBase64,
+        signedAt: Date.now(),
+      };
+      await AsyncStorage.setItem(COMMITMENT_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.error('Failed to save commitment', e);
+    }
+  },
+
+  async getCommitment(): Promise<{ reason: string; signatureImage: string; signedAt: number } | null> {
+    try {
+      const data = await AsyncStorage.getItem(COMMITMENT_KEY);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      return null;
     }
   }
 };

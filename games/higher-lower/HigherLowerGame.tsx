@@ -76,16 +76,16 @@ export default function HigherLowerGame({ onWin, onLose }: GameProps) {
       ) : (
         <View style={styles.controls}>
           <Pressable 
-            style={[styles.actionButton, { backgroundColor: Colors.dark.surface, borderWidth: 1, borderColor: Colors.dark.border }]} 
+            style={styles.actionButton} 
             onPress={() => handleChoice('HIGHER')}
           >
-            <Text style={[styles.buttonText, { color: Colors.dark.text }]}>HIGHER</Text>
+            <Text style={styles.buttonText}>HIGHER</Text>
           </Pressable>
           <Pressable 
-            style={[styles.actionButton, { backgroundColor: Colors.dark.surface, borderWidth: 1, borderColor: Colors.dark.border }]} 
+            style={styles.actionButton} 
             onPress={() => handleChoice('LOWER')}
           >
-            <Text style={[styles.buttonText, { color: Colors.dark.text }]}>LOWER</Text>
+            <Text style={styles.buttonText}>LOWER</Text>
           </Pressable>
         </View>
       )}
@@ -139,10 +139,19 @@ const styles = StyleSheet.create({
     borderRadius: Radii.md,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: Colors.dark.primary,
+    borderWidth: 2,
+    borderColor: '#000000',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   buttonText: {
     ...Typography.bodyLarge,
     fontWeight: '700',
+    color: '#000000',
   },
   resultContainer: {
     minHeight: UI.buttonHeight,

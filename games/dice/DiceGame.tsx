@@ -125,14 +125,14 @@ export default function DiceGame({ onWin, onLose }: GameProps) {
         <View style={styles.controlsWrapper}>
           <View style={styles.buttonsContainer}>
             <Pressable 
-              style={[styles.button, { backgroundColor: Colors.dark.surface }]}
+              style={styles.button}
               onPress={() => handleChoice('HIGH')}
             >
               <Text style={styles.buttonText}>HIGH</Text>
               <Text style={styles.subButtonText}>4, 5, 6</Text>
             </Pressable>
             <Pressable 
-              style={[styles.button, { backgroundColor: Colors.dark.surface }]}
+              style={styles.button}
               onPress={() => handleChoice('LOW')}
             >
               <Text style={styles.buttonText}>LOW</Text>
@@ -141,14 +141,14 @@ export default function DiceGame({ onWin, onLose }: GameProps) {
           </View>
           <View style={styles.buttonsContainer}>
             <Pressable 
-              style={[styles.button, { backgroundColor: Colors.dark.surface }]}
+              style={styles.button}
               onPress={() => handleChoice('EVEN')}
             >
               <Text style={styles.buttonText}>EVEN</Text>
               <Text style={styles.subButtonText}>2, 4, 6</Text>
             </Pressable>
             <Pressable 
-              style={[styles.button, { backgroundColor: Colors.dark.surface }]}
+              style={styles.button}
               onPress={() => handleChoice('ODD')}
             >
               <Text style={styles.buttonText}>ODD</Text>
@@ -189,16 +189,18 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     backgroundColor: '#FFF', // White dice
+    borderWidth: 2,
+    borderColor: '#000000',
     borderRadius: Radii.md,
     padding: 12,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     alignContent: 'space-between',
-    shadowColor: '#FFF',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
     elevation: 8,
   },
   dot: {
@@ -239,16 +241,22 @@ const styles = StyleSheet.create({
     borderRadius: Radii.md,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
+    backgroundColor: Colors.dark.primary,
+    borderWidth: 2,
+    borderColor: '#000000',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   buttonText: {
     ...Typography.h3,
-    color: '#FFF',
+    color: Colors.dark.text,
   },
   subButtonText: {
     ...Typography.caption,
-    color: Colors.dark.textMuted,
+    color: '#000000',
     marginTop: 4,
   }
 });

@@ -50,7 +50,7 @@ export default function MinesGame({ onWin, onLose }: GameProps) {
         <Text style={styles.headerTitle}>MINES</Text>
         <Text style={styles.headerSubtitle}>
           {gameState === 'PLAYING' 
-            ? `Find ${5 - safeCount} safe tiles` 
+            ? `Tap and find ${5 - safeCount} safe tiles`
             : gameState === 'WON' ? 'SAFE! YOU WIN 🎉' : 'BOOM! YOU LOST'}
         </Text>
       </View>
@@ -65,8 +65,8 @@ export default function MinesGame({ onWin, onLose }: GameProps) {
                   style={[
                     styles.tile, 
                     { 
-                      backgroundColor: tile.isRevealed ? (tile.isMine ? Colors.dark.danger : Colors.dark.success) : 'rgba(255, 255, 255, 0.1)',
-                      borderColor: tile.isRevealed ? (tile.isMine ? Colors.dark.danger : Colors.dark.success) : 'rgba(255, 255, 255, 0.2)'
+                      backgroundColor: tile.isRevealed ? (tile.isMine ? Colors.dark.danger : Colors.dark.success) : '#0B1A3A',
+                      borderWidth: 0
                     }
                   ]}
                   onPress={() => handleTilePress(tile.id)}
@@ -107,16 +107,16 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   board: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: '#FFFFFF',
     padding: Spacing.md,
     borderRadius: Radii.lg,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
+    borderWidth: 2,
+    borderColor: '#000000',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 10,
   },
   gridContainer: {
     gap: Spacing.md,
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
   },

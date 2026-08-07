@@ -129,11 +129,11 @@ export default function BlackjackGame({ onWin, onLose }: GameProps) {
 
       {gameState === 'PLAYING' ? (
         <View style={styles.controls}>
-          <Pressable style={[styles.actionButton, { backgroundColor: Colors.dark.primary }]} onPress={handleHit}>
+          <Pressable style={styles.actionButton} onPress={handleHit}>
             <Text style={styles.buttonText}>HIT</Text>
           </Pressable>
-          <Pressable style={[styles.actionButton, { backgroundColor: Colors.dark.surface, borderWidth: 1, borderColor: Colors.dark.border }]} onPress={handleStand}>
-            <Text style={[styles.buttonText, { color: Colors.dark.text }]}>STAND</Text>
+          <Pressable style={styles.actionButton} onPress={handleStand}>
+            <Text style={styles.buttonText}>STAND</Text>
           </Pressable>
         </View>
       ) : (
@@ -204,11 +204,19 @@ const styles = StyleSheet.create({
     borderRadius: Radii.md,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: Colors.dark.primary,
+    borderWidth: 2,
+    borderColor: '#000000',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   buttonText: {
     ...Typography.bodyLarge,
     fontWeight: '700',
-    color: '#FFF',
+    color: '#000000',
   },
   resultContainer: {
     paddingBottom: Spacing.xl,

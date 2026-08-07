@@ -50,13 +50,30 @@ export default function PlayingCard({ rank, suit, faceUp = true }: PlayingCardPr
 
 export function CardBack() {
   return (
-    <View style={[styles.card, { backgroundColor: Colors.dark.surface, padding: 6 }]}>
-      <View style={styles.cardBackInner}>
-        <View style={styles.cardBackPattern}>
-          <Text style={styles.cardBackPatternText}>◇ ◇ ◇</Text>
-          <Text style={styles.cardBackPatternText}>◇ ◇ ◇</Text>
-          <Text style={styles.cardBackPatternText}>◇ ◇ ◇</Text>
+    <View style={[styles.card, { backgroundColor: '#FFFFFF', padding: 4 }]}>
+      <View style={[styles.cardBackInner, { backgroundColor: Colors.light.text, borderColor: Colors.light.primary }]}>
+        
+        {/* Background Pattern */}
+        <View style={[StyleSheet.absoluteFill, { justifyContent: 'center', alignItems: 'center' }]}>
+          <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', width: '120%', opacity: 0.15}}>
+             {Array.from({length: 35}).map((_, i) => (
+                <Text key={i} style={{color: Colors.light.primary, fontSize: 14, margin: 4}}>◈</Text>
+             ))}
+          </View>
         </View>
+
+        {/* Center Medallion */}
+        <View style={styles.medallion}>
+          <View style={styles.medallionInner}>
+            <Text style={styles.medallionText}>W</Text>
+          </View>
+        </View>
+
+        {/* Corner Accents */}
+        <Text style={[styles.cornerAccent, { top: 4, left: 4 }]}>☀</Text>
+        <Text style={[styles.cornerAccent, { top: 4, right: 4 }]}>☀</Text>
+        <Text style={[styles.cornerAccent, { bottom: 4, left: 4 }]}>☀</Text>
+        <Text style={[styles.cornerAccent, { bottom: 4, right: 4 }]}>☀</Text>
       </View>
     </View>
   );
@@ -108,20 +125,40 @@ const styles = StyleSheet.create({
   },
   cardBackInner: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderWidth: 2,
     borderRadius: Radii.sm - 2,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
-  cardBackPattern: {
-    alignItems: 'center',
+  medallion: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: Colors.light.primary,
     justifyContent: 'center',
-    gap: 8,
+    alignItems: 'center',
+    backgroundColor: Colors.light.text,
   },
-  cardBackPatternText: {
-    color: 'rgba(255,255,255,0.2)',
-    fontSize: 16,
-    letterSpacing: 4,
+  medallionInner: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 176, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  medallionText: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: Colors.light.primary,
+    fontStyle: 'italic',
+  },
+  cornerAccent: {
+    position: 'absolute',
+    fontSize: 10,
+    color: Colors.light.primary,
   }
 });

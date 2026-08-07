@@ -109,13 +109,13 @@ export default function CoinFlipGame({ onWin, onLose }: GameProps) {
       {!flipping && !result && (
         <View style={styles.buttonsContainer}>
           <Pressable 
-            style={[styles.button, { backgroundColor: Colors.dark.surface }]}
+            style={styles.button}
             onPress={() => handleChoice('HEADS')}
           >
             <Text style={styles.buttonText}>HEADS</Text>
           </Pressable>
           <Pressable 
-            style={[styles.button, { backgroundColor: Colors.dark.surface }]}
+            style={styles.button}
             onPress={() => handleChoice('TAILS')}
           >
             <Text style={styles.buttonText}>TAILS</Text>
@@ -219,11 +219,17 @@ const styles = StyleSheet.create({
     borderRadius: Radii.md,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
+    backgroundColor: Colors.dark.primary,
+    borderWidth: 2,
+    borderColor: '#000000',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   buttonText: {
     ...Typography.h3,
-    color: '#FFF',
+    color: Colors.dark.text,
   }
 });

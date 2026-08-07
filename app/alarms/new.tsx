@@ -156,7 +156,7 @@ export default function AddAlarm() {
                 style={[
                   styles.soundChip,
                   { 
-                    backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.15)' : theme.surface,
+                    backgroundColor: isSelected ? 'rgba(255, 176, 0, 0.15)' : theme.surface,
                     borderColor: isSelected ? theme.primary : theme.border,
                   }
                 ]}
@@ -187,7 +187,7 @@ export default function AddAlarm() {
           style={[
             styles.gameCardRow,
             { 
-              backgroundColor: gameId === 'random' ? 'rgba(139, 92, 246, 0.1)' : theme.surface,
+              backgroundColor: gameId === 'random' ? 'rgba(255, 176, 0, 0.1)' : theme.surface,
               borderColor: gameId === 'random' ? theme.primary : theme.border,
             }
           ]}
@@ -209,7 +209,7 @@ export default function AddAlarm() {
               style={[
                 styles.gameCardRow,
                 { 
-                  backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.1)' : theme.surface,
+                  backgroundColor: isSelected ? 'rgba(255, 176, 0, 0.1)' : theme.surface,
                   borderColor: isSelected ? theme.primary : theme.border,
                 }
               ]}
