@@ -2,13 +2,13 @@ import { Alarm, AlarmScheduleResult } from '../types/alarm';
 import * as AlarmKit from '../modules/alarm-kit/src';
 import { storageService } from './storageService';
 import { Platform } from 'react-native';
-import { Audio } from 'expo-av';
+import { createAudioPlayer } from 'expo-audio';
 import { EventSubscription } from 'expo-modules-core';
 
 // For Expo Go compatibility during UI development, we provide a mock fallback
 const isNativeModuleAvailable = Platform.OS === 'ios' && AlarmKit !== null;
 
-let foregroundSound: Audio.Sound | null = null;
+let foregroundSound: any = null;
 
 export const alarmService = {
   async requestAuthorization(): Promise<boolean> {
@@ -80,17 +80,11 @@ export const alarmService = {
   async playForegroundAlarm(file: any): Promise<void> {
     try {
       await this.stopForegroundAlarm();
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-        shouldDuckAndroid: true,
-      });
-      const { sound } = await Audio.Sound.createAsync(file, {
-        shouldPlay: true,
-        isLooping: true,
-        volume: 1.0,
-      });
-      foregroundSound = sound;
+      
+      const player = createAudioPlayer(file);
+      player.loop = true;
+      player.play();
+      foregroundSound = player;
     } catch (e) {
       console.warn('Foreground audio failed', e);
     }
@@ -99,8 +93,11 @@ export const alarmService = {
   async stopForegroundAlarm(): Promise<void> {
     if (foregroundSound) {
       try {
-        await foregroundSound.stopAsync();
-        await foregroundSound.unloadAsync();
+        foregroundSound.pause();
+        // player.release() might be needed in expo-audio to free resources
+        if (typeof foregroundSound.release === 'function') {
+          foregroundSound.release();
+        }
       } catch (e) {
         // ignore errors on unload
       }

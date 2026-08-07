@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput, useColorScheme, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -9,6 +9,7 @@ import { Alarm } from '../../types/alarm';
 import { ALARM_SOUNDS } from '../../constants/sounds';
 import { GAMES } from '../../types/games';
 import { Ionicons } from '@expo/vector-icons';
+import { createAudioPlayer } from 'expo-audio';
 
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const TOTAL_STEPS = 3;
@@ -36,6 +37,39 @@ export default function AddAlarm() {
   const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [soundName, setSoundName] = useState(ALARM_SOUNDS[0].id);
   const [gameId, setGameId] = useState('random');
+
+  const previewPlayerRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewPlayerRef.current) {
+        previewPlayerRef.current.pause();
+        if (typeof previewPlayerRef.current.release === 'function') {
+          previewPlayerRef.current.release();
+        }
+      }
+    };
+  }, []);
+
+  const handleSoundSelect = (id: string) => {
+    setSoundName(id);
+    const soundConfig = ALARM_SOUNDS.find(s => s.id === id);
+    if (soundConfig) {
+      if (previewPlayerRef.current) {
+        previewPlayerRef.current.pause();
+        if (typeof previewPlayerRef.current.release === 'function') {
+          previewPlayerRef.current.release();
+        }
+      }
+      try {
+        const player = createAudioPlayer(soundConfig.file);
+        player.play();
+        previewPlayerRef.current = player;
+      } catch (e) {
+        console.warn('Failed to preview sound:', e);
+      }
+    }
+  };
 
   const toggleDay = (index: number) => {
     if (repeatDays.includes(index)) {
@@ -160,7 +194,7 @@ export default function AddAlarm() {
                     borderColor: isSelected ? theme.primary : theme.border,
                   }
                 ]}
-                onPress={() => setSoundName(sound.id)}
+                onPress={() => handleSoundSelect(sound.id)}
               >
                 <Text style={[
                   styles.soundText,

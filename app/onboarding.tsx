@@ -15,6 +15,7 @@ import { storageService } from '../services/storageService';
 import { subscriptionService } from '../services/subscriptionService';
 import { Alarm } from '../types/alarm';
 import { GAMES } from '../types/games';
+import { createAudioPlayer } from 'expo-audio';
 
 const generateUUID = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -205,6 +206,39 @@ export default function OnboardingScreen() {
   const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [soundName, setSoundName] = useState(ALARM_SOUNDS[0].id);
   const [gameId, setGameId] = useState('random');
+
+  const previewPlayerRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewPlayerRef.current) {
+        previewPlayerRef.current.pause();
+        if (typeof previewPlayerRef.current.release === 'function') {
+          previewPlayerRef.current.release();
+        }
+      }
+    };
+  }, []);
+
+  const handleSoundSelect = (id: string) => {
+    setSoundName(id);
+    const soundConfig = ALARM_SOUNDS.find(s => s.id === id);
+    if (soundConfig) {
+      if (previewPlayerRef.current) {
+        previewPlayerRef.current.pause();
+        if (typeof previewPlayerRef.current.release === 'function') {
+          previewPlayerRef.current.release();
+        }
+      }
+      try {
+        const player = createAudioPlayer(soundConfig.file);
+        player.play();
+        previewPlayerRef.current = player;
+      } catch (e) {
+        console.warn('Failed to preview sound:', e);
+      }
+    }
+  };
 
   const toggleDay = (index: number) => {
     if (repeatDays.includes(index)) {
@@ -678,7 +712,7 @@ export default function OnboardingScreen() {
                           borderColor: isSelected ? theme.primary : theme.border,
                         }
                       ]}
-                      onPress={() => setSoundName(sound.id)}
+                      onPress={() => handleSoundSelect(sound.id)}
                     >
                       <Text style={[
                         styles.soundText,

@@ -12,7 +12,9 @@
       "bundleIdentifier": "com.avish.wakup",
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": ["audio"],
+        "UIBackgroundModes": [
+          "audio"
+        ],
         "NSAlarmKitUsageDescription": "We'll schedule alerts for alarms you create within our app."
       }
     },
@@ -46,7 +48,8 @@
       ],
       "@react-native-community/datetimepicker",
       "./scripts/withAlarmAudio.js",
-      "./scripts/withAppIntent.js"
+      "./scripts/withAppIntent.js",
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,

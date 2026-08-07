@@ -17,4 +17,14 @@ export const ALARM_SOUNDS: AlarmSound[] = [
     label: 'Radar', 
     file: require('../assets/sounds/radar.wav') 
   },
+  { 
+    id: 'birds.wav', 
+    label: 'Morning Birds', 
+    file: require('../assets/sounds/birds.wav') 
+  },
+  { 
+    id: 'chimes.wav', 
+    label: 'Gentle Chimes', 
+    file: require('../assets/sounds/chimes.wav') 
+  },
 ];
