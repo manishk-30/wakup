@@ -56,6 +56,7 @@ export default function PaywallScreen() {
   const [selectedPackage, setSelectedPackage] = useState<string>('$rc_annual');
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
   const scrollViewRef = useRef<ScrollView>(null);
@@ -127,8 +128,10 @@ export default function PaywallScreen() {
     if (pkg && (pkg as any).isMock) {
       setTimeout(() => {
         setIsPurchasing(false);
-        Alert.alert("Success!", "Mock purchase complete.");
-        router.back();
+        setPurchaseSuccess(true);
+        setTimeout(() => {
+          router.replace('/');
+        }, 1000);
       }, 1500);
       return;
     }
@@ -139,7 +142,10 @@ export default function PaywallScreen() {
       if (success) {
         const isPremium = typeof customerInfo?.entitlements.active['Pro'] !== 'undefined';
         if (isPremium) {
-          router.replace('/');
+          setPurchaseSuccess(true);
+          setTimeout(() => {
+            router.replace('/');
+          }, 1000);
         } else {
           Alert.alert("Purchase Complete", "But the premium entitlement was not unlocked.");
         }
@@ -376,9 +382,11 @@ export default function PaywallScreen() {
           onPress={currentStep === 2 || isPro ? handlePurchase : handleNextStep}
           disabled={isPurchasing}
         >
-          <Animated.View style={[styles.ctaButton, { transform: [{ scale: ctaScale }], opacity: isPurchasing ? 0.7 : 1 }]}>
+          <Animated.View style={[styles.ctaButton, { transform: [{ scale: ctaScale }], opacity: isPurchasing ? 0.7 : 1, backgroundColor: purchaseSuccess ? '#10B981' : Theme.primary }]}>
             {isPurchasing ? (
               <ActivityIndicator color="#FFF" />
+            ) : purchaseSuccess ? (
+              <Text style={styles.ctaText}>✅ Success! Unlocking...</Text>
             ) : (
               <Text style={styles.ctaText}>
                 {isPro ? "Continue" : (currentStep === 2 ? "🌅 Start My Free Trial" : "Continue →")}

@@ -16,6 +16,7 @@ import { subscriptionService } from '../services/subscriptionService';
 import { Alarm } from '../types/alarm';
 import { GAMES } from '../types/games';
 import { createAudioPlayer } from 'expo-audio';
+import { soundSelectionStore } from '../services/soundSelectionStore';
 
 const generateUUID = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -204,41 +205,8 @@ export default function OnboardingScreen() {
   const [showPicker, setShowPicker] = useState(false);
   const [label, setLabel] = useState('Wake Up');
   const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
-  const [soundName, setSoundName] = useState(ALARM_SOUNDS[0].id);
+  const [soundName, setSoundName] = soundSelectionStore.useSound(ALARM_SOUNDS[0].id);
   const [gameId, setGameId] = useState('random');
-
-  const previewPlayerRef = useRef<any>(null);
-
-  useEffect(() => {
-    return () => {
-      if (previewPlayerRef.current) {
-        previewPlayerRef.current.pause();
-        if (typeof previewPlayerRef.current.release === 'function') {
-          previewPlayerRef.current.release();
-        }
-      }
-    };
-  }, []);
-
-  const handleSoundSelect = (id: string) => {
-    setSoundName(id);
-    const soundConfig = ALARM_SOUNDS.find(s => s.id === id);
-    if (soundConfig) {
-      if (previewPlayerRef.current) {
-        previewPlayerRef.current.pause();
-        if (typeof previewPlayerRef.current.release === 'function') {
-          previewPlayerRef.current.release();
-        }
-      }
-      try {
-        const player = createAudioPlayer(soundConfig.file);
-        player.play();
-        previewPlayerRef.current = player;
-      } catch (e) {
-        console.warn('Failed to preview sound:', e);
-      }
-    }
-  };
 
   const toggleDay = (index: number) => {
     if (repeatDays.includes(index)) {
@@ -699,31 +667,23 @@ export default function OnboardingScreen() {
 
             <View style={[styles.section, { width: '100%' }]}>
               <Text style={[styles.sectionTitle, { color: theme.text }]}>Sound</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.soundsContainer, { alignItems: 'center' }]}>
-                {ALARM_SOUNDS.map((sound) => {
-                  const isSelected = soundName === sound.id;
-                  return (
-                    <Pressable
-                      key={sound.id}
-                      style={[
-                        styles.soundChip,
-                        {
-                          backgroundColor: isSelected ? 'rgba(255, 176, 0, 0.15)' : theme.surface,
-                          borderColor: isSelected ? theme.primary : theme.border,
-                        }
-                      ]}
-                      onPress={() => handleSoundSelect(sound.id)}
-                    >
-                      <Text style={[
-                        styles.soundText,
-                        { color: isSelected ? theme.primary : theme.text }
-                      ]}>
-                        {sound.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
+              <Pressable
+                style={[styles.soundChip, { 
+                  backgroundColor: theme.surface,
+                  borderColor: theme.border,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  paddingHorizontal: Spacing.md,
+                  paddingVertical: Spacing.md,
+                  width: '100%',
+                }]}
+                onPress={() => router.push('/sounds' as any)}
+              >
+                <Text style={[styles.soundText, { color: theme.text }]}>
+                  {ALARM_SOUNDS.find(s => s.id === soundName)?.label || 'Select Sound'}
+                </Text>
+                <Ionicons name="chevron-forward" size={24} color={theme.textMuted} />
+              </Pressable>
             </View>
 
             <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xl }]} onPress={() => handleNext()}>

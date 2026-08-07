@@ -96,6 +96,7 @@ export default function RootLayout() {
         <Stack.Screen name="privacy" options={{ title: 'Privacy Policy' }} />
         <Stack.Screen name="terms" options={{ title: 'Terms of Service' }} />
         <Stack.Screen name="refund" options={{ title: 'Refund Policy' }} />
+        <Stack.Screen name="sounds" options={{ title: 'Select Sound', presentation: 'modal' }} />
         <Stack.Screen name="alarms/new" options={{ title: 'Add Alarm', presentation: 'modal' }} />
         <Stack.Screen name="alarm/ringing" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="alarm/games" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
