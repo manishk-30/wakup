@@ -13,26 +13,6 @@ import { Colors, Spacing, Radii } from '../constants/theme';
 
 const { width, height } = Dimensions.get('window');
 
-const MOCK_PACKAGES: any[] = [
-  {
-    isMock: true,
-    identifier: '$rc_annual',
-    packageType: 'ANNUAL',
-    product: {
-      identifier: 'wakup_yearly',
-      priceString: '₹2499',
-    },
-  },
-  {
-    isMock: true,
-    identifier: '$rc_monthly',
-    packageType: 'MONTHLY',
-    product: {
-      identifier: 'wakup_monthly',
-      priceString: '₹499',
-    },
-  },
-];
 
 export default function PaywallScreen() {
   const colorScheme = useColorScheme();
@@ -68,20 +48,21 @@ export default function PaywallScreen() {
   const monthCardScale = useRef(new Animated.Value(1)).current;
 
   // Initial Data Load
-  useEffect(() => {
-    async function loadOfferings() {
-      setIsLoading(true);
-      const offerings = await subscriptionService.getOfferings();
-      if (offerings.length > 0) {
-        setPackages(offerings);
-        // Default to annual
-        const annual = offerings.find((p: any) => p.packageType === 'ANNUAL');
-        if (annual) setSelectedPackage(annual.identifier);
-      } else {
-        setPackages(MOCK_PACKAGES);
-      }
-      setIsLoading(false);
+  const loadOfferings = async () => {
+    setIsLoading(true);
+    const offerings = await subscriptionService.getOfferings();
+    if (offerings.length > 0) {
+      setPackages(offerings);
+      // Default to annual
+      const annual = offerings.find((p: any) => p.packageType === 'ANNUAL');
+      if (annual) setSelectedPackage(annual.identifier);
+    } else {
+      setPackages([]);
     }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
     loadOfferings();
 
     // Floating Mascot Animation
@@ -125,16 +106,6 @@ export default function PaywallScreen() {
     setIsPurchasing(true);
     const pkg = packages.find(p => p.identifier === selectedPackage);
     
-    if (pkg && (pkg as any).isMock) {
-      setTimeout(() => {
-        setIsPurchasing(false);
-        setPurchaseSuccess(true);
-        setTimeout(() => {
-          router.replace('/');
-        }, 1000);
-      }, 1500);
-      return;
-    }
 
     if (pkg) {
       const { success, customerInfo, error } = await subscriptionService.purchasePackage(pkg as PurchasesPackage);
@@ -195,24 +166,32 @@ export default function PaywallScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center' }]}>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color={Theme.primary} />
+      </View>
+    );
+  }
+
+  if (packages.length === 0) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: Spacing.xl }]}>
+        <Ionicons name="cloud-offline" size={64} color={Theme.primary} style={{ marginBottom: Spacing.md }} />
+        <Text style={[styles.headline, { textAlign: 'center' }]}>Connection Error</Text>
+        <Text style={[styles.subtitle, { textAlign: 'center', marginBottom: Spacing.xl }]}>
+          We couldn't load the subscription plans. Please check your internet connection and try again.
+        </Text>
+        <Pressable 
+          style={[styles.ctaButton, { width: '100%', paddingHorizontal: Spacing.xl }]}
+          onPress={loadOfferings}
+        >
+          <Text style={styles.ctaText}>Try Again</Text>
+        </Pressable>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Pressable onPress={() => {
-        if (router.canGoBack()) {
-          router.back();
-        } else {
-          router.replace('/');
-        }
-      }} style={styles.closeBtn}>
-        <Ionicons name="close" size={28} color={Theme.navy} />
-      </Pressable>
-
       <ScrollView
         ref={scrollViewRef}
         horizontal

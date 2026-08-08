@@ -1,11 +1,29 @@
-import { Tabs } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { Tabs, useRouter } from 'expo-router';
+import { useColorScheme, View, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography } from '../../constants/theme';
+import { useProStatus } from '../../hooks/useProStatus';
+import { useEffect } from 'react';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+  const router = useRouter();
+  const { isPro, isLoading } = useProStatus();
+
+  useEffect(() => {
+    if (!isLoading && !isPro) {
+      router.replace('/paywall');
+    }
+  }, [isPro, isLoading]);
+
+  if (isLoading || !isPro) {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={theme.primary} />
+      </View>
+    );
+  }
 
   return (
     <Tabs
