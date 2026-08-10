@@ -447,7 +447,7 @@ const createStyles = (Theme: any) => StyleSheet.create({
     marginBottom: 24,
   },
   mascotImage: {
-    width: 200,
+    width: '100%',
     height: 200,
   },
   contentArea: {

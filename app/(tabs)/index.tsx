@@ -32,15 +32,8 @@ export default function Home() {
 
   const interceptAction = (type: 'delete' | 'toggle', alarm: Alarm) => {
     if (!commitmentData) return false;
-    
-    let activeAlarmsAfterAction = 0;
-    if (type === 'delete') {
-      activeAlarmsAfterAction = alarms.filter(a => a.id !== alarm.id && a.enabled).length;
-    } else {
-      activeAlarmsAfterAction = alarms.filter(a => (a.id === alarm.id ? !alarm.enabled : a.enabled)).length;
-    }
 
-    if (activeAlarmsAfterAction === 0 && (type === 'delete' || alarm.enabled)) {
+    if (type === 'delete' || (type === 'toggle' && alarm.enabled)) {
       setPendingAction({ type, alarm });
       setShowCommitmentModal(true);
       return true;
