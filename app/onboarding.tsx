@@ -207,7 +207,7 @@ export default function OnboardingScreen() {
   const [isLabelFocused, setIsLabelFocused] = useState(false);
   const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [soundName, setSoundName] = soundSelectionStore.useSound(ALARM_SOUNDS[0].id);
-  const [gameId, setGameId] = useState('random');
+  const [gameId, setGameId] = useState('roulette');
 
   const toggleDay = (index: number) => {
     if (repeatDays.includes(index)) {
@@ -597,26 +597,10 @@ export default function OnboardingScreen() {
           <View style={[styles.centerContainer, { justifyContent: 'flex-start', paddingTop: 40 }]}>
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xl, width: '100%' }} showsVerticalScrollIndicator={false}>
               <Text style={[styles.title, { color: theme.text, marginBottom: Spacing.md }]}>Choose Your Challenge</Text>
-              <Pressable
-                style={[
-                  styles.gameCardRow,
-                  {
-                    backgroundColor: gameId === 'random' ? 'rgba(255, 176, 0, 0.1)' : theme.surface,
-                    borderColor: gameId === 'random' ? theme.primary : theme.border,
-                  }
-                ]}
-                onPress={() => setGameId('random')}
-              >
-                <Text style={{ fontSize: 32, marginRight: Spacing.md }}>🎲</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ ...Typography.h3, color: theme.text }}>Any Game</Text>
-                  <Text style={{ ...Typography.body, color: theme.textMuted }}>Pick when you wake up</Text>
-                </View>
-                {gameId === 'random' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
-              </Pressable>
 
               {GAMES.map((game) => {
                 const isSelected = gameId === game.id;
+                const isPremium = ['mines', 'dragon-tower', 'blackjack', 'lucky-race', 'potion-mix'].includes(game.id);
                 return (
                   <Pressable
                     key={game.id}
@@ -631,7 +615,13 @@ export default function OnboardingScreen() {
                   >
                     <Text style={{ fontSize: 32, marginRight: Spacing.md }}>{game.icon}</Text>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ ...Typography.h3, color: theme.text }}>{game.title}</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
+                        <Text style={{ ...Typography.h3, color: theme.text }}>{game.title}</Text>
+                        {isPremium && (
+                          <Text style={{ fontSize: 16, marginLeft: 8 }}>🔥</Text>
+                        )}
+                      </View>
+                      <Text style={{ ...Typography.body, color: theme.textMuted }}>{game.description}</Text>
                     </View>
                     {isSelected && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
                   </Pressable>
