@@ -37,7 +37,7 @@ export default function MinesGame({ onWin, onLose }: GameProps) {
       const newSafeCount = safeCount + 1;
       setSafeCount(newSafeCount);
       
-      if (newSafeCount === 5) {
+      if (newSafeCount === 6) {
         setGameState('WON');
         setTimeout(onWin, 1000);
       }
@@ -50,7 +50,7 @@ export default function MinesGame({ onWin, onLose }: GameProps) {
         <Text style={styles.headerTitle}>MINES</Text>
         <Text style={styles.headerSubtitle}>
           {gameState === 'PLAYING' 
-            ? `Tap and find ${5 - safeCount} safe tiles`
+            ? `Tap and find ${6 - safeCount} safe tiles`
             : gameState === 'WON' ? 'SAFE! YOU WIN 🎉' : 'BOOM! YOU LOST'}
         </Text>
       </View>

@@ -10,6 +10,7 @@ import { ALARM_SOUNDS } from '../../constants/sounds';
 import { GAMES } from '../../types/games';
 import { Ionicons } from '@expo/vector-icons';
 import { soundSelectionStore } from '../../services/soundSelectionStore';
+import { useProStatus } from '../../hooks/useProStatus';
 
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const TOTAL_STEPS = 3;
@@ -24,6 +25,7 @@ const generateUUID = () => {
 
 export default function AddAlarm() {
   const router = useRouter();
+  const { isPro } = useProStatus();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   
@@ -37,7 +39,16 @@ export default function AddAlarm() {
   const [isLabelFocused, setIsLabelFocused] = useState(false);
   const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [soundName, setSoundName] = soundSelectionStore.useSound(ALARM_SOUNDS[0].id);
-  const [gameId, setGameId] = useState('random');
+  const [gameId, setGameId] = useState('roulette');
+
+  const handleGameSelect = (id: string) => {
+    const isPremium = ['mines', 'dragon-tower', 'blackjack', 'lucky-race', 'potion-mix'].includes(id);
+    if (!isPro && isPremium) {
+      router.push('/paywall');
+      return;
+    }
+    setGameId(id);
+  };
 
   const toggleDay = (index: number) => {
     if (repeatDays.includes(index)) {
@@ -182,28 +193,12 @@ export default function AddAlarm() {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.md }} showsVerticalScrollIndicator={false}>
         <Text style={[styles.title, { color: theme.text }]}>Choose Your Challenge</Text>
         <Text style={[styles.subtitle, { color: theme.textMuted, marginBottom: Spacing.md }]}>
-          Win this game to turn off your alarm. If you pick "Any Game", you'll choose each morning.
+          Win this game to turn off your alarm.
         </Text>
-        <Pressable
-          style={[
-            styles.gameCardRow,
-            { 
-              backgroundColor: gameId === 'random' ? 'rgba(255, 176, 0, 0.1)' : theme.surface,
-              borderColor: gameId === 'random' ? theme.primary : theme.border,
-            }
-          ]}
-          onPress={() => setGameId('random')}
-        >
-          <Text style={{ fontSize: 32, marginRight: Spacing.md }}>🎲</Text>
-          <View style={{ flex: 1 }}>
-            <Text style={{ ...Typography.h3, color: theme.text }}>Any Game</Text>
-            <Text style={{ ...Typography.body, color: theme.textMuted }}>Pick when you wake up</Text>
-          </View>
-          {gameId === 'random' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
-        </Pressable>
 
         {GAMES.map((game) => {
           const isSelected = gameId === game.id;
+          const isPremium = ['mines', 'dragon-tower', 'blackjack', 'lucky-race', 'potion-mix'].includes(game.id);
           return (
             <Pressable
               key={game.id}
@@ -214,11 +209,14 @@ export default function AddAlarm() {
                   borderColor: isSelected ? theme.primary : theme.border,
                 }
               ]}
-              onPress={() => setGameId(game.id)}
+              onPress={() => handleGameSelect(game.id)}
             >
               <Text style={{ fontSize: 32, marginRight: Spacing.md }}>{game.icon}</Text>
               <View style={{ flex: 1 }}>
-                <Text style={{ ...Typography.h3, color: theme.text }}>{game.title}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
+                  <Text style={{ ...Typography.h3, color: theme.text }}>{game.title}</Text>
+                  {!isPro && isPremium && <View style={styles.proBadge}><Text style={styles.proBadgeText}>PRO</Text></View>}
+                </View>
                 <Text style={{ ...Typography.body, color: theme.textMuted }}>{game.description}</Text>
               </View>
               {isSelected && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
@@ -345,6 +343,18 @@ const styles = StyleSheet.create({
     borderRadius: Radii.lg,
     borderWidth: 1,
     marginBottom: Spacing.md,
+  },
+  proBadge: {
+    backgroundColor: 'rgba(255, 176, 0, 0.2)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  proBadgeText: {
+    color: '#FFB000',
+    fontSize: 10,
+    fontWeight: '800',
   },
   footer: {
     padding: Spacing.md,

@@ -17,6 +17,8 @@ import HigherLowerGame from '../../games/higher-lower/HigherLowerGame';
 import MinesGame from '../../games/mines/MinesGame';
 import CoinFlipGame from '../../games/coin-flip/CoinFlipGame';
 import CardGuessGame from '../../games/card-guess/CardGuessGame';
+import LuckyRaceGame from '../../games/lucky-race/LuckyRaceGame';
+import PotionMixGame from '../../games/potion-mix/PotionMixGame';
 
 export default function GameScreen() {
   const { gameId, alarmId, isPreview } = useLocalSearchParams();
@@ -100,6 +102,8 @@ export default function GameScreen() {
     switch (gameId) {
       case 'blackjack': return <BlackjackGame key={sessionKey} {...props} />;
       case 'dragon-tower': return <DragonTowerGame key={sessionKey} {...props} />;
+      case 'lucky-race': return <LuckyRaceGame key={sessionKey} {...props} />;
+      case 'potion-mix': return <PotionMixGame key={sessionKey} {...props} />;
       case 'roulette': return <RouletteGame key={sessionKey} {...props} />;
       case 'dice': return <DiceGame key={sessionKey} {...props} />;
       case 'higher-lower': return <HigherLowerGame key={sessionKey} {...props} />;

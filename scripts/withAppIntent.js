@@ -70,7 +70,8 @@ struct WakupAppMetadata: AlarmMetadata { }
                         return
                     }
                     let repeatDays = options["repeatDays"] as? [Int] ?? []
-                    let success = try await self.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays)
+                    let gameId = options["gameId"] as? String ?? "random"
+                    let success = try await self.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays, gameId: gameId)
                     completion(success, id.uuidString, nil)
                 } catch {
                     completion(false, nil, error.localizedDescription)
@@ -105,7 +106,7 @@ struct WakupAppMetadata: AlarmMetadata { }
         return state == .authorized
     }
     
-    public func schedule(id: UUID, hour: Int, minute: Int, label: String, repeatDays: [Int]) async throws -> Bool {
+    public func schedule(id: UUID, hour: Int, minute: Int, label: String, repeatDays: [Int], gameId: String) async throws -> Bool {
         let weekdays: [Locale.Weekday] = repeatDays.compactMap {
             switch $0 {
             case 0: return .sunday
@@ -123,9 +124,24 @@ struct WakupAppMetadata: AlarmMetadata { }
         let recurrence: Alarm.Schedule.Relative.Recurrence = weekdays.isEmpty ? .never : .weekly(weekdays)
         let schedule = Alarm.Schedule.relative(.init(time: time, repeats: recurrence))
         
+        let gameNames: [String: String] = [
+            "mines": "Play Mines",
+            "dragon-tower": "Play Dragon Tower",
+            "blackjack": "Play Blackjack",
+            "lucky-race": "Play Lucky Race",
+            "roulette": "Play Roulette",
+            "dice": "Play Dice",
+            "higher-lower": "Play Higher / Lower",
+            "coin-flip": "Play Coin Flip",
+            "card-guess": "Play Card Guess",
+            "potion-mix": "Play Potion Mix",
+            "random": "Start Challenge"
+        ]
+        let btnText = gameNames[gameId] ?? "Start Challenge"
+        
         let titleResource = LocalizedStringResource(stringLiteral: label)
         let stopBtn = AlarmButton(text: "Stop", textColor: .white, systemImageName: "stop.circle")
-        let gameBtn = AlarmButton(text: "Start Challenge", textColor: .white, systemImageName: "gamecontroller.fill")
+        let gameBtn = AlarmButton(text: LocalizedStringResource(stringLiteral: btnText), textColor: .white, systemImageName: "gamecontroller.fill")
         
         let alertContent = AlarmPresentation.Alert(
             title: titleResource,
@@ -139,7 +155,7 @@ struct WakupAppMetadata: AlarmMetadata { }
         let attributes = AlarmAttributes(
             presentation: presentation,
             metadata: WakupAppMetadata(),
-            tintColor: Color.blue
+            tintColor: Color(red: 1.0, green: 176.0/255.0, blue: 0.0)
         )
         
         let config = AlarmManager.AlarmConfiguration(

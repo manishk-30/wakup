@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radii } from '../constants/theme';
 import { GAMES } from '../types/games';
+import { useProStatus } from '../hooks/useProStatus';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PracticeScreen() {
@@ -10,41 +11,68 @@ export default function PracticeScreen() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   const insets = useSafeAreaInsets();
+  const { isPro } = useProStatus();
+
+  const handleGameSelect = (gameId: string) => {
+    const isPremium = ['mines', 'dragon-tower', 'blackjack', 'lucky-race', 'potion-mix'].includes(gameId);
+    /* 
+    if (isPremium && !isPro) {
+      // @ts-ignore
+      router.push('/paywall');
+      return;
+    }
+    */
+    
+    // @ts-ignore
+    router.push({
+      pathname: '/alarm/games',
+      params: { gameId, isPreview: 'true' }
+    });
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={theme.text} />
+          <Ionicons name="chevron-back" size={28} color={theme.text} />
         </Pressable>
         <Text style={[styles.title, { color: theme.text }]}>Practice Games</Text>
+        <View style={{ width: 28 }} />
       </View>
-
-      <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: insets.bottom + Spacing.xl }}>
+      
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
         <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-          Try out any of the challenges below without triggering a real alarm!
+          Try out the wake-up challenges without setting an alarm.
         </Text>
 
-        {GAMES.map((game) => (
-          <Pressable
-            key={game.id}
-            style={[
-              styles.gameCardRow,
-              { 
-                backgroundColor: theme.surface,
-                borderColor: theme.border,
-              }
-            ]}
-            onPress={() => router.push(`/alarm/games?gameId=${game.id}&isPreview=true`)}
-          >
-            <Text style={{ fontSize: 32, marginRight: Spacing.md }}>{game.icon}</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.h3, color: theme.text }}>{game.title}</Text>
-              <Text style={{ ...Typography.body, color: theme.textMuted }}>{game.description}</Text>
-            </View>
-            <Ionicons name="play-circle" size={28} color={theme.primary} />
-          </Pressable>
-        ))}
+        {GAMES.map((game) => {
+          const isPremium = ['mines', 'dragon-tower', 'blackjack', 'lucky-race', 'potion-mix'].includes(game.id);
+          
+          return (
+            <Pressable
+              key={game.id}
+              style={[
+                styles.gameCardRow,
+                { backgroundColor: theme.surface, borderColor: theme.border }
+              ]}
+              onPress={() => handleGameSelect(game.id)}
+            >
+              <Text style={{ fontSize: 32, marginRight: Spacing.md }}>{game.icon}</Text>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
+                  <Text style={{ ...Typography.h3, color: theme.text }}>{game.title}</Text>
+                  {!isPro && isPremium && (
+                    <View style={[styles.proBadge, { backgroundColor: theme.primary }]}>
+                      <Text style={styles.proBadgeText}>PRO</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={{ ...Typography.body, color: theme.textMuted }}>{game.description}</Text>
+              </View>
+              <Ionicons name="play-circle" size={28} color={theme.primary} />
+            </Pressable>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -57,23 +85,26 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.lg,
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.md,
   },
   backButton: {
-    marginRight: Spacing.md,
-    padding: Spacing.xs,
+    padding: Spacing.sm,
   },
   title: {
     ...Typography.h2,
+    fontSize: 20,
   },
   content: {
     flex: 1,
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
   },
   subtitle: {
     ...Typography.bodyLarge,
     marginBottom: Spacing.xl,
+    marginTop: Spacing.sm,
   },
   gameCardRow: {
     flexDirection: 'row',
@@ -82,5 +113,17 @@ const styles = StyleSheet.create({
     borderRadius: Radii.lg,
     borderWidth: 1,
     marginBottom: Spacing.md,
-  }
+    width: '100%',
+  },
+  proBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: Radii.sm,
+    marginLeft: Spacing.sm,
+  },
+  proBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#FFF',
+  },
 });

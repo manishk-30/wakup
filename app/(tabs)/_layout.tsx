@@ -9,21 +9,6 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   const router = useRouter();
-  const { isPro, isLoading } = useProStatus();
-
-  useEffect(() => {
-    if (!isLoading && !isPro) {
-      router.replace('/paywall');
-    }
-  }, [isPro, isLoading]);
-
-  if (isLoading || !isPro) {
-    return (
-      <View style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color={theme.primary} />
-      </View>
-    );
-  }
 
   return (
     <Tabs

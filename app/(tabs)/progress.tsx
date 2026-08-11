@@ -12,7 +12,6 @@ export default function ProgressScreen() {
   
   const [streakDays, setStreakDays] = useState<string[]>([]);
   const [streakLength, setStreakLength] = useState(0);
-  const [isSharing, setIsSharing] = useState(false);
   const calendarRef = useRef<View>(null);
 
   const loadStreaks = async () => {
@@ -54,36 +53,6 @@ export default function ProgressScreen() {
     return `${year}-${mStr}-${dStr}`;
   };
 
-  const shareCalendar = async () => {
-    try {
-      setIsSharing(true);
-      // Small delay to ensure UI updates if needed
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      alert("Note: To use the share feature, the iOS app must be rebuilt on your Mac to include the new react-native-view-shot native code.");
-      
-      // Temporarily disabled until native rebuild:
-      /*
-      const { captureRef } = require('react-native-view-shot');
-      const localUri = await captureRef(calendarRef, {
-        format: 'png',
-        quality: 1,
-      });
-
-      const isAvailable = await Sharing.isAvailableAsync();
-      if (isAvailable) {
-        await Sharing.shareAsync(localUri, {
-          dialogTitle: 'Check out my Wakeup streak!',
-          mimeType: 'image/png',
-        });
-      }
-      */
-    } catch (e) {
-      console.error('Failed to capture and share', e);
-    } finally {
-      setIsSharing(false);
-    }
-  };
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]} showsVerticalScrollIndicator={false}>
@@ -158,20 +127,6 @@ export default function ProgressScreen() {
           </View>
         </View>
 
-        <Pressable 
-          style={[styles.sharePillButton, { backgroundColor: theme.primary }]}
-          onPress={shareCalendar}
-          disabled={isSharing}
-        >
-          {isSharing ? (
-            <ActivityIndicator color="#FFF" size="small" />
-          ) : (
-            <>
-              <Ionicons name="share-outline" size={20} color="#FFF" />
-              <Text style={styles.sharePillText}>Share Progress</Text>
-            </>
-          )}
-        </Pressable>
 
         <Text style={[styles.emptyText, { color: theme.textMuted }]}>
           Wake up to your next alarm to keep your streak alive.

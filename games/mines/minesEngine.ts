@@ -11,9 +11,9 @@ export const createMinesGrid = (): MineTile[] => {
     isRevealed: false,
   }));
   
-  // Place 7 mines to keep density similar to 4/9
+  // Place 6 mines, leaving 10 safe tiles
   let minesPlaced = 0;
-  while (minesPlaced < 7) {
+  while (minesPlaced < 6) {
     const idx = Math.floor(Math.random() * 16);
     if (!tiles[idx].isMine) {
       tiles[idx].isMine = true;

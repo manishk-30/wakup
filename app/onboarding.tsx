@@ -270,6 +270,24 @@ export default function OnboardingScreen() {
   const finishOnboarding = async () => {
     await storageService.saveOnboardingAnswers(answers);
     await storageService.completeOnboarding();
+    
+    // Auto-downgrade premium game to roulette if user didn't subscribe
+    const isPremium = ['mines', 'dragon-tower', 'blackjack', 'lucky-race', 'potion-mix'].includes(gameId);
+    if (isPremium) {
+      const customerInfo = await subscriptionService.getCustomerInfo();
+      const isPro = typeof customerInfo?.entitlements.active['Pro'] !== 'undefined';
+      
+      if (!isPro) {
+        const alarms = await storageService.getAlarms();
+        if (alarms.length > 0) {
+          const firstAlarm = alarms[alarms.length - 1]; // Or just the one they just created
+          const updatedAlarm = { ...firstAlarm, gameId: 'roulette' };
+          await storageService.updateAlarm(updatedAlarm);
+          await alarmService.scheduleAlarm(updatedAlarm);
+        }
+      }
+    }
+    
     router.replace('/');
   };
 
@@ -867,7 +885,18 @@ export default function OnboardingScreen() {
         );
       case 20:
         return (
-          <View style={{ flex: 1, width: '100%' }}>
+          <View style={{ flex: 1, width: '100%', position: 'relative' }}>
+            <Pressable 
+              style={({ pressed }) => [
+                styles.closeBtn, 
+                pressed && { opacity: 0.7 }
+              ]} 
+              onPress={finishOnboarding}
+            >
+              <View style={styles.closeButtonBg}>
+                <Ionicons name="close" size={28} color="#000" />
+              </View>
+            </Pressable>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
               <View style={styles.pwHeader}>
                 <Text style={[styles.headline, { color: theme.text }]}>Start your 3-day free trial.</Text>
@@ -1448,5 +1477,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#9CA3AF',
     marginHorizontal: 8,
+  },
+  closeBtn: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    zIndex: 100,
+  },
+  closeButtonBg: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
   }
 });

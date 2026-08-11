@@ -7,9 +7,11 @@ import { Alarm } from '../../types/alarm';
 import { storageService } from '../../services/storageService';
 import { alarmService } from '../../services/alarmService';
 import { GAMES } from '../../types/games';
+import { useProStatus } from '../../hooks/useProStatus';
 
 export default function Home() {
   const router = useRouter();
+  const { isPro } = useProStatus();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   const [alarms, setAlarms] = useState<Alarm[]>([]);
@@ -108,7 +110,13 @@ export default function Home() {
         </View>
         <Pressable 
           style={[styles.addButton, { backgroundColor: theme.primary }]}
-          onPress={() => router.push('/alarms/new')}
+          onPress={() => {
+            if (!isPro && alarms.length >= 2) {
+              router.push('/paywall');
+            } else {
+              router.push('/alarms/new');
+            }
+          }}
         >
           <Text style={styles.addButtonText}>+</Text>
         </Pressable>

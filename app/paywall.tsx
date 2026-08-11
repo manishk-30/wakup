@@ -37,9 +37,7 @@ export default function PaywallScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
 
-  const scrollViewRef = useRef<ScrollView>(null);
 
   // Animations
   const floatAnim = useRef(new Animated.Value(0)).current;
@@ -74,20 +72,6 @@ export default function PaywallScreen() {
     ).start();
   }, []);
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const step = Math.round(offsetX / width);
-    if (step !== currentStep) {
-      setCurrentStep(step);
-      Haptics.selectionAsync();
-    }
-  };
-
-  const handleNextStep = () => {
-    if (currentStep < 2) {
-      scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * width, animated: true });
-    }
-  };
 
   const handleSelectPackage = (pkgIdentifier: string, type: 'year' | 'month') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -192,88 +176,6 @@ export default function PaywallScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        bounces={false}
-      >
-        {/* SCREEN 1 */}
-        <View style={styles.screen}>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
-            <View style={styles.header}>
-              <Text style={styles.headline}>Wake up feeling in control.</Text>
-              <Text style={styles.subtitle}>Tomorrow's version of you starts with one better morning.</Text>
-            </View>
-
-            <View style={styles.illustrationArea}>
-              <Animated.View style={mascotTransform}>
-                <Image source={require('../assets/images/mascot_happy.png')} style={styles.mascotImage} contentFit="contain" />
-              </Animated.View>
-            </View>
-
-            <View style={styles.contentArea}>
-              <View style={styles.benefitCard}>
-                <Text style={styles.benefitIcon}>☀️</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.benefitTitle}>Beat the Snooze Button</Text>
-                  <Text style={styles.benefitDesc}>Wake up by completing fun challenges.</Text>
-                </View>
-              </View>
-              <View style={styles.benefitCard}>
-                <Text style={styles.benefitIcon}>🎯</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.benefitTitle}>Stay Consistent</Text>
-                  <Text style={styles.benefitDesc}>Build a routine you'll actually enjoy.</Text>
-                </View>
-              </View>
-              <View style={styles.benefitCard}>
-                <Text style={styles.benefitIcon}>🌅</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.benefitTitle}>Start Every Morning Better</Text>
-                  <Text style={styles.benefitDesc}>Small improvements every single day.</Text>
-                </View>
-              </View>
-            </View>
-          </ScrollView>
-        </View>
-
-        {/* SCREEN 2 */}
-        <View style={styles.screen}>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
-            <View style={styles.header}>
-              <Text style={styles.headline}>Everything you need for better mornings.</Text>
-            </View>
-
-            <View style={styles.illustrationArea}>
-              <Animated.View style={mascotTransform}>
-                <Image source={require('../assets/images/mascot_confident.png')} style={styles.mascotImage} contentFit="contain" />
-              </Animated.View>
-            </View>
-
-            <View style={styles.contentArea}>
-              <View style={[styles.premiumCard, { marginBottom: 16 }]}>
-                <Text style={styles.premiumCardTitle}>☀️ Unlimited Smart Alarms</Text>
-                <Text style={styles.premiumCardDesc}>Never miss an important morning.</Text>
-              </View>
-              <View style={[styles.premiumCard, { marginBottom: 16 }]}>
-                <Text style={styles.premiumCardTitle}>🎮 All Wake-up Games</Text>
-                <Text style={styles.premiumCardDesc}>Blackjack, Dragon Tower, Dice, Roulette, Higher/Lower, Mines. All future games included.</Text>
-              </View>
-              
-              <View style={styles.ratingCard}>
-                <Text style={styles.stars}>★★★★★</Text>
-                <Text style={styles.ratingTitle}>4.9 Rating</Text>
-                <Text style={styles.ratingDesc}>Thousands of mornings improved.</Text>
-              </View>
-            </View>
-          </ScrollView>
-        </View>
-
-        {/* SCREEN 3 */}
         <View style={styles.screen}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
             <View style={styles.header}>
@@ -350,7 +252,6 @@ export default function PaywallScreen() {
             </View>
           </ScrollView>
         </View>
-      </ScrollView>
 
       {/* FOOTER & CTA */}
       <View style={styles.footerArea}>
@@ -358,7 +259,7 @@ export default function PaywallScreen() {
         <Pressable 
           onPressIn={animateCTAPressIn}
           onPressOut={animateCTAPressOut}
-          onPress={currentStep === 2 || isPro ? handlePurchase : handleNextStep}
+          onPress={handlePurchase}
           disabled={isPurchasing}
         >
           <Animated.View style={[styles.ctaButton, { transform: [{ scale: ctaScale }], opacity: isPurchasing ? 0.7 : 1, backgroundColor: purchaseSuccess ? '#10B981' : Theme.primary }]}>
@@ -368,26 +269,34 @@ export default function PaywallScreen() {
               <Text style={styles.ctaText}>✅ Success! Unlocking...</Text>
             ) : (
               <Text style={styles.ctaText}>
-                {isPro ? "Continue" : (currentStep === 2 ? "🌅 Start My Free Trial" : "Continue →")}
+                {isPro ? "Continue" : "🌅 Start My Free Trial"}
               </Text>
             )}
           </Animated.View>
         </Pressable>
 
-        {currentStep === 2 && !isPro && (
+        {!isPro && (
           <Text style={styles.trialInfoText}>3 days free, then {getPrice('ANNUAL')}/year</Text>
         )}
 
-        {currentStep === 2 && (
-          <View style={styles.footerLinksRow}>
-            <Pressable onPress={handleRestore}><Text style={styles.footerLink}>Restore Purchases</Text></Pressable>
-            <Text style={styles.footerLinkDot}> • </Text>
-            <Pressable onPress={() => router.push('/privacy')}><Text style={styles.footerLink}>Privacy Policy</Text></Pressable>
-            <Text style={styles.footerLinkDot}> • </Text>
-            <Pressable onPress={() => router.push('/terms')}><Text style={styles.footerLink}>Terms</Text></Pressable>
-          </View>
-        )}
+        <View style={styles.footerLinksRow}>
+          <Pressable onPress={handleRestore}><Text style={styles.footerLink}>Restore Purchases</Text></Pressable>
+          <Text style={styles.footerLinkDot}> • </Text>
+          <Pressable onPress={() => router.push('/privacy')}><Text style={styles.footerLink}>Privacy Policy</Text></Pressable>
+          <Text style={styles.footerLinkDot}> • </Text>
+          <Pressable onPress={() => router.push('/terms')}><Text style={styles.footerLink}>Terms</Text></Pressable>
+        </View>
       </View>
+      
+      <Pressable onPress={() => {
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace('/');
+        }
+      }} style={styles.closeBtn}>
+        <Ionicons name="close" size={28} color={Theme.navy} />
+      </Pressable>
     </View>
   );
 }
@@ -401,8 +310,10 @@ const createStyles = (Theme: any) => StyleSheet.create({
     position: 'absolute',
     top: 60,
     right: 24,
-    zIndex: 10,
+    zIndex: 100,
     padding: 8,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    borderRadius: Radii.full,
   },
   screen: {
     width: width,
