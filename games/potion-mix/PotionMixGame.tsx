@@ -186,7 +186,10 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
           <Animated.View style={[
             styles.glow, 
             { 
-              transform: [{ scale: flaskScaleAnim }]
+              transform: [
+                { scale: flaskScaleAnim },
+                { translateX: flaskShakeAnim }
+              ]
             }
           ]}>
             <Animated.View style={{
