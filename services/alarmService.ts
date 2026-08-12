@@ -25,11 +25,21 @@ export const alarmService = {
     console.log(`[AlarmKit] Alarm date: ${alarm.hour}:${alarm.minute}`);
     
     if (isNativeModuleAvailable && AlarmKit.default?.scheduleAlarm) {
-      const result = await AlarmKit.default!.scheduleAlarm(alarm);
+      let result = await AlarmKit.default!.scheduleAlarm(alarm);
+      let retries = 0;
+      
+      // Retry up to 3 times if the OS daemon rejects the scheduling (common right after first authorization)
+      while (!result.success && retries < 3) {
+        console.warn(`[AlarmKit] Scheduling failed, retrying in 500ms... (Attempt ${retries + 1}/3)`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        result = await AlarmKit.default!.scheduleAlarm(alarm);
+        retries++;
+      }
+
       if (result.success) {
         console.log(`[AlarmKit] Alarm scheduled successfully`);
       } else {
-        console.error(`[AlarmKit] Scheduling failed:`, result.error);
+        console.error(`[AlarmKit] Scheduling failed after retries:`, result.error);
       }
       return result;
     }

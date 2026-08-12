@@ -102,7 +102,15 @@ export default function PaywallScreen() {
         if (isPremium) {
           console.log(`[Paywall] 'Pro' entitlement active. Navigating to Home immediately.`);
           setPurchaseSuccess(true);
-          router.replace('/');
+          Alert.alert(
+            "Payment Successful!",
+            "Please wait for a few seconds while we set up your Pro features...",
+            [],
+            { cancelable: false }
+          );
+          setTimeout(() => {
+            router.replace('/');
+          }, 1500);
         } else {
           console.log(`[Paywall] Purchase successful but 'Pro' entitlement not immediately active.`);
           // Handle gracefully without getting stuck

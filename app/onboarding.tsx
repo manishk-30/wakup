@@ -307,7 +307,15 @@ export default function OnboardingScreen() {
       const { success, customerInfo, error } = await subscriptionService.purchasePackage(pkg as PurchasesPackage);
       setIsPurchasing(false);
       if (success) {
-        finishOnboarding();
+        Alert.alert(
+          "Payment Successful!",
+          "Please wait for a few seconds while we set up your Pro features...",
+          [],
+          { cancelable: false }
+        );
+        setTimeout(() => {
+          finishOnboarding();
+        }, 1500);
       } else if (error !== 'User cancelled') {
         Alert.alert("Purchase Failed", error || "Unknown error occurred.");
       }
