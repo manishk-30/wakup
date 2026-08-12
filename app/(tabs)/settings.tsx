@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, useColorScheme, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, useColorScheme, Pressable, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
@@ -14,6 +14,24 @@ export default function SettingsScreen() {
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   
   const { isPro } = useProStatus();
+  const [isRestoring, setIsRestoring] = useState(false);
+
+  const handleRestore = async () => {
+    setIsRestoring(true);
+    const { success, customerInfo, error } = await subscriptionService.restorePurchases();
+    setIsRestoring(false);
+    
+    if (success) {
+      const isPremium = typeof customerInfo?.entitlements.active['Pro'] !== 'undefined';
+      if (isPremium) {
+        Alert.alert("Restored", "Your purchases have been successfully restored.");
+      } else {
+        Alert.alert("Restored", "No active premium subscription found.");
+      }
+    } else {
+      Alert.alert("Restore Failed", error || "Could not restore purchases.");
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -71,6 +89,15 @@ export default function SettingsScreen() {
           <Pressable style={styles.row} onPress={() => router.push('/refund')}>
             <Text style={[styles.rowText, { color: theme.text }]}>Refund Policy</Text>
             <Ionicons name="chevron-forward" size={20} color={theme.textMuted} />
+          </Pressable>
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+          <Pressable style={styles.row} onPress={handleRestore} disabled={isRestoring}>
+            <Text style={[styles.rowText, { color: theme.text }]}>Restore Purchases</Text>
+            {isRestoring ? (
+              <ActivityIndicator size="small" color={theme.primary} />
+            ) : (
+              <Ionicons name="refresh" size={20} color={theme.textMuted} />
+            )}
           </Pressable>
         </View>
 
