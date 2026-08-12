@@ -9,23 +9,47 @@ export default function TermsScreen() {
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
       <Text style={[styles.header, { color: theme.text }]}>Terms of Service</Text>
       <Text style={[styles.paragraph, { color: theme.textMuted }]}>
-        By downloading or using the app, these terms will automatically apply to you – you should make sure therefore that you read them carefully before using the app.
-      </Text>
-      <Text style={[styles.paragraph, { color: theme.textMuted }]}>
-        You’re not allowed to copy, or modify the app, any part of the app, or our trademarks in any way. You’re not allowed to attempt to extract the source code of the app, and you also shouldn’t try to translate the app into other languages, or make derivative versions.
-      </Text>
-      <Text style={[styles.paragraph, { color: theme.textMuted }]}>
-        Wakup is committed to ensuring that the app is as useful and efficient as possible. For that reason, we reserve the right to make changes to the app or to charge for its services, at any time and for any reason.
+        By downloading or using Wakup, you agree to these Terms of Service.
       </Text>
 
-      <Text style={[styles.subHeader, { color: theme.text }]}>Requirements for Use</Text>
+      <Text style={[styles.subHeader, { color: theme.text }]}>1. Intellectual Property</Text>
       <Text style={[styles.paragraph, { color: theme.textMuted }]}>
-        To use Wakup effectively, you must agree to and meet the following requirements:
+        Wakup's Name, Logo, Sun mascot, Illustrations, Game designs, UI, Software, Content, and Trademarks are protected intellectual property.
       </Text>
-      <Text style={[styles.bullet, { color: theme.textMuted }]}>• You must be at least 13 years of age to use this app.</Text>
-      <Text style={[styles.bullet, { color: theme.textMuted }]}>• You must grant the app permission to send critical alerts, push notifications, and play sounds, otherwise the alarms will not function.</Text>
-      <Text style={[styles.bullet, { color: theme.textMuted }]}>• You are responsible for keeping your device charged, turned on, and with the volume up overnight for alarms to trigger reliably.</Text>
-      <Text style={[styles.bullet, { color: theme.textMuted }]}>• You agree not to attempt to bypass the alarm mini-games using exploits, force-quitting the app, or unauthorized device modifications.</Text>
+      <Text style={[styles.paragraph, { color: theme.textMuted }]}>
+        Users may not copy, modify, reverse engineer, extract, redistribute, or create derivative versions of Wakup.
+      </Text>
+
+      <Text style={[styles.subHeader, { color: theme.text }]}>2. Requirements for Use</Text>
+      <Text style={[styles.paragraph, { color: theme.textMuted }]}>
+        To use Wakup effectively:
+      </Text>
+      <Text style={[styles.bullet, { color: theme.textMuted }]}>• You must meet the minimum age requirement.</Text>
+      <Text style={[styles.bullet, { color: theme.textMuted }]}>• You should grant the permissions required for alarms and notifications.</Text>
+      <Text style={[styles.bullet, { color: theme.textMuted }]}>• You should keep your device charged and powered on.</Text>
+      <Text style={[styles.bullet, { color: theme.textMuted }]}>• You should keep required notification/sound settings enabled.</Text>
+      <Text style={[styles.bullet, { color: theme.textMuted }]}>• You should not intentionally attempt to bypass the app's wake-up challenges through exploits or unauthorized device modifications.</Text>
+
+      <Text style={[styles.subHeader, { color: theme.text }]}>3. Wake-Up Games</Text>
+      <Text style={[styles.paragraph, { color: theme.textMuted }]}>
+        Wakup's games are designed solely as interactive wake-up challenges.
+      </Text>
+
+      <Text style={[styles.subHeader, { color: theme.text }]}>4. Alarm Disclaimer</Text>
+      <Text style={[styles.paragraph, { color: theme.textMuted }]}>
+        Wakup is designed to provide alarm functionality, but no software can guarantee an alarm will function under every circumstance.
+      </Text>
+      <Text style={[styles.paragraph, { color: theme.textMuted }]}>
+        Potential causes for failure include: Device being powered off, battery depletion, system restrictions, disabled permissions, user settings, hardware issues, or iOS behavior.
+      </Text>
+      <Text style={[styles.paragraph, { color: theme.textMuted }]}>
+        Users should take appropriate precautions when an alarm is important.
+      </Text>
+
+      <Text style={[styles.subHeader, { color: theme.text }]}>5. Subscriptions</Text>
+      <Text style={[styles.paragraph, { color: theme.textMuted, marginBottom: 100 }]}>
+        Wakup Pro subscriptions are purchased through Apple's App Store. Subscriptions may automatically renew according to the selected plan unless cancelled before renewal. Apple's terms and billing policies apply to App Store transactions.
+      </Text>
     </ScrollView>
   );
 }
