@@ -490,7 +490,7 @@ const createStyles = (Theme: any) => StyleSheet.create({
     padding: 16,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: 'rgba(0,0,0,0.1)',
     alignItems: 'center',
     position: 'relative',
     height: 140,

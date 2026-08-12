@@ -95,6 +95,7 @@ export default function AddAlarm() {
       gameId,
     };
 
+    await alarmService.requestAuthorization();
     await storageService.addAlarm(newAlarm);
     await alarmService.scheduleAlarm(newAlarm);
     

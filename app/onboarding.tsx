@@ -349,6 +349,7 @@ export default function OnboardingScreen() {
       gameId
     };
 
+    await alarmService.requestAuthorization();
     await storageService.addAlarm(newAlarm);
     await alarmService.scheduleAlarm(newAlarm);
 
@@ -1406,7 +1407,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: 'rgba(0,0,0,0.1)',
     alignItems: 'center',
     position: 'relative',
     height: 110,
