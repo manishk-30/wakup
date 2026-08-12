@@ -90,21 +90,31 @@ export default function PaywallScreen() {
     setIsPurchasing(true);
     const pkg = packages.find(p => p.identifier === selectedPackage);
     
-
     if (pkg) {
+      console.log(`[Paywall] Starting purchase for package: ${pkg.identifier}`);
       const { success, customerInfo, error } = await subscriptionService.purchasePackage(pkg as PurchasesPackage);
       setIsPurchasing(false);
+      
       if (success) {
+        console.log(`[Paywall] Purchase successful. Checking 'Pro' entitlement...`);
         const isPremium = typeof customerInfo?.entitlements.active['Pro'] !== 'undefined';
+        
         if (isPremium) {
+          console.log(`[Paywall] 'Pro' entitlement active. Navigating to Home immediately.`);
           setPurchaseSuccess(true);
-          setTimeout(() => {
-            router.replace('/');
-          }, 1000);
+          router.replace('/');
         } else {
-          Alert.alert("Purchase Complete", "But the premium entitlement was not unlocked.");
+          console.log(`[Paywall] Purchase successful but 'Pro' entitlement not immediately active.`);
+          // Handle gracefully without getting stuck
+          setPurchaseSuccess(true);
+          Alert.alert(
+            "Purchase Successful", 
+            "Your purchase was successful, but it might take a moment for the Pro features to unlock. You can restore purchases later if needed.",
+            [{ text: "OK", onPress: () => router.replace('/') }]
+          );
         }
       } else {
+        console.log(`[Paywall] Purchase failed or cancelled. Error: ${error}`);
         if (error !== 'User cancelled') {
           Alert.alert("Purchase Failed", error || "Unknown error occurred.");
         }
@@ -113,19 +123,25 @@ export default function PaywallScreen() {
   };
 
   const handleRestore = async () => {
+    console.log(`[Paywall] Starting restore...`);
     setIsPurchasing(true);
     const { success, customerInfo, error } = await subscriptionService.restorePurchases();
     setIsPurchasing(false);
     
     if (success) {
+      console.log(`[Paywall] Restore successful. Checking 'Pro' entitlement...`);
       const isPremium = typeof customerInfo?.entitlements.active['Pro'] !== 'undefined';
       if (isPremium) {
-        Alert.alert("Restored", "Your purchases have been restored.");
-        router.replace('/');
+        console.log(`[Paywall] 'Pro' entitlement found. Navigating to Home.`);
+        Alert.alert("Restored", "Your purchases have been restored.", [
+          { text: "OK", onPress: () => router.replace('/') }
+        ]);
       } else {
+        console.log(`[Paywall] Restore completed but no 'Pro' entitlement found.`);
         Alert.alert("Restored", "No active premium subscription found.");
       }
     } else {
+      console.log(`[Paywall] Restore failed. Error: ${error}`);
       Alert.alert("Restore Failed", error || "Could not restore purchases.");
     }
   };
