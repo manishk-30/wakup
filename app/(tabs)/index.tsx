@@ -11,7 +11,7 @@ import { useProStatus } from '../../hooks/useProStatus';
 
 export default function Home() {
   const router = useRouter();
-  const { isPro } = useProStatus();
+  const { isPro, isLoading } = useProStatus();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   const [alarms, setAlarms] = useState<Alarm[]>([]);
@@ -31,6 +31,34 @@ export default function Home() {
       loadData();
     }, [])
   );
+
+  // Auto-downgrade premium games to roulette if user is not Pro
+  useEffect(() => {
+    if (isLoading) return;
+    
+    const checkAlarms = async () => {
+      if (!isPro && alarms.length > 0) {
+        let changed = false;
+        const newAlarms = [...alarms];
+        for (let i = 0; i < newAlarms.length; i++) {
+          const alarm = newAlarms[i];
+          const isPremium = alarm.gameId ? ['mines', 'dragon-tower', 'blackjack', 'lucky-race', 'potion-mix'].includes(alarm.gameId) : false;
+          if (isPremium) {
+            newAlarms[i] = { ...alarm, gameId: 'roulette' };
+            await storageService.updateAlarm(newAlarms[i]);
+            if (newAlarms[i].enabled) {
+              await alarmService.scheduleAlarm(newAlarms[i]);
+            }
+            changed = true;
+          }
+        }
+        if (changed) {
+          setAlarms(newAlarms);
+        }
+      }
+    };
+    checkAlarms();
+  }, [isPro, isLoading, alarms.length]);
 
   const interceptAction = (type: 'delete' | 'toggle', alarm: Alarm) => {
     if (!commitmentData) return false;

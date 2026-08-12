@@ -235,7 +235,7 @@ export default function PaywallScreen() {
                       <Text style={styles.timelineIcon}>💛</Text>
                       <View style={styles.timelineContent}>
                         <Text style={styles.timelineTitle}>DAY 3</Text>
-                        <Text style={styles.timelineDesc}>Continue with Pro or cancel anytime.</Text>
+                        <Text style={styles.timelineDesc}>Your subscription renews automatically unless cancelled.</Text>
                       </View>
                     </View>
                   </View>
@@ -374,7 +374,7 @@ const createStyles = (Theme: any) => StyleSheet.create({
     marginBottom: 24,
   },
   mascotImage: {
-    width: '100%',
+    width: 200,
     height: 200,
   },
   contentArea: {
