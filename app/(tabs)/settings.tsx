@@ -91,6 +91,7 @@ export default function SettingsScreen() {
             <Ionicons name="chevron-forward" size={20} color={theme.textMuted} />
           </Pressable>
           <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
           <Pressable style={styles.row} onPress={handleRestore} disabled={isRestoring}>
             <Text style={[styles.rowText, { color: theme.text }]}>Restore Purchases</Text>
             {isRestoring ? (
