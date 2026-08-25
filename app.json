@@ -43,6 +43,7 @@
       "@react-native-community/datetimepicker",
       "./scripts/withAlarmAudio.js",
       "./scripts/withAppIntent.js",
+      "./scripts/withIphoneOnly.js",
       "expo-audio"
     ],
     "experiments": {
