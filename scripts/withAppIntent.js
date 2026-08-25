@@ -159,14 +159,14 @@ struct WakupAppMetadata: AlarmMetadata { }
             tintColor: Color(red: 1.0, green: 176.0/255.0, blue: 0.0)
         )
         
-        let alertSound = AlertConfiguration.AlertSound.named(soundName)
+        let cleanSoundName = soundName.replacingOccurrences(of: ".wav", with: "")
         
         let config = AlarmManager.AlarmConfiguration(
             schedule: schedule,
             attributes: attributes,
-            sound: alertSound,
             stopIntent: StopAlarmIntent(alarmId: id.uuidString),
-            secondaryIntent: StartChallengeIntent(alarmId: id.uuidString)
+            secondaryIntent: StartChallengeIntent(alarmId: id.uuidString),
+            sound: .named(cleanSoundName)
         )
         
         _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
