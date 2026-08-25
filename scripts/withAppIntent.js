@@ -71,7 +71,8 @@ struct WakupAppMetadata: AlarmMetadata { }
                     }
                     let repeatDays = options["repeatDays"] as? [Int] ?? []
                     let gameId = options["gameId"] as? String ?? "random"
-                    let success = try await self.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays, gameId: gameId)
+                    let soundName = options["soundName"] as? String ?? "radar.wav"
+                    let success = try await self.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays, gameId: gameId, soundName: soundName)
                     completion(success, id.uuidString, nil)
                 } catch {
                     completion(false, nil, error.localizedDescription)
@@ -106,7 +107,7 @@ struct WakupAppMetadata: AlarmMetadata { }
         return state == .authorized
     }
     
-    public func schedule(id: UUID, hour: Int, minute: Int, label: String, repeatDays: [Int], gameId: String) async throws -> Bool {
+    public func schedule(id: UUID, hour: Int, minute: Int, label: String, repeatDays: [Int], gameId: String, soundName: String) async throws -> Bool {
         let weekdays: [Locale.Weekday] = repeatDays.compactMap {
             switch $0 {
             case 0: return .sunday
@@ -158,9 +159,12 @@ struct WakupAppMetadata: AlarmMetadata { }
             tintColor: Color(red: 1.0, green: 176.0/255.0, blue: 0.0)
         )
         
+        let alertSound = AlertConfiguration.AlertSound.named(soundName)
+        
         let config = AlarmManager.AlarmConfiguration(
             schedule: schedule,
             attributes: attributes,
+            sound: alertSound,
             stopIntent: StopAlarmIntent(alarmId: id.uuidString),
             secondaryIntent: StartChallengeIntent(alarmId: id.uuidString)
         )
