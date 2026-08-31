@@ -12,9 +12,6 @@
       "bundleIdentifier": "com.avish.wakup",
       "supportsTablet": false,
       "infoPlist": {
-        "UIBackgroundModes": [
-          "audio"
-        ],
         "NSAlarmKitUsageDescription": "We'll schedule alerts for alarms you create within our app."
       }
     },
