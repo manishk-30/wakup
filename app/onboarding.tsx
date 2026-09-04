@@ -437,7 +437,7 @@ export default function OnboardingScreen() {
         );
       case 6:
         return (
-          <View style={styles.centerContainer}>
+          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
             <Text style={[styles.title, { color: theme.text }]}>To personalize your sleep profile, how old are you?</Text>
             <View style={styles.optionsContainer}>
               <Pressable style={getOptionStyle('age', 'under18')} onPress={() => handleAnswer('age', 'under18')}>
@@ -459,11 +459,11 @@ export default function OnboardingScreen() {
             >
               <Text style={styles.buttonText}>Continue</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         );
       case 7:
         return (
-          <View style={styles.centerContainer}>
+          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
             <Text style={[styles.title, { color: theme.text }]}>What is your gender?</Text>
             <View style={styles.optionsContainer}>
               <Pressable style={getOptionStyle('gender', 'male')} onPress={() => handleAnswer('gender', 'male')}>
@@ -482,11 +482,11 @@ export default function OnboardingScreen() {
             >
               <Text style={styles.buttonText}>Continue</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         );
       case 8:
         return (
-          <View style={styles.centerContainer}>
+          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
             <Text style={[styles.title, { color: theme.text }]}>Are you naturally a morning person?</Text>
             <View style={styles.optionsContainer}>
               <Pressable style={getOptionStyle('morningPerson', 'owl')} onPress={() => handleAnswer('morningPerson', 'owl')}>
@@ -505,11 +505,11 @@ export default function OnboardingScreen() {
             >
               <Text style={styles.buttonText}>Continue</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         );
       case 9:
         return (
-          <View style={styles.centerContainer}>
+          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
             <Text style={[styles.title, { color: theme.text }]}>What time do you usually wake up?</Text>
             <View style={styles.optionsContainer}>
               <Pressable style={getOptionStyle('wakeTime', 'before6')} onPress={() => handleAnswer('wakeTime', 'before6')}>
@@ -531,11 +531,11 @@ export default function OnboardingScreen() {
             >
               <Text style={styles.buttonText}>Continue</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         );
       case 10:
         return (
-          <View style={styles.centerContainer}>
+          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
             <Text style={[styles.title, { color: theme.text }]}>What is your ultimate morning goal?</Text>
             <View style={styles.optionsContainer}>
               <Pressable style={getOptionStyle('goal', 'snooze')} onPress={() => handleAnswer('goal', 'snooze')}>
@@ -554,7 +554,7 @@ export default function OnboardingScreen() {
             >
               <Text style={styles.buttonText}>Continue</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         );
       case 11:
         return (
@@ -646,7 +646,7 @@ export default function OnboardingScreen() {
       case 14:
         const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
         return (
-          <View style={styles.centerContainer}>
+          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
             <Text style={[styles.title, { color: theme.text }]}>Alarm Details</Text>
 
             <View style={[styles.section, { width: '100%', alignItems: 'center' }]}>
@@ -714,7 +714,7 @@ export default function OnboardingScreen() {
             <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xl }]} onPress={() => handleNext()}>
               <Text style={styles.buttonText}>Next</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         );
       case 15:
         return (
@@ -1027,16 +1027,19 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: 'rgba(150, 150, 150, 0.2)',
     width: '100%',
-    position: 'absolute',
-    top: 50, // safe area approx
-    zIndex: 10,
+    marginVertical: Spacing.sm,
   },
   progressBarFill: {
     height: '100%',
   },
   content: {
     flex: 1,
-    paddingHorizontal: Spacing.xl,
+  },
+  scrollCenterContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
   },
   centerContainer: {
     flex: 1,
