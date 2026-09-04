@@ -100,28 +100,6 @@ export default function SettingsScreen() {
               <Ionicons name="refresh" size={20} color={theme.textMuted} />
             )}
           </Pressable>
-          <View style={[styles.divider, { backgroundColor: theme.border }]} />
-          
-          <Pressable 
-            style={styles.row} 
-            onPress={async () => {
-              Alert.alert(
-                "Test Onboarding",
-                "This will clear your current onboarding data and start over. Continue?",
-                [
-                  { text: "Cancel", style: "cancel" },
-                  { text: "Yes", onPress: async () => {
-                      await storageService.clearOnboarding();
-                      router.replace('/onboarding');
-                    }
-                  }
-                ]
-              );
-            }}
-          >
-            <Text style={[styles.rowText, { color: theme.text }]}>Test Onboarding</Text>
-            <Ionicons name="flask" size={20} color={theme.textMuted} />
-          </Pressable>
         </View>
 
         <Text style={[styles.versionText, { color: theme.textMuted }]}>Wakup v1.0.0</Text>
