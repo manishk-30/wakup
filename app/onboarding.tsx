@@ -718,7 +718,7 @@ export default function OnboardingScreen() {
         );
       case 15:
         return (
-          <View style={styles.centerContainer}>
+          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
             <Text style={[styles.title, { color: theme.text }]}>One small promise.</Text>
             <Text style={[styles.subtitle, { color: theme.textMuted }]}>
               You're not making a promise to us.{"\n"}
@@ -779,11 +779,11 @@ export default function OnboardingScreen() {
             <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xl }]} onPress={() => signatureRef.current?.readSignature()}>
               <Text style={styles.buttonText}>I'm Committed</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         );
       case 16:
         return (
-          <View style={styles.centerContainer}>
+          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
             <Animated.Text style={{ fontSize: 80, marginBottom: Spacing.xl, transform: [{ scale: pulseAnim }] }}>
               ✅
             </Animated.Text>
@@ -795,11 +795,11 @@ export default function OnboardingScreen() {
             <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xl }]} onPress={() => handleNext()}>
               <Text style={styles.buttonText}>Continue</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         );
       case 17:
         return (
-          <View style={styles.centerContainer}>
+          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
             <Animated.Text style={{ fontSize: 80, marginBottom: Spacing.xl, transform: [{ translateY: bounceAnim }] }}>
               🚀
             </Animated.Text>
@@ -808,7 +808,7 @@ export default function OnboardingScreen() {
             <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xl }]} onPress={handleSetAlarm}>
               <Text style={styles.buttonText}>Allow Notifications & Continue</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         );
       case 18:
         return (

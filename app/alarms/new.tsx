@@ -103,7 +103,7 @@ export default function AddAlarm() {
   };
 
   const renderStep1 = () => (
-    <View style={styles.stepContainer}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1, paddingTop: Spacing.xl, paddingBottom: Spacing.xl, justifyContent: 'center' }} showsVerticalScrollIndicator={false}>
       <Text style={[styles.title, { color: theme.text }]}>When should we wake you?</Text>
       <View style={styles.timePickerContainer}>
         <DateTimePicker
@@ -118,11 +118,11 @@ export default function AddAlarm() {
           style={{ width: '100%', height: 250 }}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 
   const renderStep3 = () => (
-    <View style={styles.stepContainer}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1, paddingTop: Spacing.xl, paddingBottom: Spacing.xl }} showsVerticalScrollIndicator={false}>
       <Text style={[styles.title, { color: theme.text }]}>Alarm Details</Text>
       
       <View style={styles.section}>
@@ -186,7 +186,7 @@ export default function AddAlarm() {
           <Ionicons name="chevron-forward" size={24} color={theme.textMuted} />
         </Pressable>
       </View>
-    </View>
+    </ScrollView>
   );
 
   const renderStep2 = () => (
