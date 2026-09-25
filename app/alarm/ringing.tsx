@@ -37,7 +37,7 @@ export default function AlarmRinging() {
         const alarms = await storageService.getAlarms();
         const now = new Date();
         
-        let activeAlarm = alarms.find(a => a.id === currentAlarmId);
+        let activeAlarm = alarms.find(a => a.id.toLowerCase() === currentAlarmId.toLowerCase());
         
         if (!activeAlarm) {
           // Find the most recently triggered enabled alarm within the last hour

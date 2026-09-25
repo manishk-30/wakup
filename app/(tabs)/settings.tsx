@@ -102,7 +102,7 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
-        <Text style={[styles.versionText, { color: theme.textMuted }]}>Wakup v1.0.0</Text>
+        <Text style={[styles.versionText, { color: theme.textMuted }]}>Wakup v1.1.0</Text>
 
 
       </ScrollView>
