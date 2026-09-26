@@ -57,6 +57,13 @@ public class AlarmKitModule: Module {
       do {
         try AVAudioSession.sharedInstance().setCategory(.playback, options: [.duckOthers])
         try AVAudioSession.sharedInstance().setActive(true)
+        
+        // Notify intents that the custom app audio is about to start
+        NotificationCenter.default.post(
+            name: NSNotification.Name("WakupAudioSessionConfigured"),
+            object: nil
+        )
+        
         promise.resolve(true)
       } catch {
         promise.resolve(["success": false, "error": error.localizedDescription])

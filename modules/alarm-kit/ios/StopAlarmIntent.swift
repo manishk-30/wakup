@@ -47,6 +47,31 @@ public struct StopAlarmIntent: LiveActivityIntent, ForegroundContinuableIntent {
         try await requestToContinueInForeground()
         print("[AlarmKit] App became active from Stop intent")
         
+        // Wait for the app to take over the audio so the system alarm doesn't stop immediately
+        _ = try? await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            var observer: Any?
+            
+            let timeoutTask = Task {
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+                if let obs = observer {
+                    NotificationCenter.default.removeObserver(obs)
+                }
+                continuation.resume()
+            }
+            
+            observer = NotificationCenter.default.addObserver(
+                forName: NSNotification.Name("WakupAudioSessionConfigured"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                timeoutTask.cancel()
+                if let obs = observer {
+                    NotificationCenter.default.removeObserver(obs)
+                }
+                continuation.resume()
+            }
+        }
+        
         return .result()
     }
 }
