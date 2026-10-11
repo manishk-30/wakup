@@ -165,11 +165,11 @@ export default function PaywallScreen() {
   const mascotTransform = { transform: [{ translateY: floatAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -10] }) }] };
 
   const getPrice = (type: 'ANNUAL' | 'MONTHLY') => {
-    const pkg = packages.find(p => p.packageType === type || p.identifier.includes(type.toLowerCase()));
-    if (pkg) {
+    const pkg = packages.find(p => p.packageType === type || p.identifier.toLowerCase().includes(type.toLowerCase()));
+    if (pkg?.product?.priceString) {
       return pkg.product.priceString;
     }
-    return type === 'ANNUAL' ? '₹2499' : '₹499';
+    return type === 'ANNUAL' ? '$24.99' : '$4.99';
   };
 
   if (isLoading) {

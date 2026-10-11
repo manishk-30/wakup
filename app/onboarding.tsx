@@ -33,13 +33,13 @@ const MOCK_PACKAGES: any[] = [
     isMock: true,
     identifier: '$rc_annual',
     packageType: 'ANNUAL',
-    product: { identifier: 'wakup_yearly', priceString: '₹2499' },
+    product: { identifier: 'wakup_yearly', priceString: '$24.99' },
   },
   {
     isMock: true,
     identifier: '$rc_monthly',
     packageType: 'MONTHLY',
-    product: { identifier: 'wakup_monthly', priceString: '₹499' },
+    product: { identifier: 'wakup_monthly', priceString: '$4.99' },
   },
 ];
 
@@ -340,9 +340,9 @@ export default function OnboardingScreen() {
   };
 
   const getPrice = (type: 'ANNUAL' | 'MONTHLY') => {
-    const pkg = packages.find(p => p.packageType === type || p.identifier.includes(type.toLowerCase()));
-    if (pkg) return pkg.product.priceString;
-    return type === 'ANNUAL' ? '₹2499' : '₹499';
+    const pkg = packages.find(p => p.packageType === type || p.identifier.toLowerCase().includes(type.toLowerCase()));
+    if (pkg?.product?.priceString) return pkg.product.priceString;
+    return type === 'ANNUAL' ? '$24.99' : '$4.99';
   };
 
   const handleSetAlarm = async () => {
@@ -945,8 +945,9 @@ export default function OnboardingScreen() {
 
                     <View style={styles.pricingContainer}>
                       {packages.map((pkg, idx) => {
-                        const isYear = pkg.packageType === 'ANNUAL';
+                        const isYear = pkg.packageType === 'ANNUAL' || pkg.identifier.toLowerCase().includes('annual') || pkg.identifier.toLowerCase().includes('yearly');
                         const isSelected = selectedPackage === pkg.identifier;
+                        const priceDisplay = pkg.product?.priceString || (isYear ? '$24.99' : '$4.99');
 
                         return (
                           <View key={pkg.identifier} style={{ width: '48%' }}>
@@ -961,7 +962,7 @@ export default function OnboardingScreen() {
                               {isSelected && <View style={styles.checkIcon}><Ionicons name="checkmark-circle" size={24} color={'#FFB000'} /></View>}
 
                               <Text style={styles.planName}>{isYear ? 'Yearly' : 'Monthly'}</Text>
-                              <Text style={styles.planPrice}>{isYear ? '$24.99' : '$4.99'}/{isYear ? 'year' : 'mo'}</Text>
+                              <Text style={styles.planPrice}>{priceDisplay}/{isYear ? 'year' : 'mo'}</Text>
                               {isYear && <Text style={styles.planSavings}>Save over 70%</Text>}
                             </Pressable>
                           </View>
@@ -983,7 +984,7 @@ export default function OnboardingScreen() {
               </Pressable>
 
               {!isPro && (
-                <Text style={[styles.trialInfoText, { marginTop: 0, marginBottom: 8 }]}>3 days free, then $24.99/year</Text>
+                <Text style={[styles.trialInfoText, { marginTop: 0, marginBottom: 8 }]}>3 days free, then {getPrice('ANNUAL')}/year</Text>
               )}
 
               {isPro ? null : (
