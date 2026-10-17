@@ -573,30 +573,20 @@ export default function OnboardingScreen() {
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>When should we wake you?</Text>
+            <Text style={[styles.subtitle, { color: theme.textMuted, marginBottom: Spacing.md }]}>Scroll to pick your time</Text>
 
-            <Pressable
-              style={[styles.timePickerDisplay, { backgroundColor: theme.surface, borderColor: theme.border }]}
-              onPress={() => setShowPicker(true)}
-            >
-              <Text style={[styles.timePickerText, { color: theme.primary }]}>
-                {alarmTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-              </Text>
-            </Pressable>
+            <DateTimePicker
+              value={alarmTime}
+              mode="time"
+              display="spinner"
+              textColor={theme.text}
+              onChange={(event, selectedDate) => {
+                if (selectedDate) setAlarmTime(selectedDate);
+              }}
+              style={{ width: '100%' }}
+            />
 
-            {showPicker && (
-              <DateTimePicker
-                value={alarmTime}
-                mode="time"
-                display="spinner"
-                textColor={theme.text}
-                onChange={(event, selectedDate) => {
-                  setShowPicker(false);
-                  if (selectedDate) setAlarmTime(selectedDate);
-                }}
-              />
-            )}
-
-            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xxl }]} onPress={() => handleNext()}>
+            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.lg }]} onPress={() => handleNext()}>
               <Text style={styles.buttonText}>Next</Text>
             </Pressable>
           </View>
