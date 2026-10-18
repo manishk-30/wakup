@@ -216,7 +216,11 @@ export default function AddAlarm() {
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
                   <Text style={{ ...Typography.h3, color: theme.text }}>{game.title}</Text>
-                  {isPremium && <Text style={{ fontSize: 16, marginLeft: 8 }}>🔥</Text>}
+                  {isPremium && (
+                    <View style={styles.proBadge}>
+                      <Text style={styles.proBadgeText}>PRO</Text>
+                    </View>
+                  )}
                 </View>
                 <Text style={{ ...Typography.body, color: theme.textMuted }}>{game.description}</Text>
               </View>

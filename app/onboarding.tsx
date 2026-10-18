@@ -617,7 +617,9 @@ export default function OnboardingScreen() {
                       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
                         <Text style={{ ...Typography.h3, color: theme.text }}>{game.title}</Text>
                         {isPremium && (
-                          <Text style={{ fontSize: 16, marginLeft: 8 }}>🔥</Text>
+                          <View style={{ backgroundColor: theme.primary, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: 8 }}>
+                            <Text style={{ fontSize: 10, fontWeight: '900', color: '#FFF' }}>PRO</Text>
+                          </View>
                         )}
                       </View>
                       <Text style={{ ...Typography.body, color: theme.textMuted }}>{game.description}</Text>
