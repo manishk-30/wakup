@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import * as StoreReview from 'expo-store-review';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Easing, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native';
 import { PurchasesPackage } from 'react-native-purchases';
@@ -395,13 +394,6 @@ export default function OnboardingScreen() {
 
   const handleSubmitRating = async () => {
     handleAnswer('rating', String(rating));
-    try {
-      if (await StoreReview.isAvailableAsync()) {
-        await StoreReview.requestReview();
-      }
-    } catch (e) {
-      console.log('[StoreReview] Error requesting review:', e);
-    }
     handleNext();
   };
 
@@ -775,11 +767,10 @@ export default function OnboardingScreen() {
               <Image source={require('../assets/images/mascot_happy.png')} style={{ width: 130, height: 130 }} contentFit="contain" />
             </Animated.View>
 
-            <Text style={[styles.title, { color: theme.text, marginBottom: Spacing.xs }]}>Give us a rating! ⭐️</Text>
+            <Text style={[styles.title, { color: theme.text, marginBottom: Spacing.xs }]}>Give us a rating & join the movement. 🏆</Text>
             
             <Text style={[styles.subtitle, { color: theme.textMuted, marginBottom: Spacing.lg, paddingHorizontal: Spacing.sm }]}>
-              We are a tiny indie team pouring our heart and soul into building this for you. 🥺💛{"\n\n"}
-              It takes just 3 seconds, but your support means everything to us and helps more people beat snooze and win their mornings. Please don't ignore this! 🥹✨
+              Join thousands of people who decided their goals and dreams are worth more than 10 more minutes of sleep.{"\n\n"}We are a tiny indie team with one heartfelt promise: tomorrow morning, you WILL be awake and proud. Tap 5 stars to join our community! 🥹✨
             </Text>
 
             <View style={{
@@ -811,7 +802,7 @@ export default function OnboardingScreen() {
               </View>
 
               <Text style={{ ...Typography.bodyLarge, color: theme.primary, fontWeight: '700', marginTop: Spacing.md, textAlign: 'center' }}>
-                {rating === 5 ? "You're our hero! 🥹💛" : rating >= 4 ? "Thank you so much! 💛" : "We will keep improving! 💪"}
+                {rating === 5 ? "You're a champion! 🏆" : rating >= 4 ? "Thank you for believing in us! 💛" : "We will keep improving for you! 💪"}
               </Text>
             </View>
 
@@ -819,14 +810,7 @@ export default function OnboardingScreen() {
               style={[styles.button, { backgroundColor: theme.primary }]} 
               onPress={handleSubmitRating}
             >
-              <Text style={styles.buttonText}>Submit Rating ➔</Text>
-            </Pressable>
-
-            <Pressable 
-              onPress={() => handleNext()} 
-              style={{ marginTop: Spacing.md, padding: 8 }}
-            >
-              <Text style={{ ...Typography.caption, color: theme.textMuted }}>Maybe later</Text>
+              <Text style={styles.buttonText}>Continue</Text>
             </Pressable>
           </ScrollView>
         );

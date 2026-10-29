@@ -7,6 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { subscriptionService } from '../../services/subscriptionService';
 import { useProStatus } from '../../hooks/useProStatus';
+import { reviewService } from '../../services/reviewService';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -15,8 +16,7 @@ export default function SettingsScreen() {
   
   const { isPro } = useProStatus();
   const [isRestoring, setIsRestoring] = useState(false);
-  const [isResettingOnboarding, setIsResettingOnboarding] = useState(false);
-
+  
   const handleRestore = async () => {
     setIsRestoring(true);
     const { success, customerInfo, error } = await subscriptionService.restorePurchases();
@@ -34,26 +34,7 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleTestOnboarding = () => {
-    Alert.alert(
-      'Test Onboarding',
-      'This will reset your onboarding and take you back to the start. Your alarms will not be deleted.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset & Open',
-          style: 'destructive',
-          onPress: async () => {
-            setIsResettingOnboarding(true);
-            await storageService.clearOnboarding();
-            setIsResettingOnboarding(false);
-            router.replace('/onboarding');
-          },
-        },
-      ]
-    );
-  };
-
+  
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
@@ -113,6 +94,12 @@ export default function SettingsScreen() {
           </Pressable>
           <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
+          <Pressable style={styles.row} onPress={() => reviewService.requestReviewDirect()}>
+            <Text style={[styles.rowText, { color: theme.text }]}>Rate Wakup ⭐</Text>
+            <Ionicons name="chevron-forward" size={20} color={theme.textMuted} />
+          </Pressable>
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
           <Pressable style={styles.row} onPress={handleRestore} disabled={isRestoring}>
             <Text style={[styles.rowText, { color: theme.text }]}>Restore Purchases</Text>
             {isRestoring ? (
@@ -123,18 +110,7 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
-        <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border, marginTop: Spacing.lg }]}>
-          <Pressable style={styles.row} onPress={handleTestOnboarding} disabled={isResettingOnboarding}>
-            <Text style={[styles.rowText, { color: theme.primary }]}>🧪 Test Onboarding</Text>
-            {isResettingOnboarding ? (
-              <ActivityIndicator size="small" color={theme.primary} />
-            ) : (
-              <Ionicons name="refresh-circle" size={22} color={theme.primary} />
-            )}
-          </Pressable>
-        </View>
-
-        <Text style={[styles.versionText, { color: theme.textMuted }]}>Wakup v1.1.2</Text>
+                <Text style={[styles.versionText, { color: theme.textMuted }]}>Wakup v1.1.2</Text>
 
 
       </ScrollView>

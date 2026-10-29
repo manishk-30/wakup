@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
 import { alarmService } from '../../services/alarmService';
 import { storageService } from '../../services/storageService';
+import { reviewService } from '../../services/reviewService';
 import { GameSession } from '../../types/games';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ALARM_SOUNDS } from '../../constants/sounds';
@@ -83,6 +84,9 @@ export default function GameScreen() {
     await storageService.addStreakDay(todayStr);
 
     await alarmService.stopAlarm((alarmId as string) || 'current');
+    
+    // Prompt App Store review after winning alarm challenge (high satisfaction moment)
+    await reviewService.recordChallengeWinAndPromptReview();
     
     console.log('[Navigation] Returning to Home after challenge completion');
     router.replace('/');
