@@ -15,6 +15,7 @@ export default function SettingsScreen() {
   
   const { isPro } = useProStatus();
   const [isRestoring, setIsRestoring] = useState(false);
+  const [isResettingOnboarding, setIsResettingOnboarding] = useState(false);
 
   const handleRestore = async () => {
     setIsRestoring(true);
@@ -31,6 +32,26 @@ export default function SettingsScreen() {
     } else {
       Alert.alert("Restore Failed", error || "Could not restore purchases.");
     }
+  };
+
+  const handleTestOnboarding = () => {
+    Alert.alert(
+      'Test Onboarding',
+      'This will reset your onboarding and take you back to the start. Your alarms will not be deleted.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset & Open',
+          style: 'destructive',
+          onPress: async () => {
+            setIsResettingOnboarding(true);
+            await storageService.clearOnboarding();
+            setIsResettingOnboarding(false);
+            router.replace('/onboarding');
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -102,7 +123,18 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
-        <Text style={[styles.versionText, { color: theme.textMuted }]}>Wakup v1.1.1</Text>
+        <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border, marginTop: Spacing.lg }]}>
+          <Pressable style={styles.row} onPress={handleTestOnboarding} disabled={isResettingOnboarding}>
+            <Text style={[styles.rowText, { color: theme.primary }]}>🧪 Test Onboarding</Text>
+            {isResettingOnboarding ? (
+              <ActivityIndicator size="small" color={theme.primary} />
+            ) : (
+              <Ionicons name="refresh-circle" size={22} color={theme.primary} />
+            )}
+          </Pressable>
+        </View>
+
+        <Text style={[styles.versionText, { color: theme.textMuted }]}>Wakup v1.1.2</Text>
 
 
       </ScrollView>

@@ -2,8 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import * as StoreReview from 'expo-store-review';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Easing, Pressable, ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native';
+import { Alert, Animated, Easing, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native';
 import { PurchasesPackage } from 'react-native-purchases';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SignatureScreen, { SignatureViewRef } from 'react-native-signature-canvas';
@@ -26,7 +27,7 @@ const generateUUID = () => {
   });
 };
 
-const TOTAL_STEPS = 20;
+const TOTAL_STEPS = 22;
 
 const MOCK_PACKAGES: any[] = [
   {
@@ -199,6 +200,23 @@ export default function OnboardingScreen() {
     loadSavedStep();
   }, []);
 
+  // When user approaches paywall screens, re-fetch live offerings if we previously fell back to mock
+  useEffect(() => {
+    if (step >= 20) {
+      subscriptionService.getOfferings().then((offerings) => {
+        if (offerings && offerings.length > 0) {
+          setPackages(offerings);
+          const annual = offerings.find((p: any) => 
+            p.packageType === 'ANNUAL' || 
+            p.identifier.toLowerCase().includes('annual') || 
+            p.identifier.toLowerCase().includes('year')
+          );
+          if (annual) setSelectedPackage(annual.identifier);
+        }
+      }).catch(e => console.warn('Failed to refresh offerings on paywall step:', e));
+    }
+  }, [step]);
+
   const mascotTransform = { transform: [{ translateY: floatAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -10] }) }] };
 
   const [alarmTime, setAlarmTime] = useState(new Date(new Date().setHours(7, 30, 0, 0)));
@@ -208,6 +226,7 @@ export default function OnboardingScreen() {
   const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [soundName, setSoundName] = soundSelectionStore.useSound(ALARM_SOUNDS[0].id);
   const [gameId, setGameId] = useState('roulette');
+  const [rating, setRating] = useState<number>(5);
 
   const toggleDay = (index: number) => {
     if (repeatDays.includes(index)) {
@@ -340,7 +359,12 @@ export default function OnboardingScreen() {
   };
 
   const getPrice = (type: 'ANNUAL' | 'MONTHLY') => {
-    const pkg = packages.find(p => p.packageType === type || p.identifier.toLowerCase().includes(type.toLowerCase()));
+    const isAnnual = type === 'ANNUAL';
+    const pkg = packages.find(p => 
+      isAnnual 
+        ? (p.packageType === 'ANNUAL' || p.identifier.toLowerCase().includes('annual') || p.identifier.toLowerCase().includes('year'))
+        : (p.packageType === 'MONTHLY' || p.identifier.toLowerCase().includes('month'))
+    );
     if (pkg?.product?.priceString) return pkg.product.priceString;
     return type === 'ANNUAL' ? '$24.99' : '$4.99';
   };
@@ -369,6 +393,18 @@ export default function OnboardingScreen() {
     handleNext(); // Goes to step 17
   };
 
+  const handleSubmitRating = async () => {
+    handleAnswer('rating', String(rating));
+    try {
+      if (await StoreReview.isAvailableAsync()) {
+        await StoreReview.requestReview();
+      }
+    } catch (e) {
+      console.log('[StoreReview] Error requesting review:', e);
+    }
+    handleNext();
+  };
+
   // Removed auto-advance for step 16
 
   const renderStep = () => {
@@ -376,11 +412,9 @@ export default function OnboardingScreen() {
       case 1:
         return (
           <View style={styles.centerContainer}>
-            <Animated.Text style={{ fontSize: 80, marginBottom: Spacing.xl, transform: [{ scale: pulseAnim }] }}>
-              🔔
-            </Animated.Text>
+            <Text style={[styles.welcomeTitle, { color: theme.primary }]}>Welcome!</Text>
             <Text style={[styles.title, { color: theme.text }]}>Wake up.{"\n"}Take your chance.{"\n"}Win your morning.</Text>
-            <Text style={[styles.subtitle, { color: theme.textMuted }]}>Your alarm just got a little more interesting.</Text>
+            <Text style={[styles.subtitle, { color: theme.textMuted }]}>One alarm. One challenge. You're up.</Text>
             <Pressable style={[styles.button, { backgroundColor: theme.primary }]} onPress={() => handleNext()}>
               <Text style={styles.buttonText}>Get Started</Text>
             </Pressable>
@@ -536,6 +570,32 @@ export default function OnboardingScreen() {
       case 10:
         return (
           <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
+            <Text style={[styles.title, { color: theme.text }]}>How many alarms do you set to get up?</Text>
+            <View style={styles.optionsContainer}>
+              <Pressable style={getOptionStyle('alarmsCount', '2')} onPress={() => handleAnswer('alarmsCount', '2')}>
+                <Text style={[styles.optionText, { color: theme.text }]}>2</Text>
+              </Pressable>
+              <Pressable style={getOptionStyle('alarmsCount', '3')} onPress={() => handleAnswer('alarmsCount', '3')}>
+                <Text style={[styles.optionText, { color: theme.text }]}>3</Text>
+              </Pressable>
+              <Pressable style={getOptionStyle('alarmsCount', '4')} onPress={() => handleAnswer('alarmsCount', '4')}>
+                <Text style={[styles.optionText, { color: theme.text }]}>4</Text>
+              </Pressable>
+              <Pressable style={getOptionStyle('alarmsCount', 'moreThan4')} onPress={() => handleAnswer('alarmsCount', 'moreThan4')}>
+                <Text style={[styles.optionText, { color: theme.text }]}>More than 4</Text>
+              </Pressable>
+            </View>
+            <Pressable 
+              style={[styles.button, { backgroundColor: theme.primary, opacity: answers['alarmsCount'] ? 1 : 0.5, marginTop: Spacing.xl }]} 
+              onPress={() => answers['alarmsCount'] && handleNext()}
+            >
+              <Text style={styles.buttonText}>Continue</Text>
+            </Pressable>
+          </ScrollView>
+        );
+      case 11:
+        return (
+          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
             <Text style={[styles.title, { color: theme.text }]}>What is your ultimate morning goal?</Text>
             <View style={styles.optionsContainer}>
               <Pressable style={getOptionStyle('goal', 'snooze')} onPress={() => handleAnswer('goal', 'snooze')}>
@@ -556,7 +616,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </ScrollView>
         );
-      case 11:
+      case 12:
         return (
           <View style={styles.centerContainer}>
             <Animated.Text style={{ fontSize: 80, marginBottom: Spacing.xl, transform: [{ translateY: bounceAnim }] }}>
@@ -569,7 +629,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 12:
+      case 13:
         return (
           <View style={styles.centerContainer}>
             <Text style={[styles.title, { color: theme.text }]}>When should we wake you?</Text>
@@ -591,10 +651,10 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 13:
+      case 14:
         return (
           <View style={[styles.centerContainer, { justifyContent: 'flex-start', paddingTop: 40 }]}>
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xl, width: '100%' }} showsVerticalScrollIndicator={false}>
+            <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={{ paddingBottom: Spacing.xl, width: '100%' }} showsVerticalScrollIndicator={false}>
               <Text style={[styles.title, { color: theme.text, marginBottom: Spacing.md }]}>Choose Your Challenge</Text>
 
               {GAMES.map((game) => {
@@ -635,7 +695,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </View>
         );
-      case 14:
+      case 15:
         const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
         return (
           <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
@@ -708,35 +768,97 @@ export default function OnboardingScreen() {
             </Pressable>
           </ScrollView>
         );
-      case 15:
+      case 16:
         return (
           <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
-            <Text style={[styles.title, { color: theme.text }]}>One small promise.</Text>
-            <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-              You're not making a promise to us.{"\n"}
-              You're making it to the version of yourself that wants a better tomorrow.
+            <Animated.View style={[mascotTransform, { alignItems: 'center', marginBottom: Spacing.md }]}>
+              <Image source={require('../assets/images/mascot_happy.png')} style={{ width: 130, height: 130 }} contentFit="contain" />
+            </Animated.View>
+
+            <Text style={[styles.title, { color: theme.text, marginBottom: Spacing.xs }]}>Give us a rating! ⭐️</Text>
+            
+            <Text style={[styles.subtitle, { color: theme.textMuted, marginBottom: Spacing.lg, paddingHorizontal: Spacing.sm }]}>
+              We are a tiny indie team pouring our heart and soul into building this for you. 🥺💛{"\n\n"}
+              It takes just 3 seconds, but your support means everything to us and helps more people beat snooze and win their mornings. Please don't ignore this! 🥹✨
             </Text>
 
             <View style={{
-              backgroundColor: theme.background,
-              padding: Spacing.lg,
+              backgroundColor: theme.surface,
               borderRadius: Radii.xl,
+              paddingVertical: Spacing.lg,
+              paddingHorizontal: Spacing.xl,
               borderWidth: 1,
               borderColor: theme.border,
+              alignItems: 'center',
               width: '100%',
-              marginTop: Spacing.xl,
+              marginBottom: Spacing.lg,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.05,
               shadowRadius: 10,
               elevation: 2,
             }}>
-              <Text style={{ ...Typography.bodyLarge, color: theme.text, textAlign: 'center', marginBottom: Spacing.md }}>
-                I am committing to my future self right now.{"\n\n"}
-                I will wake up, beat the alarm, and win the morning.{"\n\n"}
-                My goals are worth more than sleep.
+              <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Pressable key={star} onPress={() => setRating(star)} hitSlop={10} style={{ padding: 4 }}>
+                    <Ionicons 
+                      name={star <= rating ? "star" : "star-outline"} 
+                      size={44} 
+                      color={star <= rating ? "#FFB000" : theme.border} 
+                    />
+                  </Pressable>
+                ))}
+              </View>
+
+              <Text style={{ ...Typography.bodyLarge, color: theme.primary, fontWeight: '700', marginTop: Spacing.md, textAlign: 'center' }}>
+                {rating === 5 ? "You're our hero! 🥹💛" : rating >= 4 ? "Thank you so much! 💛" : "We will keep improving! 💪"}
               </Text>
-              <View style={{ position: 'relative', height: 120, width: '100%', marginTop: Spacing.sm, borderRadius: Radii.md, overflow: 'hidden', borderWidth: 1, borderColor: theme.border }}>
+            </View>
+
+            <Pressable 
+              style={[styles.button, { backgroundColor: theme.primary }]} 
+              onPress={handleSubmitRating}
+            >
+              <Text style={styles.buttonText}>Submit Rating ➔</Text>
+            </Pressable>
+
+            <Pressable 
+              onPress={() => handleNext()} 
+              style={{ marginTop: Spacing.md, padding: 8 }}
+            >
+              <Text style={{ ...Typography.caption, color: theme.textMuted }}>Maybe later</Text>
+            </Pressable>
+          </ScrollView>
+        );
+      case 17:
+        return (
+          <View style={{ flex: 1, width: '100%', justifyContent: 'space-between', paddingVertical: Spacing.sm }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={[styles.title, { color: theme.text, marginBottom: Spacing.xs, fontSize: 28 }]}>One small promise.</Text>
+              <Text style={[styles.subtitle, { color: theme.textMuted, marginBottom: Spacing.sm, lineHeight: 22 }]}>
+                You're making it to the version of yourself that wants a better tomorrow.
+              </Text>
+            </View>
+
+            <View style={{
+              backgroundColor: theme.background,
+              padding: Spacing.md,
+              borderRadius: Radii.xl,
+              borderWidth: 1,
+              borderColor: theme.border,
+              width: '100%',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.05,
+              shadowRadius: 10,
+              elevation: 2,
+            }}>
+              <Text style={{ ...Typography.body, color: theme.text, textAlign: 'center', marginBottom: Spacing.sm, lineHeight: 22 }}>
+                "I am committing to my future self right now.{"\n"}
+                I will wake up, beat the alarm, and win the morning.{"\n"}
+                My goals are worth more than sleep."
+              </Text>
+              <View style={{ position: 'relative', height: 130, width: '100%', marginTop: Spacing.xs, borderRadius: Radii.md, overflow: 'hidden', borderWidth: 1, borderColor: theme.border }}>
                 <SignatureScreen
                   ref={signatureRef}
                   onOK={handleSignatureOK}
@@ -744,36 +866,37 @@ export default function OnboardingScreen() {
                   clearText="Clear"
                   confirmText="Save"
                   webStyle={`.m-signature-pad {box-shadow: none; border: none; background-color: transparent;} 
-                              .m-signature-pad--body {border: none;}
+                              body,html {width: 100%; height: 100%; overflow: hidden; touch-action: none;}
+                              .m-signature-pad--body {border: none; touch-action: none;}
                               .m-signature-pad--footer {display: none; margin: 0px;}`}
                   backgroundColor="transparent"
                 />
                 <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }} pointerEvents="none">
-                  <Text style={{ color: theme.textMuted, opacity: 0.4, fontSize: 18 }}>Your signature here</Text>
+                  <Text style={{ color: theme.textMuted, opacity: 0.4, fontSize: 16 }}>Your signature here</Text>
                 </View>
               </View>
               <Pressable 
                 onPress={() => signatureRef.current?.clearSignature()} 
                 style={{ 
                   alignSelf: 'center', 
-                  marginTop: 16,
+                  marginTop: 10,
                   backgroundColor: 'transparent',
-                  paddingHorizontal: 24,
-                  paddingVertical: 10,
+                  paddingHorizontal: 20,
+                  paddingVertical: 6,
                   borderRadius: 20,
-                  borderWidth: 2,
+                  borderWidth: 1.5,
                   borderColor: theme.primary
                 }}>
-                <Text style={{ ...Typography.body, color: theme.primary, fontWeight: '700' }}>Retry Signature</Text>
+                <Text style={{ ...Typography.caption, color: theme.primary, fontWeight: '700' }}>Retry Signature</Text>
               </Pressable>
             </View>
 
-            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xl }]} onPress={() => signatureRef.current?.readSignature()}>
+            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.sm }]} onPress={() => signatureRef.current?.readSignature()}>
               <Text style={styles.buttonText}>I'm Committed</Text>
             </Pressable>
-          </ScrollView>
+          </View>
         );
-      case 16:
+      case 18:
         return (
           <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
             <Animated.Text style={{ fontSize: 80, marginBottom: Spacing.xl, transform: [{ scale: pulseAnim }] }}>
@@ -789,7 +912,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </ScrollView>
         );
-      case 17:
+      case 19:
         return (
           <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={styles.scrollCenterContainer} showsVerticalScrollIndicator={false}>
             <Animated.Text style={{ fontSize: 80, marginBottom: Spacing.xl, transform: [{ translateY: bounceAnim }] }}>
@@ -802,7 +925,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </ScrollView>
         );
-      case 18:
+      case 20:
         return (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
             <View style={styles.pwHeader}>
@@ -845,7 +968,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </ScrollView>
         );
-      case 19:
+      case 21:
         return (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
             <View style={styles.pwHeader}>
@@ -874,7 +997,7 @@ export default function OnboardingScreen() {
             </Pressable>
           </ScrollView>
         );
-      case 20:
+      case 22:
         return (
           <View style={{ flex: 1, width: '100%', position: 'relative' }}>
             <Pressable 
@@ -937,7 +1060,7 @@ export default function OnboardingScreen() {
 
                     <View style={styles.pricingContainer}>
                       {packages.map((pkg, idx) => {
-                        const isYear = pkg.packageType === 'ANNUAL' || pkg.identifier.toLowerCase().includes('annual') || pkg.identifier.toLowerCase().includes('yearly');
+                        const isYear = pkg.packageType === 'ANNUAL' || pkg.identifier.toLowerCase().includes('annual') || pkg.identifier.toLowerCase().includes('yearly') || pkg.identifier.toLowerCase().includes('year');
                         const isSelected = selectedPackage === pkg.identifier;
                         const priceDisplay = pkg.product?.priceString || (isYear ? '$24.99' : '$4.99');
 
@@ -966,7 +1089,7 @@ export default function OnboardingScreen() {
               </View>
             </ScrollView>
 
-            <View style={{ paddingHorizontal: Spacing.xl, paddingBottom: 0, paddingTop: 10, backgroundColor: theme.background }}>
+            <View style={{ paddingBottom: 0, paddingTop: 10, backgroundColor: theme.background }}>
               <Pressable
                 style={[styles.pwButton, { backgroundColor: theme.primary, opacity: isPurchasing ? 0.7 : 1, marginBottom: 8, marginTop: 0 }]}
                 onPress={isPro ? finishOnboarding : handlePurchase}
@@ -1015,15 +1138,19 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: Spacing.lg,
   },
   progressBarContainer: {
     height: 4,
     backgroundColor: 'rgba(150, 150, 150, 0.2)',
+    borderRadius: Radii.full,
+    overflow: 'hidden',
     width: '100%',
     marginVertical: Spacing.sm,
   },
   progressBarFill: {
     height: '100%',
+    borderRadius: Radii.full,
   },
   content: {
     flex: 1,
@@ -1038,6 +1165,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  welcomeTitle: {
+    fontFamily: Platform.select({ ios: 'Avenir Next', android: 'sans-serif-medium', default: 'System' }),
+    fontSize: 34,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
   },
   title: {
     ...Typography.h1,

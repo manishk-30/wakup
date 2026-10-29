@@ -52,8 +52,16 @@ export default function PaywallScreen() {
     if (offerings.length > 0) {
       setPackages(offerings);
       // Default to annual
-      const annual = offerings.find((p: any) => p.packageType === 'ANNUAL');
-      if (annual) setSelectedPackage(annual.identifier);
+      const annual = offerings.find((p: any) => 
+        p.packageType === 'ANNUAL' || 
+        p.identifier.toLowerCase().includes('annual') || 
+        p.identifier.toLowerCase().includes('year')
+      );
+      if (annual) {
+        setSelectedPackage(annual.identifier);
+      } else {
+        setSelectedPackage(offerings[0].identifier);
+      }
     } else {
       setPackages([]);
     }
@@ -165,7 +173,12 @@ export default function PaywallScreen() {
   const mascotTransform = { transform: [{ translateY: floatAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -10] }) }] };
 
   const getPrice = (type: 'ANNUAL' | 'MONTHLY') => {
-    const pkg = packages.find(p => p.packageType === type || p.identifier.toLowerCase().includes(type.toLowerCase()));
+    const isAnnualQuery = type === 'ANNUAL';
+    const pkg = packages.find(p => 
+      isAnnualQuery
+        ? (p.packageType === 'ANNUAL' || p.identifier.toLowerCase().includes('annual') || p.identifier.toLowerCase().includes('year'))
+        : (p.packageType === 'MONTHLY' || p.identifier.toLowerCase().includes('month'))
+    );
     if (pkg?.product?.priceString) {
       return pkg.product.priceString;
     }
@@ -250,7 +263,7 @@ export default function PaywallScreen() {
 
                   <View style={styles.pricingContainer}>
                     {packages.map(pkg => {
-                      const isYear = pkg.packageType === 'ANNUAL';
+                      const isYear = pkg.packageType === 'ANNUAL' || pkg.identifier.toLowerCase().includes('annual') || pkg.identifier.toLowerCase().includes('year');
                       const isSelected = selectedPackage === pkg.identifier;
                       const scaleAnim = isYear ? yearCardScale : monthCardScale;
                       

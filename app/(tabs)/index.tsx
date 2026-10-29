@@ -15,6 +15,7 @@ export default function Home() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   const [alarms, setAlarms] = useState<Alarm[]>([]);
+  const [streak, setStreak] = useState(0);
   const [commitmentData, setCommitmentData] = useState<{reason: string; signatureImage: string; signedAt: number} | null>(null);
   const [showCommitmentModal, setShowCommitmentModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<{type: 'delete' | 'toggle', alarm: Alarm} | null>(null);
@@ -24,6 +25,8 @@ export default function Home() {
     setAlarms(data);
     const commitment = await storageService.getCommitment();
     setCommitmentData(commitment);
+    const streakLength = await storageService.getStreakLength();
+    setStreak(streakLength);
   };
 
   useFocusEffect(
@@ -111,16 +114,11 @@ export default function Home() {
           <Text style={[styles.title, { color: theme.text }]}>Alarms</Text>
         </View>
         <Pressable 
-          style={[styles.addButton, { backgroundColor: theme.primary }]}
-          onPress={() => {
-            if (!isPro && alarms.length >= 2) {
-              router.push('/paywall');
-            } else {
-              router.push('/alarms/new');
-            }
-          }}
+          style={[styles.streakBadge, { backgroundColor: theme.surface, borderColor: theme.border }]}
+          onPress={() => router.push('/progress' as any)}
         >
-          <Text style={styles.addButtonText}>+</Text>
+          <Text style={styles.streakEmoji}>☀️</Text>
+          <Text style={[styles.streakCount, { color: theme.text }]}>{streak}</Text>
         </Pressable>
       </View>
       
@@ -189,6 +187,22 @@ export default function Home() {
           })
         )}
       </ScrollView>
+
+      <View style={[styles.bottomBar, { backgroundColor: theme.background }]}>
+        <Pressable 
+          style={[styles.addAlarmButton, { backgroundColor: theme.primary }]}
+          onPress={() => {
+            if (!isPro && alarms.length >= 2) {
+              router.push('/paywall');
+            } else {
+              router.push('/alarms/new');
+            }
+          }}
+        >
+          <Ionicons name="add" size={24} color="#FFF" style={{ marginRight: 6 }} />
+          <Text style={styles.addAlarmButtonText}>Add Alarm</Text>
+        </Pressable>
+      </View>
       
       <Modal
         visible={showCommitmentModal}
@@ -290,27 +304,54 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: '700',
   },
-  addButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
+  streakBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: Radii.full,
+    borderWidth: 1,
+    gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  streakEmoji: {
+    fontSize: 16,
+  },
+  streakCount: {
+    ...Typography.body,
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  bottomBar: {
+    paddingHorizontal: Spacing.xl,
+    paddingTop: 8,
+    paddingBottom: 16,
+  },
+  addAlarmButton: {
+    height: 54,
+    borderRadius: Radii.full,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
   },
-  addButtonText: {
-    fontSize: 28,
-    fontWeight: '300',
-    color: '#000000',
-    lineHeight: 32,
+  addAlarmButtonText: {
+    ...Typography.bodyLarge,
+    fontWeight: '700',
+    color: '#FFF',
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
-    paddingBottom: 100,
+    paddingBottom: 20,
   },
   emptyState: {
     flex: 1,

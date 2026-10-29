@@ -7,6 +7,7 @@ const API_KEY_APPLE = 'appl_FOrEjBfhifvAwBWcqPfGKrOYWdB';
 
 class SubscriptionService {
   private isInitialized = false;
+  private setupPromise: Promise<void> | null = null;
   private listeners: ((info: CustomerInfo) => void)[] = [];
 
   addListener(callback: (info: CustomerInfo) => void) {
@@ -22,31 +23,39 @@ class SubscriptionService {
 
   async setup() {
     if (this.isInitialized) return;
+    if (this.setupPromise) return this.setupPromise;
 
-    try {
-      Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+    this.setupPromise = (async () => {
+      try {
+        Purchases.setLogLevel(LOG_LEVEL.DEBUG);
 
-      if (Platform.OS === 'ios') {
-        Purchases.configure({ apiKey: API_KEY_APPLE });
-      } else if (Platform.OS === 'android') {
-        // Purchases.configure({ apiKey: API_KEY_GOOGLE });
-        console.warn('Android API Key not configured yet');
+        if (Platform.OS === 'ios') {
+          Purchases.configure({ apiKey: API_KEY_APPLE });
+        } else if (Platform.OS === 'android') {
+          // Purchases.configure({ apiKey: API_KEY_GOOGLE });
+          console.warn('Android API Key not configured yet');
+        }
+        
+        Purchases.addCustomerInfoUpdateListener((info) => {
+          console.log('[SubscriptionService] CustomerInfo updated');
+          this.notifyListeners(info);
+        });
+        
+        this.isInitialized = true;
+        console.log('[SubscriptionService] Successfully configured RevenueCat');
+      } catch (e) {
+        console.error('[SubscriptionService] Failed to configure RevenueCat:', e);
+      } finally {
+        this.setupPromise = null;
       }
-      
-      Purchases.addCustomerInfoUpdateListener((info) => {
-        console.log('[SubscriptionService] CustomerInfo updated');
-        this.notifyListeners(info);
-      });
-      
-      this.isInitialized = true;
-      console.log('[SubscriptionService] Successfully configured RevenueCat');
-    } catch (e) {
-      console.error('[SubscriptionService] Failed to configure RevenueCat:', e);
-    }
+    })();
+
+    return this.setupPromise;
   }
 
   async getCustomerInfo(): Promise<CustomerInfo | null> {
     try {
+      await this.setup();
       return await Purchases.getCustomerInfo();
     } catch (e) {
       console.error('[SubscriptionService] Error fetching CustomerInfo:', e);
@@ -57,6 +66,7 @@ class SubscriptionService {
   async isPro(): Promise<boolean> {
     console.log('[SubscriptionService] Checking Pro status');
     try {
+      await this.setup();
       const customerInfo = await Purchases.getCustomerInfo();
       // Using 'Pro' entitlement as explicitly configured in RevenueCat
       const isActive = typeof customerInfo.entitlements.active['Pro'] !== 'undefined';
@@ -76,18 +86,22 @@ class SubscriptionService {
 
   async getOfferings() {
     try {
-      console.log('[SubscriptionService] Fetching offering: paywall');
+      await this.setup();
+      console.log('[SubscriptionService] Fetching offerings from RevenueCat...');
       const offerings = await Purchases.getOfferings();
       
-      const paywallOffering = offerings?.all['paywall'];
+      const paywallOffering = 
+        offerings?.all['paywall'] || 
+        offerings?.current || 
+        (offerings?.all ? Object.values(offerings.all)[0] : null);
 
-      if (!paywallOffering?.availablePackages) {
+      if (!paywallOffering?.availablePackages || paywallOffering.availablePackages.length === 0) {
         console.log("[SubscriptionService] No RevenueCat offerings available");
         return [];
       }
       
-      console.log('[SubscriptionService] Paywall offering loaded');
       const packages = paywallOffering.availablePackages;
+      console.log(`[SubscriptionService] Offering loaded: '${paywallOffering.identifier}' with ${packages.length} packages`);
       
       const hasMonthly = packages.some(p => p.packageType === 'MONTHLY' || p.identifier === '$rc_monthly');
       const hasYearly = packages.some(p => p.packageType === 'ANNUAL' || p.identifier === '$rc_annual');
@@ -104,6 +118,7 @@ class SubscriptionService {
 
   async purchasePackage(pkg: PurchasesPackage): Promise<{ success: boolean; customerInfo?: CustomerInfo; error?: string }> {
     try {
+      await this.setup();
       console.log(`[SubscriptionService] Purchasing package: ${pkg.identifier}`);
       const { customerInfo } = await Purchases.purchasePackage(pkg);
       console.log('[SubscriptionService] Purchase successful');
