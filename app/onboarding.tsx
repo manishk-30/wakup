@@ -972,7 +972,7 @@ export default function OnboardingScreen() {
               </View>
               <View style={styles.premiumCard}>
                 <Text style={styles.premiumCardTitle}>🎮 All Wake-up Games</Text>
-                <Text style={styles.premiumCardDesc}>Blackjack, Dragon Tower, Dice, Roulette, Higher/Lower, Mines. All future games included.</Text>
+                <Text style={styles.premiumCardDesc}>Card Challenge, Tower Climb, Dice, Color Wheel, Higher/Lower, Hidden Tiles. All future games included.</Text>
               </View>
             </View>
 

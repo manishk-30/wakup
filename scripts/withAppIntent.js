@@ -126,11 +126,11 @@ struct WakupAppMetadata: AlarmMetadata { }
         let schedule = Alarm.Schedule.relative(.init(time: time, repeats: recurrence))
         
         let gameNames: [String: String] = [
-            "mines": "Play Mines",
-            "dragon-tower": "Play Dragon Tower",
-            "blackjack": "Play Blackjack",
+            "mines": "Play Hidden Tiles",
+            "dragon-tower": "Play Tower Climb",
+            "blackjack": "Play Card Challenge",
             "lucky-race": "Play Lucky Race",
-            "roulette": "Play Roulette",
+            "roulette": "Play Color Wheel",
             "dice": "Play Dice",
             "higher-lower": "Play Higher / Lower",
             "coin-flip": "Play Coin Flip",

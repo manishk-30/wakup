@@ -93,7 +93,7 @@ export default function BlackjackGame({ onWin, onLose }: GameProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.headerTitle}>BLACKJACK</Text>
+      <Text style={styles.headerTitle}>CARD CHALLENGE</Text>
 
       <View style={styles.playArea}>
         {/* Dealer Area */}

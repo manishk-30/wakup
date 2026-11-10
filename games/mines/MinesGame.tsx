@@ -47,11 +47,11 @@ export default function MinesGame({ onWin, onLose }: GameProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>MINES</Text>
+        <Text style={styles.headerTitle}>HIDDEN TILES</Text>
         <Text style={styles.headerSubtitle}>
           {gameState === 'PLAYING' 
             ? `Tap and find ${6 - safeCount} safe tiles`
-            : gameState === 'WON' ? 'SAFE! YOU WIN 🎉' : 'BOOM! YOU LOST'}
+            : gameState === 'WON' ? 'SAFE! YOU WIN 🎉' : 'TRY AGAIN'}
         </Text>
       </View>
 

@@ -50,9 +50,9 @@ export default function DragonTowerGame({ onWin, onLose }: GameProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>DRAGON TOWER</Text>
+        <Text style={styles.headerTitle}>TOWER CLIMB</Text>
         <Text style={styles.headerSubtitle}>
-          {gameState === 'PLAYING' ? 'Tap and pick safe tile to climb' : gameState === 'WON' ? 'TOWER COMPLETE 🎉' : 'THE DRAGON GOT YOU'}
+          {gameState === 'PLAYING' ? 'Tap and pick safe tile to climb' : gameState === 'WON' ? 'TOWER COMPLETE 🎉' : 'TRY AGAIN'}
         </Text>
       </View>
 

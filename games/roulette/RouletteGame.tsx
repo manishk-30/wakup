@@ -66,8 +66,8 @@ export default function RouletteGame({ onWin, onLose }: GameProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>ROULETTE</Text>
-      <Text style={styles.subtitle}>Choose a color.</Text>
+      <Text style={styles.title}>COLOR WHEEL</Text>
+      <Text style={styles.subtitle}>Choose a color to spin.</Text>
       
       {/* The Animated Wheel */}
       <View style={styles.wheelContainer}>
