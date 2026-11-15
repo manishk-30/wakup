@@ -14,7 +14,7 @@ export default function PracticeScreen() {
   const { isPro } = useProStatus();
 
   const handleGameSelect = (gameId: string) => {
-    const isPremium = ['mines', 'dragon-tower', 'blackjack', 'lucky-race', 'potion-mix'].includes(gameId);
+    // const isPremium = ['mines', 'dragon-tower', 'blackjack', 'lucky-race', 'potion-mix'].includes(gameId);
     /* 
     if (isPremium && !isPro) {
       // @ts-ignore

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated, Dimensions, Easing } from 'react-native';
-import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { Colors, Spacing, Radii, Typography, UI } from '../../constants/theme';
 
@@ -46,6 +45,7 @@ export default function LuckyRaceGame({ onWin, onLose }: LuckyRaceGameProps) {
     } else if (gameState === 'racing') {
       runRace();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState]);
 
   const handleSelectRacer = (id: string) => {

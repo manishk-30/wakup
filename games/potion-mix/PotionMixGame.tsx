@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
 import { Accelerometer } from 'expo-sensors';
 import * as Haptics from 'expo-haptics';
-import { Image } from 'expo-image';
 import { Colors, Spacing, Typography } from '../../constants/theme';
 
 type PotionState = 'mixing' | 'won' | 'lost' | 'restarting';
+type PotionOutcome = 'golden' | 'murky_purple' | 'murky_gray';
 
 interface PotionMixGameProps {
   onWin: () => void;
@@ -19,7 +19,14 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
   // Ref for mutable state
   const stateRef = useRef({
     requiredShakes: 10 + Math.floor(Math.random() * 6), // 10 to 15
-    result: Math.random() > 0.5 ? 'golden' : 'murky',
+    result: ((): PotionOutcome => {
+      const rand = Math.random();
+      // 50% chance of winning Golden potion
+      if (rand < 0.50) return 'golden';
+      // 50% chance of losing (split into 2 loss colors: Murky Slop & Toxic Ash)
+      if (rand < 0.75) return 'murky_purple';
+      return 'murky_gray';
+    })(),
     lastShakeTime: 0,
     shakeCount: 0
   });
@@ -45,6 +52,7 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
     }
     
     return () => idleAnim?.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState]);
 
   // Shake detection
@@ -71,6 +79,7 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
     return () => {
       subscription?.remove();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState]);
 
   const handleValidShake = () => {
@@ -114,7 +123,6 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
   };
 
   const startExplosionAnimation = () => {
-    // Determine winner purely on final result state
     const isWin = stateRef.current.result === 'golden';
     setGameState(isWin ? 'won' : 'lost');
     
@@ -146,8 +154,12 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
   const handleTapFallback = () => handleValidShake();
 
   const getMessage = () => {
-    if (gameState === 'won') return 'Golden Potion! 🧪';
-    if (gameState === 'lost') return 'Murky slop... 💨';
+    if (gameState === 'won') {
+      return 'Golden Potion! 🧪';
+    }
+    if (gameState === 'lost') {
+      return stateRef.current.result === 'murky_gray' ? 'Ash & Smoke... 💨' : 'Murky Slop... 💨';
+    }
     if (gameState === 'restarting') return 'Restarting...';
     
     const progress = shakeCount / stateRef.current.requiredShakes;
@@ -158,29 +170,37 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
   };
 
   const getSubMessage = () => {
-    if (gameState === 'won') return 'Perfect brew. Alarm beaten.';
+    if (gameState === 'won') return 'Pure elixir brewed! Alarm beaten.';
     if (gameState === 'lost') return 'Failed mixture. Try again.';
     if (gameState === 'restarting') return '';
     return 'Mix until the color blooms.';
   };
 
-  // Mascot removed per request
-
-  // Interpolate glowing color based on progress (Blue -> Purple -> Magenta -> Orange)
+  // Interpolate glowing color based on progress (Cyan -> Blue -> Purple -> Magenta -> Orange)
   const mixingColor = colorPulseAnim.interpolate({
-    inputRange: [0, 0.3, 0.6, 0.9, 1],
-    outputRange: ['#00B4D8', '#7209B7', '#F72585', '#F8961E', '#FFD166']
+    inputRange: [0, 0.25, 0.5, 0.75, 1],
+    outputRange: ['#00B4D8', '#3A86FF', '#7209B7', '#F72585', '#FFD166']
   });
 
-  const finalColor = gameState === 'won' ? '#FFD166' : (gameState === 'lost' || gameState === 'restarting' ? '#4A0E4E' : mixingColor);
+  const getOutcomeColor = () => {
+    if (gameState === 'won') {
+      return '#FFD166'; // Golden Win
+    }
+    if (gameState === 'lost' || gameState === 'restarting') {
+      // 2 distinct loss colors
+      return stateRef.current.result === 'murky_gray' ? '#4B5563' : '#4A0E4E'; // Grayish Ash vs Dark Purple Murk
+    }
+    return mixingColor;
+  };
+
+  const finalColor = getOutcomeColor();
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>POTION MIX</Text>
-      <Text style={styles.ruleText}>Golden = Win    |    Other = Loss</Text>
+      <Text style={styles.ruleText}>Golden = Win  |  Murky or Ash = Loss</Text>
       
       <View style={styles.centerContainer}>
-        
         <Pressable onPress={handleTapFallback} style={styles.potionContainer}>
           {/* Dynamic Glow Background */}
           <Animated.View style={[
@@ -195,7 +215,7 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
             <Animated.View style={{
               flex: 1,
               borderRadius: 16,
-              backgroundColor: finalColor as any, // TypeScript sometimes complains about Animated colors
+              backgroundColor: finalColor as any,
               opacity: glowOpacity,
             }} />
           </Animated.View>
@@ -229,22 +249,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
-  mascot: {
-    width: 80,
-    height: 80,
-    marginBottom: Spacing.xl,
-  },
   potionContainer: {
     width: 300,
     height: 300,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-  },
-  potionEmoji: {
-    fontSize: 120,
-    textAlign: 'center',
-    zIndex: 10,
   },
   glow: {
     position: 'absolute',

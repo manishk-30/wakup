@@ -1,7 +1,7 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Switch, useColorScheme, Alert, Modal, Image } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
+import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { Alarm } from '../../types/alarm';
 import { storageService } from '../../services/storageService';
@@ -11,7 +11,7 @@ import { useProStatus } from '../../hooks/useProStatus';
 
 export default function Home() {
   const router = useRouter();
-  const { isPro, isLoading } = useProStatus();
+  const { isPro } = useProStatus();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   const [alarms, setAlarms] = useState<Alarm[]>([]);

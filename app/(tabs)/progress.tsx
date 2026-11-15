@@ -1,8 +1,6 @@
 import { useCallback, useState, useRef } from 'react';
-import { View, Text, StyleSheet, useColorScheme, ScrollView, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, useColorScheme, ScrollView } from 'react-native';
 import { useFocusEffect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import * as Sharing from 'expo-sharing';
 import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
 import { storageService } from '../../services/storageService';
 

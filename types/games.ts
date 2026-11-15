@@ -11,12 +11,12 @@ export interface AlarmGame {
 }
 
 export const GAMES: AlarmGame[] = [
-  { id: 'mines', title: 'Hidden Tiles', description: 'Tap and find 6 safe tiles', icon: '🧩' },
+  { id: 'mines', title: 'Minesweeper', description: 'Tap and find 5 safe tiles', icon: '💣' },
   { id: 'dragon-tower', title: 'Tower Climb', description: 'Tap and pick safe tile to climb', icon: '🏰' },
   { id: 'lucky-race', title: 'Lucky Race', description: 'Pick your friendly racer', icon: '🏁' },
   { id: 'potion-mix', title: 'Potion Mix', description: 'Shake to mix a golden potion', icon: '⚗️' },
-  { id: 'blackjack', title: 'Card Challenge', description: 'Reach 21 or beat the score', icon: '🃏' },
-  { id: 'roulette', title: 'Color Wheel', description: 'Pick red or black', icon: '🎡' },
+  { id: 'blackjack', title: 'Sundoku ☀️', description: 'Place 6 suns without touching', icon: '☀️' },
+  { id: 'roulette', title: 'Color Wheel', description: 'Pick a color to spin', icon: '🎡' },
   { id: 'dice', title: 'Dice', description: 'Predict high or low', icon: '🎲' },
   { id: 'higher-lower', title: 'Higher / Lower', description: 'Predict the next card', icon: '🃏' },
   { id: 'coin-flip', title: 'Coin Flip', description: 'Heads or tails', icon: '🪙' },

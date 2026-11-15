@@ -146,6 +146,7 @@ export const storageService = {
       const data = await AsyncStorage.getItem(ONBOARDING_ANSWERS_KEY);
       return data ? JSON.parse(data) : {};
     } catch (e) {
+      void e;
       return {};
     }
   },
@@ -163,6 +164,7 @@ export const storageService = {
       const data = await AsyncStorage.getItem('@wakup_onboarding_step');
       return data ? parseInt(data, 10) : 1;
     } catch (e) {
+      void e;
       return 1;
     }
   },
@@ -197,6 +199,7 @@ export const storageService = {
       const data = await AsyncStorage.getItem(COMMITMENT_KEY);
       return data ? JSON.parse(data) : null;
     } catch (e) {
+      void e;
       return null;
     }
   }

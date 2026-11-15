@@ -1,22 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS } from 'react-native-reanimated';
 import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
-import { spinRoulette } from './rouletteEngine';
+import { spinRoulette, WheelColor } from './rouletteEngine';
 
 interface GameProps {
   onWin: () => void;
   onLose: () => void;
 }
 
-const WHEEL_SIZE = 200;
-const SLICES = 12;
-const SLICE_ANGLE = 360 / SLICES;
+const WHEEL_SIZE = 220;
+const SLICES = 12; // 3 slices of each of the 4 colors
+const SLICE_ANGLE = 360 / SLICES; // 30 degrees each
 const TRIANGLE_WIDTH = 2 * (WHEEL_SIZE / 2) * Math.tan((SLICE_ANGLE / 2) * (Math.PI / 180));
+
+const COLOR_CONFIG: Record<WheelColor, { hex: string; label: string; emoji: string }> = {
+  RED: { hex: '#EF4444', label: 'RED', emoji: '🔴' },
+  BLUE: { hex: '#3B82F6', label: 'BLUE', emoji: '🔵' },
+  GREEN: { hex: '#10B981', label: 'GREEN', emoji: '🟢' },
+  YELLOW: { hex: '#F59E0B', label: 'YELLOW', emoji: '🟡' },
+};
+
+// 12 slices pattern repeating: RED, BLUE, GREEN, YELLOW (3 times)
+const SLICE_COLORS: WheelColor[] = [
+  'RED', 'BLUE', 'GREEN', 'YELLOW',
+  'RED', 'BLUE', 'GREEN', 'YELLOW',
+  'RED', 'BLUE', 'GREEN', 'YELLOW',
+];
 
 export default function RouletteGame({ onWin, onLose }: GameProps) {
   const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState<'RED' | 'BLACK' | null>(null);
+  const [result, setResult] = useState<WheelColor | null>(null);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const rotation = useSharedValue(0);
 
   const animatedWheelStyle = useAnimatedStyle(() => {
@@ -25,30 +40,45 @@ export default function RouletteGame({ onWin, onLose }: GameProps) {
     };
   });
 
-  const triggerResult = (outcome: 'RED' | 'BLACK', choice: 'RED' | 'BLACK') => {
+  const triggerResult = (outcome: WheelColor, choice: WheelColor) => {
     setResult(outcome);
     setSpinning(false);
+    const correct = outcome === choice;
+    setIsCorrect(correct);
+
     setTimeout(() => {
-      if (outcome === choice) {
+      if (correct) {
         onWin();
       } else {
+        // Reset state so user can spin again if game restarts in place
+        setTimeout(() => {
+          setResult(null);
+          setIsCorrect(null);
+        }, 1200);
         onLose();
       }
-    }, 1000);
+    }, 1200);
   };
 
-  const handleChoice = (choice: 'RED' | 'BLACK') => {
+  const handleChoice = (choice: WheelColor) => {
     if (spinning) return;
     setSpinning(true);
     setResult(null);
+    setIsCorrect(null);
     
-    // Reset rotation before spinning again
+    // Normalize rotation angle
     rotation.value = rotation.value % 360;
     
     const outcome = spinRoulette();
     
-    // RED is at 0 degrees, BLACK is at 330 degrees (which lands at top if we rotate +30)
-    const targetDegrees = outcome === 'RED' ? 0 : 30;
+    // Pick one of the matching slices for this outcome
+    const matchingIndices = SLICE_COLORS.map((c, i) => c === outcome ? i : -1).filter(i => i !== -1);
+    const targetSliceIndex = matchingIndices[Math.floor(Math.random() * matchingIndices.length)];
+    
+    // Each slice is centered at targetSliceIndex * SLICE_ANGLE.
+    // To land the slice center exactly under the pointer at 12 o'clock (0°), rotate by:
+    const sliceCenterAngle = targetSliceIndex * SLICE_ANGLE;
+    const targetDegrees = (360 - (sliceCenterAngle % 360)) % 360;
     const spins = 5; // Spin 5 full times
     const finalRotation = rotation.value + (360 * spins) + targetDegrees - (rotation.value % 360);
 
@@ -66,7 +96,7 @@ export default function RouletteGame({ onWin, onLose }: GameProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>COLOR WHEEL</Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit style={styles.title}>COLOR WHEEL</Text>
       <Text style={styles.subtitle}>Choose a color to spin.</Text>
       
       {/* The Animated Wheel */}
@@ -75,8 +105,7 @@ export default function RouletteGame({ onWin, onLose }: GameProps) {
         <View style={styles.pointer} />
         
         <Animated.View style={[styles.wheel, animatedWheelStyle]}>
-          {Array.from({ length: SLICES }).map((_, i) => {
-            const isRed = i % 2 === 0;
+          {SLICE_COLORS.map((colorKey, i) => {
             return (
               <View
                 key={i}
@@ -88,7 +117,7 @@ export default function RouletteGame({ onWin, onLose }: GameProps) {
                 <View
                   style={[
                     styles.slice,
-                    { borderTopColor: isRed ? Colors.dark.danger : '#111827' },
+                    { borderTopColor: COLOR_CONFIG[colorKey].hex },
                   ]}
                 />
               </View>
@@ -100,33 +129,41 @@ export default function RouletteGame({ onWin, onLose }: GameProps) {
       </View>
 
       <View style={styles.resultContainer}>
-        {spinning && <Text style={styles.spinningText}>SPINNING...</Text>}
+        {spinning && (
+          <Text style={styles.spinningText}>SPINNING...</Text>
+        )}
         {result && !spinning && (
-          <Text style={[
-            styles.resultText, 
-            { color: result === 'RED' ? Colors.dark.danger : Colors.dark.text }
-          ]}>
-            {result}
-          </Text>
+          <View style={styles.resultBox}>
+            <Text style={[styles.resultText, { color: COLOR_CONFIG[result].hex }]}>
+              {COLOR_CONFIG[result].emoji} {COLOR_CONFIG[result].label}
+            </Text>
+            {isCorrect === true && (
+              <Text style={styles.correctBadge}>✓ CORRECT! YOU WIN 🎉</Text>
+            )}
+            {isCorrect === false && (
+              <Text style={styles.incorrectBadge}>✗ INCORRECT! TRY AGAIN</Text>
+            )}
+          </View>
         )}
       </View>
 
-      {!spinning && !result && (
-        <View style={styles.buttonsContainer}>
+      <View style={styles.buttonsGrid}>
+        {(['RED', 'BLUE', 'GREEN', 'YELLOW'] as WheelColor[]).map((col) => (
           <Pressable 
-            style={[styles.button, { backgroundColor: Colors.dark.danger }]}
-            onPress={() => handleChoice('RED')}
+            key={col}
+            disabled={spinning || result !== null}
+            style={({ pressed }) => [
+              styles.button,
+              { backgroundColor: COLOR_CONFIG[col].hex },
+              (spinning || result !== null) && { opacity: 0.45 },
+              pressed && { opacity: 0.8 },
+            ]}
+            onPress={() => handleChoice(col)}
           >
-            <Text style={styles.buttonText}>🔴 RED</Text>
+            <Text style={styles.buttonText}>{COLOR_CONFIG[col].emoji} {COLOR_CONFIG[col].label}</Text>
           </Pressable>
-          <Pressable 
-            style={[styles.button, { backgroundColor: '#111827' }]} // Pure black
-            onPress={() => handleChoice('BLACK')}
-          >
-            <Text style={styles.buttonText}>⚫ BLACK</Text>
-          </Pressable>
-        </View>
-      )}
+        ))}
+      </View>
     </View>
   );
 }
@@ -140,18 +177,27 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.background,
   },
   title: {
-    ...Typography.h2,
+    fontSize: 30,
+    fontWeight: '800',
     color: Colors.dark.text,
-    letterSpacing: 2,
+    letterSpacing: 1.5,
+    marginBottom: Spacing.xs,
+    textAlign: 'center',
   },
   subtitle: {
     ...Typography.bodyLarge,
     color: Colors.dark.textMuted,
-    marginTop: Spacing.md,
+    marginBottom: Spacing.md,
+    textAlign: 'center',
   },
   wheelContainer: {
-    marginVertical: Spacing.xxl,
+    width: WHEEL_SIZE,
+    height: WHEEL_SIZE,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.md,
+    marginBottom: Spacing.md,
+    position: 'relative',
   },
   wheel: {
     width: WHEEL_SIZE,
@@ -160,7 +206,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#111827',
     borderWidth: 4,
-    borderColor: Colors.dark.surface,
+    borderColor: '#374151',
   },
   sliceContainer: {
     position: 'absolute',
@@ -183,35 +229,40 @@ const styles = StyleSheet.create({
   },
   innerCircle: {
     position: 'absolute',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.dark.surface,
-    top: WHEEL_SIZE / 2 - 20,
-    left: WHEEL_SIZE / 2 - 20,
-    borderWidth: 2,
-    borderColor: Colors.dark.border,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#1F2937',
+    top: WHEEL_SIZE / 2 - 22,
+    left: WHEEL_SIZE / 2 - 22,
+    borderWidth: 3,
+    borderColor: '#F9FAFB',
   },
   pointer: {
     position: 'absolute',
-    top: -15,
-    zIndex: 10,
+    top: -16,
+    left: WHEEL_SIZE / 2 - 12,
+    zIndex: 2,
     width: 0,
     height: 0,
-    borderLeftWidth: 10,
-    borderRightWidth: 10,
-    borderTopWidth: 20,
+    borderLeftWidth: 12,
+    borderRightWidth: 12,
+    borderTopWidth: 22,
     borderStyle: 'solid',
     backgroundColor: 'transparent',
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: '#8A2BE2',
+    borderTopColor: '#78350F', // Warm rich brown
   },
   resultContainer: {
-    height: 60,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginVertical: Spacing.xs,
+  },
+  resultBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   spinningText: {
     ...Typography.h3,
@@ -220,25 +271,42 @@ const styles = StyleSheet.create({
   },
   resultText: {
     ...Typography.h1,
-    fontSize: 56,
+    fontSize: 26,
+    fontWeight: '800',
+    marginBottom: 2,
   },
-  buttonsContainer: {
+  correctBadge: {
+    ...Typography.bodyLarge,
+    color: '#10B981',
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  incorrectBadge: {
+    ...Typography.bodyLarge,
+    color: '#EF4444',
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  buttonsGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Spacing.md,
-    marginTop: Spacing.md,
+    marginTop: Spacing.xs,
     width: '100%',
+    justifyContent: 'center',
   },
   button: {
-    flex: 1,
+    width: '47%',
     height: UI.buttonHeight,
     borderRadius: Radii.md,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   buttonText: {
     ...Typography.h3,
     color: '#FFF',
+    fontWeight: '700',
   }
 });

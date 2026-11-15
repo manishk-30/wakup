@@ -128,7 +128,7 @@ struct WakupAppMetadata: AlarmMetadata { }
         let gameNames: [String: String] = [
             "mines": "Play Hidden Tiles",
             "dragon-tower": "Play Tower Climb",
-            "blackjack": "Play Card Challenge",
+            "blackjack": "Play Sundoku",
             "lucky-race": "Play Lucky Race",
             "roulette": "Play Color Wheel",
             "dice": "Play Dice",

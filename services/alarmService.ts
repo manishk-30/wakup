@@ -23,11 +23,11 @@ export const alarmService = {
     console.log(`[AlarmKit] Scheduling alarm...`);
     console.log(`[AlarmKit] Alarm ID: ${alarm.id}`);
     console.log(`[AlarmKit] Alarm date: ${alarm.hour}:${alarm.minute}`);
-    
+
     if (isNativeModuleAvailable && AlarmKit.default?.scheduleAlarm) {
       let result = await AlarmKit.default!.scheduleAlarm(alarm);
       let retries = 0;
-      
+
       // Retry up to 3 times if the OS daemon rejects the scheduling (common right after first authorization)
       while (!result.success && retries < 3) {
         console.warn(`[AlarmKit] Scheduling failed, retrying in 500ms... (Attempt ${retries + 1}/3)`);
@@ -57,15 +57,15 @@ export const alarmService = {
 
   async stopAlarm(id: string): Promise<boolean> {
     await this.stopForegroundAlarm();
-    
+
     // Cancel the rest of today's machine gun chain immediately
     await this.cancelAlarm(id);
-    
+
     // Handle rescheduling or disabling the alarm
     try {
       const alarms = await storageService.getAlarms();
       const alarm = alarms.find(a => a.id === id);
-      
+
       if (alarm) {
         if (alarm.repeatDays.length > 0) {
           // If it repeats, reschedule the 10-chain for the next occurrence
@@ -79,18 +79,18 @@ export const alarmService = {
     } catch (e) {
       console.warn('Failed to handle alarm repeat logic', e);
     }
-    
+
     if (isNativeModuleAvailable && AlarmKit.default?.stopAlarm) {
       return await AlarmKit.default!.stopAlarm(id);
     }
     console.log('[AlarmService] Mock: stopAlarm completed', id);
     return true;
   },
-  
+
   async playForegroundAlarm(file: any): Promise<void> {
     try {
       await this.stopForegroundAlarm();
-      
+
       const player = createAudioPlayer(file);
       player.loop = true;
       player.play();
@@ -109,12 +109,13 @@ export const alarmService = {
           foregroundSound.release();
         }
       } catch (e) {
+        void e;
         // ignore errors on unload
       }
       foregroundSound = null;
     }
   },
-  
+
   async snoozeAlarm(id: string): Promise<boolean> {
     if (isNativeModuleAvailable && AlarmKit.default?.snoozeAlarm) {
       return await AlarmKit.default!.snoozeAlarm(id);
@@ -136,7 +137,7 @@ export const alarmService = {
     }
     return null;
   },
-  
+
   addListener(eventName: string, listener: (event: any) => void): EventSubscription | null {
     if (isNativeModuleAvailable && (AlarmKit.default as any)?.addListener) {
       return (AlarmKit.default as any).addListener(eventName, listener);

@@ -1,12 +1,10 @@
 import { Image } from 'expo-image';
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, useColorScheme, View, Animated } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radii, Spacing, Typography } from '../../constants/theme';
 import { storageService } from '../../services/storageService';
-
 import { useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
 
 export default function CommitmentScreen() {
   const insets = useSafeAreaInsets();

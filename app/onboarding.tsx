@@ -15,7 +15,6 @@ import { storageService } from '../services/storageService';
 import { subscriptionService } from '../services/subscriptionService';
 import { Alarm } from '../types/alarm';
 import { GAMES } from '../types/games';
-import { createAudioPlayer } from 'expo-audio';
 import { soundSelectionStore } from '../services/soundSelectionStore';
 
 const generateUUID = () => {
@@ -80,6 +79,7 @@ const AlarmComparisonAnimation = ({ theme }: { theme: any }) => {
         Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver: true })
       ])
     ).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -139,7 +139,7 @@ export default function OnboardingScreen() {
   const { isPro } = useProStatus();
 
   // Commitment State
-  const [commitmentReason, setCommitmentReason] = useState('');
+  const [commitmentReason] = useState('');
   const signatureRef = useRef<SignatureViewRef>(null);
 
   // Transition animations
@@ -197,6 +197,7 @@ export default function OnboardingScreen() {
       }
     }
     loadSavedStep();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // When user approaches paywall screens, re-fetch live offerings if we previously fell back to mock
@@ -219,11 +220,10 @@ export default function OnboardingScreen() {
   const mascotTransform = { transform: [{ translateY: floatAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -10] }) }] };
 
   const [alarmTime, setAlarmTime] = useState(new Date(new Date().setHours(7, 30, 0, 0)));
-  const [showPicker, setShowPicker] = useState(false);
   const [label, setLabel] = useState('Wake Up');
   const [isLabelFocused, setIsLabelFocused] = useState(false);
   const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
-  const [soundName, setSoundName] = soundSelectionStore.useSound(ALARM_SOUNDS[0].id);
+  const [soundName] = soundSelectionStore.useSound(ALARM_SOUNDS[0].id);
   const [gameId, setGameId] = useState('roulette');
   const [rating, setRating] = useState<number>(5);
 
@@ -322,7 +322,7 @@ export default function OnboardingScreen() {
       return;
     }
     if (pkg) {
-      const { success, customerInfo, error } = await subscriptionService.purchasePackage(pkg as PurchasesPackage);
+      const { success, error } = await subscriptionService.purchasePackage(pkg as PurchasesPackage);
       setIsPurchasing(false);
       if (success) {
         Alert.alert(
@@ -972,7 +972,7 @@ export default function OnboardingScreen() {
               </View>
               <View style={styles.premiumCard}>
                 <Text style={styles.premiumCardTitle}>🎮 All Wake-up Games</Text>
-                <Text style={styles.premiumCardDesc}>Card Challenge, Tower Climb, Dice, Color Wheel, Higher/Lower, Hidden Tiles. All future games included.</Text>
+                <Text style={styles.premiumCardDesc}>Sundoku ☀️, Tower Climb, Dice, Color Wheel, Higher/Lower, Minesweeper. All future games included.</Text>
               </View>
             </View>
 
@@ -1043,7 +1043,7 @@ export default function OnboardingScreen() {
                     </View>
 
                     <View style={styles.pricingContainer}>
-                      {packages.map((pkg, idx) => {
+                      {packages.map((pkg) => {
                         const isYear = pkg.packageType === 'ANNUAL' || pkg.identifier.toLowerCase().includes('annual') || pkg.identifier.toLowerCase().includes('yearly') || pkg.identifier.toLowerCase().includes('year');
                         const isSelected = selectedPackage === pkg.identifier;
                         const priceDisplay = pkg.product?.priceString || (isYear ? '$24.99' : '$4.99');

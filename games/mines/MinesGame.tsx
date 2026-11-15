@@ -8,6 +8,8 @@ interface GameProps {
   onLose: () => void;
 }
 
+const TARGET_SAFE_TILES = 5;
+
 export default function MinesGame({ onWin, onLose }: GameProps) {
   const [grid, setGrid] = useState<MineTile[]>([]);
   const [safeCount, setSafeCount] = useState(0);
@@ -37,7 +39,7 @@ export default function MinesGame({ onWin, onLose }: GameProps) {
       const newSafeCount = safeCount + 1;
       setSafeCount(newSafeCount);
       
-      if (newSafeCount === 6) {
+      if (newSafeCount === TARGET_SAFE_TILES) {
         setGameState('WON');
         setTimeout(onWin, 1000);
       }
@@ -47,10 +49,10 @@ export default function MinesGame({ onWin, onLose }: GameProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>HIDDEN TILES</Text>
+        <Text style={styles.headerTitle}>MINESWEEPER</Text>
         <Text style={styles.headerSubtitle}>
           {gameState === 'PLAYING' 
-            ? `Tap and find ${6 - safeCount} safe tiles`
+            ? `Tap and find ${TARGET_SAFE_TILES - safeCount} safe tiles`
             : gameState === 'WON' ? 'SAFE! YOU WIN 🎉' : 'TRY AGAIN'}
         </Text>
       </View>

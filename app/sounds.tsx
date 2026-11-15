@@ -30,7 +30,9 @@ export default function SoundSelectionScreen() {
         if (typeof previewPlayerRef.current.release === 'function') {
           previewPlayerRef.current.release();
         }
-      } catch (e) {}
+      } catch (e) {
+        void e;
+      }
       previewPlayerRef.current = null;
     }
     setPlayingSoundId(null);

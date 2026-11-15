@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS } from 'react-native-reanimated';
 import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
@@ -59,7 +59,6 @@ export default function CoinFlipGame({ onWin, onLose }: GameProps) {
     
     const outcome = flipCoin();
     const targetDegrees = outcome === 'HEADS' ? 0 : 180;
-    const spins = 6; // 6 half-flips (3 full rotations) + target
     const finalRotation = rotation.value + (360 * 3) + targetDegrees - (rotation.value % 360);
 
     rotation.value = withTiming(

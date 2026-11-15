@@ -84,6 +84,7 @@ export default function AlarmRinging() {
           return null;
         }
       } catch (e) {
+        void e;
         setAlarmTime('Unknown');
         return null;
       }
@@ -116,6 +117,7 @@ export default function AlarmRinging() {
     }
 
     setupAudio();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleGameSelect = (gameId: string) => {

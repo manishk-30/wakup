@@ -1,10 +1,8 @@
 import { View, Text, StyleSheet, useColorScheme, Pressable, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
-import { storageService } from '../../services/storageService';
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
+import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
+import { useState } from 'react';
 import { subscriptionService } from '../../services/subscriptionService';
 import { useProStatus } from '../../hooks/useProStatus';
 import { reviewService } from '../../services/reviewService';

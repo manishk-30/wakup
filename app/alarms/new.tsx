@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput, useColorScheme, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -38,7 +38,7 @@ export default function AddAlarm() {
   const [label, setLabel] = useState('Wake Up');
   const [isLabelFocused, setIsLabelFocused] = useState(false);
   const [repeatDays, setRepeatDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
-  const [soundName, setSoundName] = soundSelectionStore.useSound(ALARM_SOUNDS[0].id);
+  const [soundName] = soundSelectionStore.useSound(ALARM_SOUNDS[0].id);
   const [gameId, setGameId] = useState('roulette');
 
   const handleGameSelect = (id: string) => {

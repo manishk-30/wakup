@@ -23,6 +23,7 @@ export default function ContactScreen() {
     const emailBody = encodeURIComponent(`From: ${name}\n\n${description}`);
     const mailtoUrl = `mailto:${email}?subject=${emailSubject}&body=${emailBody}`;
 
+    setIsSubmitting(true);
     try {
       const canOpen = await Linking.canOpenURL(mailtoUrl);
       if (canOpen) {
@@ -33,8 +34,11 @@ export default function ContactScreen() {
       } else {
         Alert.alert('Error', 'No email app is installed or configured on your device.');
       }
-    } catch (error) {
+    } catch (e) {
+      void e;
       Alert.alert('Error', 'There was a problem opening your email app.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

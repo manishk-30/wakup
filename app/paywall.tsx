@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing, Dimensions, ActivityIndicator, Alert, NativeSyntheticEvent, NativeScrollEvent, Linking } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing, Dimensions, ActivityIndicator, Alert, useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -8,17 +8,16 @@ import { subscriptionService } from '../services/subscriptionService';
 import { PurchasesPackage } from 'react-native-purchases';
 import { useProStatus } from '../hooks/useProStatus';
 
-import { useColorScheme } from 'react-native';
 import { Colors, Spacing, Radii } from '../constants/theme';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 
 export default function PaywallScreen() {
   const colorScheme = useColorScheme();
   const themeColors = colorScheme === 'dark' ? Colors.dark : Colors.light;
   
-  const Theme = {
+  const Theme = useMemo(() => ({
     background: themeColors.background,
     primary: themeColors.primary,
     secondary: themeColors.primaryMuted,
@@ -26,7 +25,7 @@ export default function PaywallScreen() {
     gray: themeColors.surface,
     radius: Radii.xl,
     padding: Spacing.xl,
-  };
+  }), [themeColors]);
 
   const router = useRouter();
   const { isPro } = useProStatus();
@@ -78,6 +77,7 @@ export default function PaywallScreen() {
         Animated.timing(floatAnim, { toValue: 0, duration: 2000, easing: Easing.inOut(Easing.sin), useNativeDriver: true })
       ])
     ).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 

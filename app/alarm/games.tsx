@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ALARM_SOUNDS } from '../../constants/sounds';
 
 // Import Games
-import BlackjackGame from '../../games/blackjack/BlackjackGame';
+import SundokuGame from '../../games/sundoku/SundokuGame';
 import DragonTowerGame from '../../games/dragon-tower/DragonTowerGame';
 import RouletteGame from '../../games/roulette/RouletteGame';
 import DiceGame from '../../games/dice/DiceGame';
@@ -20,12 +20,14 @@ import CoinFlipGame from '../../games/coin-flip/CoinFlipGame';
 import CardGuessGame from '../../games/card-guess/CardGuessGame';
 import LuckyRaceGame from '../../games/lucky-race/LuckyRaceGame';
 import PotionMixGame from '../../games/potion-mix/PotionMixGame';
+import GameCelebration from '../../components/GameCelebration';
 
 export default function GameScreen() {
   const { gameId, alarmId, isPreview } = useLocalSearchParams();
   const router = useRouter();
   
   const [gameState, setGameState] = useState<'PLAYING' | 'WON' | 'LOST'>('PLAYING');
+  const [isCelebrating, setIsCelebrating] = useState(false);
   const [session, setSession] = useState<GameSession | null>(null);
   const [skipTimeLeft, setSkipTimeLeft] = useState(60);
 
@@ -64,13 +66,18 @@ export default function GameScreen() {
       }, 1000);
       return () => clearInterval(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId, isPreview]);
 
-  const handleWin = async () => {
+  const handleWin = () => {
+    setGameState('WON');
     if (session) {
       session.result = 'win';
-      // Analytics/logging could happen here
     }
+    setIsCelebrating(true);
+  };
+
+  const handleCelebrationFinish = async () => {
     if (isPreview === 'true') {
       alarmService.stopForegroundAlarm();
       router.back();
@@ -93,6 +100,7 @@ export default function GameScreen() {
   };
 
   const handleLose = () => {
+    setGameState('LOST');
     if (session) {
       session.result = 'loss';
     }
@@ -101,10 +109,10 @@ export default function GameScreen() {
   };
 
   const renderGame = () => {
-    const props = { onWin: handleWin, onLose: handleLose };
+    const props = { onWin: handleWin, onLose: handleLose, gameState };
     const sessionKey = session?.id;
     switch (gameId) {
-      case 'blackjack': return <BlackjackGame key={sessionKey} {...props} />;
+      case 'blackjack': return <SundokuGame key={sessionKey} {...props} />;
       case 'dragon-tower': return <DragonTowerGame key={sessionKey} {...props} />;
       case 'lucky-race': return <LuckyRaceGame key={sessionKey} {...props} />;
       case 'potion-mix': return <PotionMixGame key={sessionKey} {...props} />;
@@ -119,6 +127,7 @@ export default function GameScreen() {
   };
 
   const restartGame = () => {
+    setIsCelebrating(false);
     setGameState('PLAYING');
     setSession({
       id: Date.now().toString(),
@@ -135,31 +144,44 @@ export default function GameScreen() {
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom || Spacing.md }]}>
       <View style={{ flex: 1 }}>
         {renderGame()}
-      </View>
-      <View style={styles.persistentBottomNav}>
-        <Pressable 
-          style={[
-            styles.bottomNavButton,
-            skipTimeLeft > 0 ? { opacity: 0.5, backgroundColor: Colors.dark.surface } : {}
-          ]}
-          disabled={skipTimeLeft > 0}
-          onPress={() => {
-            if (isPreview === 'true') {
-              router.back();
-            } else {
-              router.replace(`/alarm/ringing?alarmId=${alarmId || 'current'}&forceList=true`);
+        {isCelebrating && (
+          <GameCelebration
+            title={gameId === 'blackjack' ? 'Puzzle Solved!' : 'Challenge Completed!'}
+            subtitle={
+              gameId === 'blackjack'
+                ? 'All 6 Suns Found • Alarm Beaten!'
+                : 'Alarm Beaten • Great Job!'
             }
-          }}
-        >
-          <Text style={[styles.bottomNavButtonText, skipTimeLeft > 0 ? { color: Colors.dark.textMuted } : {}]}>
-            {isPreview === 'true' 
-              ? 'BACK TO SETUP' 
-              : skipTimeLeft > 0 
-                ? `CHOOSE ANOTHER GAME (${skipTimeLeft}s)` 
-                : 'CHOOSE ANOTHER GAME'}
-          </Text>
-        </Pressable>
+            onFinish={handleCelebrationFinish}
+          />
+        )}
       </View>
+      {!isCelebrating && (
+        <View style={styles.persistentBottomNav}>
+          <Pressable 
+            style={[
+              styles.bottomNavButton,
+              skipTimeLeft > 0 ? { opacity: 0.5, backgroundColor: Colors.dark.surface } : {}
+            ]}
+            disabled={skipTimeLeft > 0}
+            onPress={() => {
+              if (isPreview === 'true') {
+                router.back();
+              } else {
+                router.replace(`/alarm/ringing?alarmId=${alarmId || 'current'}&forceList=true`);
+              }
+            }}
+          >
+            <Text style={[styles.bottomNavButtonText, skipTimeLeft > 0 ? { color: Colors.dark.textMuted } : {}]}>
+              {isPreview === 'true' 
+                ? 'BACK TO SETUP' 
+                : skipTimeLeft > 0 
+                  ? `CHOOSE ANOTHER GAME (${skipTimeLeft}s)` 
+                  : 'CHOOSE ANOTHER GAME'}
+            </Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -204,8 +226,8 @@ const styles = StyleSheet.create({
   },
   persistentBottomNav: {
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.sm,
-    paddingBottom: Spacing.xl,
+    paddingTop: Spacing.xs,
+    paddingBottom: Spacing.sm,
   },
   bottomNavButton: {
     height: UI.buttonHeight,
