@@ -45,12 +45,12 @@ interface SundokuGameProps {
 // Elegant, refined minimalist exclusion cross mark with smooth rounded pill caps
 function ElegantCross({
   size = 20,
-  color = '#EF4444',
+  color = '#FFFFFF',
 }: {
   size?: number;
   color?: string;
 }) {
-  const barThickness = Math.max(2.6, Math.round(size * 0.15));
+  const barThickness = Math.max(2.2, Math.round(size * 0.22));
   return (
     <View
       style={{
@@ -58,6 +58,11 @@ function ElegantCross({
         height: size,
         alignItems: 'center',
         justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.16,
+        shadowRadius: 1.5,
+        elevation: 2,
       }}
     >
       <View
@@ -145,7 +150,7 @@ const SudokuCell = React.memo(
         )}
         {state === 'cross' && (
           <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-            <ElegantCross size={Math.round(cellSize * 0.42)} color="#EF4444" />
+            <ElegantCross size={Math.round(cellSize * 0.54)} color="#FFFFFF" />
           </Animated.View>
         )}
       </Pressable>
@@ -545,7 +550,7 @@ export default function SundokuGame({ onWin, onLose: _onLose }: SundokuGameProps
             {/* Micro instruction pill */}
             <View style={styles.instructionPill}>
               <Text style={styles.instructionPillText}>
-                👆 Tap: <Text style={{ color: '#EF4444', fontWeight: '800' }}>✕ mark</Text>  •  ✌️ Double tap: <Text style={{ color: '#F59E0B', fontWeight: '800' }}>☀️ place sun</Text>
+                👆 Tap: <Text style={{ color: '#FFFFFF', fontWeight: '800' }}>✕ mark</Text>  •  ✌️ Double tap: <Text style={{ color: '#F59E0B', fontWeight: '800' }}>☀️ place sun</Text>
               </Text>
             </View>
           </View>
