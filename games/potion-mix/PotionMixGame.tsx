@@ -5,7 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { Colors, Spacing, Typography } from '../../constants/theme';
 
 type PotionState = 'mixing' | 'won' | 'lost' | 'restarting';
-type PotionOutcome = 'golden' | 'murky_purple' | 'murky_gray';
+type PotionOutcome = 'golden' | 'murky_purple' | 'murky_gray' | 'murky_green';
 
 interface PotionMixGameProps {
   onWin: () => void;
@@ -18,14 +18,15 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
   
   // Ref for mutable state
   const stateRef = useRef({
-    requiredShakes: 10 + Math.floor(Math.random() * 6), // 10 to 15
+    requiredShakes: 20, // Exactly 20 taps or shakes
     result: ((): PotionOutcome => {
       const rand = Math.random();
       // 50% chance of winning Golden potion
       if (rand < 0.50) return 'golden';
-      // 50% chance of losing (split into 2 loss colors: Murky Slop & Toxic Ash)
-      if (rand < 0.75) return 'murky_purple';
-      return 'murky_gray';
+      // 50% chance of losing (split into 3 loss colors: Murky Purple, Toxic Ash, Swamp Slime)
+      if (rand < 0.67) return 'murky_purple';
+      if (rand < 0.84) return 'murky_gray';
+      return 'murky_green';
     })(),
     lastShakeTime: 0,
     shakeCount: 0
@@ -158,7 +159,9 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
       return 'Golden Potion! 🧪';
     }
     if (gameState === 'lost') {
-      return stateRef.current.result === 'murky_gray' ? 'Ash & Smoke... 💨' : 'Murky Slop... 💨';
+      if (stateRef.current.result === 'murky_gray') return 'Ash & Smoke... 💨';
+      if (stateRef.current.result === 'murky_green') return 'Swamp Slime... 💨';
+      return 'Murky Slop... 💨';
     }
     if (gameState === 'restarting') return 'Restarting...';
     
@@ -187,8 +190,10 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
       return '#FFD166'; // Golden Win
     }
     if (gameState === 'lost' || gameState === 'restarting') {
-      // 2 distinct loss colors
-      return stateRef.current.result === 'murky_gray' ? '#4B5563' : '#4A0E4E'; // Grayish Ash vs Dark Purple Murk
+      // 3 distinct loss colors
+      if (stateRef.current.result === 'murky_gray') return '#4B5563'; // Grayish Ash
+      if (stateRef.current.result === 'murky_green') return '#14532D'; // Swamp Slime Green
+      return '#4A0E4E'; // Dark Purple Murk
     }
     return mixingColor;
   };
@@ -198,7 +203,7 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>POTION MIX</Text>
-      <Text style={styles.ruleText}>Golden = Win  |  Murky or Ash = Loss</Text>
+      <Text style={styles.ruleText}>Golden = Win  |  Murky, Ash or Slime = Loss</Text>
       
       <View style={styles.centerContainer}>
         <Pressable onPress={handleTapFallback} style={styles.potionContainer}>

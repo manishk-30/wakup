@@ -12,7 +12,7 @@ export interface AlarmGame {
 
 export const GAMES: AlarmGame[] = [
   { id: 'mines', title: 'Minesweeper', description: 'Tap and find 5 safe tiles', icon: '💣' },
-  { id: 'dragon-tower', title: 'Tower Climb', description: 'Tap and pick safe tile to climb', icon: '🏰' },
+  { id: 'dragon-tower', title: 'Tower Climb', description: 'Memorize the path and climb', icon: '🏰' },
   { id: 'lucky-race', title: 'Lucky Race', description: 'Pick your friendly racer', icon: '🏁' },
   { id: 'potion-mix', title: 'Potion Mix', description: 'Shake to mix a golden potion', icon: '⚗️' },
   { id: 'blackjack', title: 'Sundoku ☀️', description: 'Place 6 suns without touching', icon: '☀️' },

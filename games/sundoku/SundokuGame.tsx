@@ -507,7 +507,7 @@ export default function SundokuGame({ onWin, onLose: _onLose }: SundokuGameProps
         <View style={styles.topSection}>
           {/* Centered Title with Top Gap */}
           <View style={styles.titleContainer}>
-            <Text style={styles.gameTitle}>Sundoku ☀️</Text>
+            <Text style={styles.gameTitle}>SUNDOKU ☀️</Text>
           </View>
 
           {/* Compact In-Game Rules Section with 3 Sub-Cards */}
