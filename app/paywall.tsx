@@ -37,6 +37,17 @@ export default function PaywallScreen() {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
 
+  const isSelectedYearly = useMemo(() => {
+    const pkg = packages.find(p => p.identifier === selectedPackage);
+    if (!pkg) return true;
+    return (
+      pkg.packageType === 'ANNUAL' ||
+      pkg.identifier.toLowerCase().includes('annual') ||
+      pkg.identifier.toLowerCase().includes('yearly') ||
+      pkg.identifier.toLowerCase().includes('year')
+    );
+  }, [packages, selectedPackage]);
+
 
   // Animations
   const floatAnim = useRef(new Animated.Value(0)).current;
@@ -216,7 +227,9 @@ export default function PaywallScreen() {
         <View style={styles.screen}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
             <View style={styles.header}>
-              <Text style={styles.headline}>Start your 3-day free trial.</Text>
+              <Text style={styles.headline}>
+                {isSelectedYearly ? 'Start your 3-day free trial.' : 'Unlock Wakup Pro.'}
+              </Text>
               <Text style={styles.subtitle}>Wake up better. Cancel anytime.</Text>
             </View>
 
@@ -240,23 +253,31 @@ export default function PaywallScreen() {
                       <Text style={styles.timelineIcon}>☀️</Text>
                       <View style={styles.timelineContent}>
                         <Text style={styles.timelineTitle}>TODAY</Text>
-                        <Text style={styles.timelineDesc}>Unlock every Pro feature</Text>
+                        <Text style={styles.timelineDesc}>
+                          {isSelectedYearly ? 'Unlock every Pro feature' : 'Instant access to every Pro feature'}
+                        </Text>
                       </View>
                     </View>
                     <View style={styles.timelineLine} />
                     <View style={styles.timelineRow}>
-                      <Text style={styles.timelineIcon}>🔔</Text>
+                      <Text style={styles.timelineIcon}>{isSelectedYearly ? '🔔' : '🔒'}</Text>
                       <View style={styles.timelineContent}>
-                        <Text style={styles.timelineTitle}>2 DAYS</Text>
-                        <Text style={styles.timelineDesc}>We'll remind you before your trial ends.</Text>
+                        <Text style={styles.timelineTitle}>{isSelectedYearly ? '2 DAYS' : 'CANCEL ANYTIME'}</Text>
+                        <Text style={styles.timelineDesc}>
+                          {isSelectedYearly ? "We'll remind you before your trial ends." : 'Manage or cancel anytime in App Store settings.'}
+                        </Text>
                       </View>
                     </View>
                     <View style={styles.timelineLine} />
                     <View style={styles.timelineRow}>
                       <Text style={styles.timelineIcon}>💛</Text>
                       <View style={styles.timelineContent}>
-                        <Text style={styles.timelineTitle}>DAY 3</Text>
-                        <Text style={styles.timelineDesc}>Your subscription renews automatically unless cancelled.</Text>
+                        <Text style={styles.timelineTitle}>{isSelectedYearly ? 'DAY 3' : 'RENEWS MONTHLY'}</Text>
+                        <Text style={styles.timelineDesc}>
+                          {isSelectedYearly
+                            ? 'Your subscription renews automatically unless cancelled.'
+                            : `Renews at ${getPrice('MONTHLY')}/month until cancelled.`}
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -306,14 +327,18 @@ export default function PaywallScreen() {
               <Text style={styles.ctaText}>✅ Success! Unlocking...</Text>
             ) : (
               <Text style={styles.ctaText}>
-                {isPro ? "Continue" : "🌅 Start My Free Trial"}
+                {isPro ? "Continue" : isSelectedYearly ? "🌅 Start My Free Trial" : "Subscribe Now"}
               </Text>
             )}
           </Animated.View>
         </Pressable>
 
         {!isPro && (
-          <Text style={styles.trialInfoText}>3 days free, then {getPrice('ANNUAL')}/year</Text>
+          <Text style={styles.trialInfoText}>
+            {isSelectedYearly
+              ? `3 days free, then ${getPrice('ANNUAL')}/year`
+              : `Billed ${getPrice('MONTHLY')} monthly`}
+          </Text>
         )}
 
         <View style={styles.footerLinksRow}>

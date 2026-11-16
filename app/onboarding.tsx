@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Animated, Easing, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native';
 import { PurchasesPackage } from 'react-native-purchases';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -137,6 +137,17 @@ export default function OnboardingScreen() {
   const [selectedPackage, setSelectedPackage] = useState<string>('$rc_annual');
   const [isPurchasing, setIsPurchasing] = useState(false);
   const { isPro } = useProStatus();
+
+  const isSelectedYearly = useMemo(() => {
+    const pkg = packages.find((p) => p.identifier === selectedPackage);
+    if (!pkg) return true;
+    return (
+      pkg.packageType === 'ANNUAL' ||
+      pkg.identifier.toLowerCase().includes('annual') ||
+      pkg.identifier.toLowerCase().includes('yearly') ||
+      pkg.identifier.toLowerCase().includes('year')
+    );
+  }, [packages, selectedPackage]);
 
   // Commitment State
   const [commitmentReason] = useState('');
@@ -843,24 +854,37 @@ export default function OnboardingScreen() {
                 My goals are worth more than sleep."
               </Text>
               <View style={{ position: 'relative', height: 130, width: '100%', marginTop: Spacing.xs, borderRadius: Radii.md, overflow: 'hidden', borderWidth: 1, borderColor: theme.border }}>
-                <SignatureScreen
-                  ref={signatureRef}
-                  onOK={handleSignatureOK}
-                  descriptionText="Sign here"
-                  clearText="Clear"
-                  confirmText="Save"
-                  webStyle={`.m-signature-pad {box-shadow: none; border: none; background-color: transparent;} 
-                              body,html {width: 100%; height: 100%; overflow: hidden; touch-action: none;}
-                              .m-signature-pad--body {border: none; touch-action: none;}
-                              .m-signature-pad--footer {display: none; margin: 0px;}`}
-                  backgroundColor="transparent"
-                />
-                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }} pointerEvents="none">
-                  <Text style={{ color: theme.textMuted, opacity: 0.4, fontSize: 16 }}>Your signature here</Text>
-                </View>
+                {Platform.OS === 'web' ? (
+                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.surface }}>
+                    <Text style={{ color: theme.textMuted, fontSize: 13 }}>✍️ [Web Preview: Signature Mode]</Text>
+                    <Text style={{ color: theme.primary, fontSize: 20, fontStyle: 'italic', marginTop: 6, fontWeight: '700' }}>Your Signature</Text>
+                  </View>
+                ) : (
+                  <>
+                    <SignatureScreen
+                      ref={signatureRef}
+                      onOK={handleSignatureOK}
+                      descriptionText="Sign here"
+                      clearText="Clear"
+                      confirmText="Save"
+                      webStyle={`.m-signature-pad {box-shadow: none; border: none; background-color: transparent;} 
+                                  body,html {width: 100%; height: 100%; overflow: hidden; touch-action: none;}
+                                  .m-signature-pad--body {border: none; touch-action: none;}
+                                  .m-signature-pad--footer {display: none; margin: 0px;}`}
+                      backgroundColor="transparent"
+                    />
+                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }} pointerEvents="none">
+                      <Text style={{ color: theme.textMuted, opacity: 0.4, fontSize: 16 }}>Your signature here</Text>
+                    </View>
+                  </>
+                )}
               </View>
               <Pressable 
-                onPress={() => signatureRef.current?.clearSignature()} 
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    signatureRef.current?.clearSignature();
+                  }
+                }} 
                 style={{ 
                   alignSelf: 'center', 
                   marginTop: 10,
@@ -875,7 +899,16 @@ export default function OnboardingScreen() {
               </Pressable>
             </View>
 
-            <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.sm }]} onPress={() => signatureRef.current?.readSignature()}>
+            <Pressable 
+              style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.sm }]} 
+              onPress={() => {
+                if (Platform.OS === 'web') {
+                  handleSignatureOK("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
+                } else {
+                  signatureRef.current?.readSignature();
+                }
+              }}
+            >
               <Text style={styles.buttonText}>I'm Committed</Text>
             </Pressable>
           </View>
@@ -997,7 +1030,9 @@ export default function OnboardingScreen() {
             </Pressable>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
               <View style={styles.pwHeader}>
-                <Text style={[styles.headline, { color: theme.text }]}>Start your 3-day free trial.</Text>
+                <Text style={[styles.headline, { color: theme.text }]}>
+                  {isSelectedYearly ? 'Start your 3-day free trial.' : 'Unlock Wakup Pro.'}
+                </Text>
                 <Text style={[styles.pwSubtitle, { color: theme.text, opacity: 0.8 }]}>Wake up better. Cancel anytime.</Text>
               </View>
 
@@ -1021,23 +1056,31 @@ export default function OnboardingScreen() {
                         <Text style={styles.timelineIcon}>☀️</Text>
                         <View style={styles.timelineContent}>
                           <Text style={styles.timelineTitle}>TODAY</Text>
-                          <Text style={styles.timelineDesc}>Unlock every Pro feature</Text>
+                          <Text style={styles.timelineDesc}>
+                            {isSelectedYearly ? 'Unlock every Pro feature' : 'Instant access to every Pro feature'}
+                          </Text>
                         </View>
                       </View>
                       <View style={styles.timelineLine} />
                       <View style={styles.timelineRow}>
-                        <Text style={styles.timelineIcon}>🔔</Text>
+                        <Text style={styles.timelineIcon}>{isSelectedYearly ? '🔔' : '🔒'}</Text>
                         <View style={styles.timelineContent}>
-                          <Text style={styles.timelineTitle}>DAY 2</Text>
-                          <Text style={styles.timelineDesc}>We'll remind you before your trial ends.</Text>
+                          <Text style={styles.timelineTitle}>{isSelectedYearly ? 'DAY 2' : 'CANCEL ANYTIME'}</Text>
+                          <Text style={styles.timelineDesc}>
+                            {isSelectedYearly ? "We'll remind you before your trial ends." : 'Manage or cancel anytime in App Store settings.'}
+                          </Text>
                         </View>
                       </View>
                       <View style={styles.timelineLine} />
                       <View style={styles.timelineRow}>
                         <Text style={styles.timelineIcon}>💛</Text>
                         <View style={styles.timelineContent}>
-                          <Text style={styles.timelineTitle}>DAY 3</Text>
-                          <Text style={styles.timelineDesc}>Your subscription renews automatically unless cancelled.</Text>
+                          <Text style={styles.timelineTitle}>{isSelectedYearly ? 'DAY 3' : 'RENEWS MONTHLY'}</Text>
+                          <Text style={styles.timelineDesc}>
+                            {isSelectedYearly
+                              ? 'Your subscription renews automatically unless cancelled.'
+                              : `Renews at ${getPrice('MONTHLY')}/month until cancelled.`}
+                          </Text>
                         </View>
                       </View>
                     </View>
@@ -1079,11 +1122,21 @@ export default function OnboardingScreen() {
                 onPress={isPro ? finishOnboarding : handlePurchase}
                 disabled={isPurchasing}
               >
-                <Text style={styles.pwButtonText}>{isPro ? "Finish" : "🌅 Start 3-Day Free Trial"}</Text>
+                <Text style={styles.pwButtonText}>
+                  {isPro 
+                    ? "Finish" 
+                    : isSelectedYearly 
+                      ? "🌅 Start 3-Day Free Trial" 
+                      : "Subscribe Now"}
+                </Text>
               </Pressable>
 
               {!isPro && (
-                <Text style={[styles.trialInfoText, { marginTop: 0, marginBottom: 8 }]}>3 days free, then {getPrice('ANNUAL')}/year</Text>
+                <Text style={[styles.trialInfoText, { marginTop: 0, marginBottom: 8 }]}>
+                  {isSelectedYearly
+                    ? `3 days free, then ${getPrice('ANNUAL')}/year`
+                    : `Billed ${getPrice('MONTHLY')} monthly`}
+                </Text>
               )}
 
               {isPro ? null : (

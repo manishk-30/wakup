@@ -5,11 +5,11 @@ module.exports = function withIphoneOnly(config) {
     const xcodeProject = config.modResults;
     const buildConfigs = xcodeProject.pbxXCBuildConfigurationSection();
     
-    // Force TARGETED_DEVICE_FAMILY to 1 (iPhone only) across all build configurations
+    // Support both iPhone (1) and iPad (2) across all build configurations
     for (const uuid in buildConfigs) {
       const buildConfig = buildConfigs[uuid];
       if (typeof buildConfig === 'object' && buildConfig.buildSettings) {
-        buildConfig.buildSettings['TARGETED_DEVICE_FAMILY'] = '"1"';
+        buildConfig.buildSettings['TARGETED_DEVICE_FAMILY'] = '"1,2"';
       }
     }
     
@@ -17,13 +17,14 @@ module.exports = function withIphoneOnly(config) {
   });
 
   config = withInfoPlist(config, (config) => {
-    // Remove iPad interface orientations if they exist from previous non-clean builds
-    if (config.modResults['UISupportedInterfaceOrientations~ipad']) {
-      delete config.modResults['UISupportedInterfaceOrientations~ipad'];
-    }
+    // Preserve portrait orientations for iPad
+    config.modResults['UISupportedInterfaceOrientations~ipad'] = [
+      'UIInterfaceOrientationPortrait',
+      'UIInterfaceOrientationPortraitUpsideDown',
+    ];
     
-    // Force UIDeviceFamily to strictly contain only 1 (iPhone)
-    config.modResults['UIDeviceFamily'] = [1];
+    // Support both iPhone (1) and iPad (2)
+    config.modResults['UIDeviceFamily'] = [1, 2];
     
     // Remove "audio" from UIBackgroundModes (Guideline 2.5.4)
     if (Array.isArray(config.modResults['UIBackgroundModes'])) {
