@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Animated } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Animated, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
@@ -7,10 +7,13 @@ import { GAMES } from '../../types/games';
 import { alarmService } from '../../services/alarmService';
 import { storageService } from '../../services/storageService';
 import { ALARM_SOUNDS } from '../../constants/sounds';
+import PortraitContainer from '../../components/PortraitContainer';
 
 export default function AlarmRinging() {
   const router = useRouter();
   const params = useLocalSearchParams<{ alarmId?: string, forceList?: string }>();
+  const { width } = useWindowDimensions();
+  const isFolded = width <= 480;
   
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const [currentAlarmId, setCurrentAlarmId] = useState<string>(params.alarmId || 'current');
@@ -132,41 +135,48 @@ export default function AlarmRinging() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Animated.Text style={[styles.timeText, { transform: [{ scale: pulseAnim }] }]}>
-          {alarmTime}
-        </Animated.Text>
-        <Text style={styles.title}>WAKE UP</Text>
-        <Text style={styles.subtitle}>
-          Win any game to stop the alarm.
-        </Text>
-      </View>
+      <PortraitContainer>
+        {isFolded && (
+          <View style={styles.unfoldHintBanner}>
+            <Text style={styles.unfoldHintText}>📖 Unfold your iPhone Duo for the full challenge</Text>
+          </View>
+        )}
+        <View style={styles.header}>
+          <Animated.Text style={[styles.timeText, { transform: [{ scale: pulseAnim }] }]}>
+            {alarmTime}
+          </Animated.Text>
+          <Text style={styles.title}>WAKE UP</Text>
+          <Text style={styles.subtitle}>
+            Win any game to stop the alarm.
+          </Text>
+        </View>
 
-      <View style={styles.listHeader}>
-        <Text style={styles.chooseText}>Choose your challenge</Text>
-      </View>
+        <View style={styles.listHeader}>
+          <Text style={styles.chooseText}>Choose your challenge</Text>
+        </View>
 
-      <ScrollView contentContainerStyle={styles.gamesList} showsVerticalScrollIndicator={false}>
-        {GAMES.map((game) => (
-          <Pressable
-            key={game.id}
-            style={({ pressed }) => [
-              styles.gameCard,
-              pressed && styles.gameCardPressed
-            ]}
-            onPress={() => handleGameSelect(game.id)}
-          >
-            <View style={styles.iconContainer}>
-              <Text style={styles.gameIcon}>{game.icon}</Text>
-            </View>
-            <View style={styles.gameInfo}>
-              <Text style={styles.gameTitle}>{game.title}</Text>
-              <Text style={styles.gameDesc}>{game.description}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={Colors.dark.textMuted} />
-          </Pressable>
-        ))}
-      </ScrollView>
+        <ScrollView contentContainerStyle={styles.gamesList} showsVerticalScrollIndicator={false}>
+          {GAMES.map((game) => (
+            <Pressable
+              key={game.id}
+              style={({ pressed }) => [
+                styles.gameCard,
+                pressed && styles.gameCardPressed
+              ]}
+              onPress={() => handleGameSelect(game.id)}
+            >
+              <View style={styles.iconContainer}>
+                <Text style={styles.gameIcon}>{game.icon}</Text>
+              </View>
+              <View style={styles.gameInfo}>
+                <Text style={styles.gameTitle}>{game.title}</Text>
+                <Text style={styles.gameDesc}>{game.description}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color={Colors.dark.textMuted} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      </PortraitContainer>
     </View>
   );
 }
@@ -176,6 +186,22 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: Spacing.xxl * 2.5,
     backgroundColor: '#0F111A',
+  },
+  unfoldHintBanner: {
+    backgroundColor: 'rgba(255, 176, 0, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 176, 0, 0.35)',
+    borderRadius: Radii.full,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    alignSelf: 'center',
+    marginBottom: Spacing.md,
+  },
+  unfoldHintText: {
+    ...Typography.caption,
+    color: Colors.dark.primary,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   header: {
     alignItems: 'center',

@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { subscriptionService } from '../../services/subscriptionService';
 import { useProStatus } from '../../hooks/useProStatus';
 import { reviewService } from '../../services/reviewService';
+import PortraitContainer from '../../components/PortraitContainer';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -35,7 +36,8 @@ export default function SettingsScreen() {
   
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
+      <PortraitContainer>
+        <View style={styles.header}>
         <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
       </View>
       
@@ -114,6 +116,7 @@ export default function SettingsScreen() {
 
 
       </ScrollView>
+      </PortraitContainer>
     </View>
   );
 }

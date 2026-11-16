@@ -16,6 +16,7 @@ import { subscriptionService } from '../services/subscriptionService';
 import { Alarm } from '../types/alarm';
 import { GAMES } from '../types/games';
 import { soundSelectionStore } from '../services/soundSelectionStore';
+import PortraitContainer from '../components/PortraitContainer';
 
 const generateUUID = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -1160,14 +1161,16 @@ export default function OnboardingScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top, paddingBottom: insets.bottom || Spacing.lg }]}>
-      {/* Line Loader Progress Bar */}
-      <View style={styles.progressBarContainer}>
-        <View style={[styles.progressBarFill, { backgroundColor: theme.primary, width: `${progressPercentage}%` }]} />
-      </View>
+      <PortraitContainer>
+        {/* Line Loader Progress Bar */}
+        <View style={styles.progressBarContainer}>
+          <View style={[styles.progressBarFill, { backgroundColor: theme.primary, width: `${progressPercentage}%` }]} />
+        </View>
 
-      <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-        {renderStep()}
-      </Animated.View>
+        <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+          {renderStep()}
+        </Animated.View>
+      </PortraitContainer>
     </View>
   );
 }

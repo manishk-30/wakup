@@ -11,6 +11,7 @@ import { GAMES } from '../../types/games';
 import { Ionicons } from '@expo/vector-icons';
 import { soundSelectionStore } from '../../services/soundSelectionStore';
 import { useProStatus } from '../../hooks/useProStatus';
+import PortraitContainer from '../../components/PortraitContainer';
 
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const TOTAL_STEPS = 3;
@@ -234,28 +235,30 @@ export default function AddAlarm() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
-        <Pressable onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={theme.text} />
-        </Pressable>
-        <Text style={[styles.headerTitle, { color: theme.text }]}>Step {step} of {TOTAL_STEPS}</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <PortraitContainer>
+        <View style={styles.header}>
+          <Pressable onPress={handleBack} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={theme.text} />
+          </Pressable>
+          <Text style={[styles.headerTitle, { color: theme.text }]}>Step {step} of {TOTAL_STEPS}</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-      <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-        {step === 1 && renderStep1()}
-        {step === 2 && renderStep2()}
-        {step === 3 && renderStep3()}
-      </Animated.View>
+        <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+          {step === 1 && renderStep1()}
+          {step === 2 && renderStep2()}
+          {step === 3 && renderStep3()}
+        </Animated.View>
 
-      <View style={styles.footer}>
-        <Pressable 
-          style={[styles.nextButton, { backgroundColor: theme.primary }]}
-          onPress={handleNext}
-        >
-          <Text style={styles.nextButtonText}>{step === TOTAL_STEPS ? 'Save Alarm' : 'Next'}</Text>
-        </Pressable>
-      </View>
+        <View style={styles.footer}>
+          <Pressable 
+            style={[styles.nextButton, { backgroundColor: theme.primary }]}
+            onPress={handleNext}
+          >
+            <Text style={styles.nextButtonText}>{step === TOTAL_STEPS ? 'Save Alarm' : 'Next'}</Text>
+          </Pressable>
+        </View>
+      </PortraitContainer>
     </View>
   );
 }

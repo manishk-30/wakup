@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, Animated, Dimensions, Easing } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Animated, useWindowDimensions, Easing } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors, Spacing, Radii, Typography, UI } from '../../constants/theme';
-
-const { width } = Dimensions.get('window');
 
 type RaceState = 'selecting' | 'countdown' | 'racing' | 'won' | 'lost';
 
@@ -27,13 +25,15 @@ interface LuckyRaceGameProps {
 }
 
 export default function LuckyRaceGame({ onWin, onLose }: LuckyRaceGameProps) {
+  const { width } = useWindowDimensions();
   const [gameState, setGameState] = useState<RaceState>('selecting');
   const [selectedRacerId, setSelectedRacerId] = useState<string | null>(null);
   const [winnerId, setWinnerId] = useState<string | null>(null);
   const [countdown, setCountdown] = useState<number | string>(3);
   
-  // Track width for racing animation calculation
-  const trackWidth = width - (Spacing.lg * 2) - 40; // Total width minus padding minus racer icon size
+  // Track width for racing animation calculation (adapts to centered portrait column)
+  const effectiveWidth = Math.min(width, 440);
+  const trackWidth = effectiveWidth - (Spacing.lg * 2) - 40; // Total width minus padding minus racer icon size
   
   // Animations
   const countdownScale = useRef(new Animated.Value(0)).current;

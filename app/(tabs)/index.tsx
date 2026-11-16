@@ -8,6 +8,7 @@ import { storageService } from '../../services/storageService';
 import { alarmService } from '../../services/alarmService';
 import { GAMES } from '../../types/games';
 import { useProStatus } from '../../hooks/useProStatus';
+import PortraitContainer from '../../components/PortraitContainer';
 
 export default function Home() {
   const router = useRouter();
@@ -108,21 +109,22 @@ export default function Home() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
-        <View>
-          <Text style={[styles.greeting, { color: theme.textMuted }]}>Wakup</Text>
-          <Text style={[styles.title, { color: theme.text }]}>Alarms</Text>
+      <PortraitContainer>
+        <View style={styles.header}>
+          <View>
+            <Text style={[styles.greeting, { color: theme.textMuted }]}>Wakup</Text>
+            <Text style={[styles.title, { color: theme.text }]}>Alarms</Text>
+          </View>
+          <Pressable 
+            style={[styles.streakBadge, { backgroundColor: theme.surface, borderColor: theme.border }]}
+            onPress={() => router.push('/progress' as any)}
+          >
+            <Text style={styles.streakEmoji}>☀️</Text>
+            <Text style={[styles.streakCount, { color: theme.text }]}>{streak}</Text>
+          </Pressable>
         </View>
-        <Pressable 
-          style={[styles.streakBadge, { backgroundColor: theme.surface, borderColor: theme.border }]}
-          onPress={() => router.push('/progress' as any)}
-        >
-          <Text style={styles.streakEmoji}>☀️</Text>
-          <Text style={[styles.streakCount, { color: theme.text }]}>{streak}</Text>
-        </Pressable>
-      </View>
-      
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {alarms.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyIcon}>⏰</Text>
@@ -203,6 +205,7 @@ export default function Home() {
           <Text style={styles.addAlarmButtonText}>Add Alarm</Text>
         </Pressable>
       </View>
+      </PortraitContainer>
       
       <Modal
         visible={showCommitmentModal}
@@ -211,7 +214,7 @@ export default function Home() {
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' }}>
           <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.xl }} showsVerticalScrollIndicator={false}>
-            <View style={{ width: '100%', backgroundColor: theme.surface, borderRadius: Radii.xl, padding: Spacing.xl, alignItems: 'center' }}>
+            <View style={{ width: '100%', maxWidth: 420, backgroundColor: theme.surface, borderRadius: Radii.xl, padding: Spacing.xl, alignItems: 'center' }}>
               <Text style={{ fontSize: 40, marginBottom: Spacing.md }}>🥺</Text>
               <Text style={{ ...Typography.h2, color: theme.text, textAlign: 'center', marginBottom: Spacing.sm }}>
                 You promised yourself one real chance.

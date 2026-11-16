@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing, Dimensions, ActivityIndicator, Alert, useColorScheme } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing, ActivityIndicator, Alert, useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -9,8 +9,7 @@ import { PurchasesPackage } from 'react-native-purchases';
 import { useProStatus } from '../hooks/useProStatus';
 
 import { Colors, Spacing, Radii } from '../constants/theme';
-
-const { width } = Dimensions.get('window');
+import PortraitContainer from '../components/PortraitContainer';
 
 
 export default function PaywallScreen() {
@@ -224,6 +223,7 @@ export default function PaywallScreen() {
 
   return (
     <View style={styles.container}>
+      <PortraitContainer>
         <View style={styles.screen}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
             <View style={styles.header}>
@@ -349,6 +349,7 @@ export default function PaywallScreen() {
           <Pressable onPress={() => router.push('/terms')}><Text style={styles.footerLink}>Terms</Text></Pressable>
         </View>
       </View>
+      </PortraitContainer>
       
       <Pressable onPress={() => {
         if (router.canGoBack()) {
@@ -378,7 +379,7 @@ const createStyles = (Theme: any) => StyleSheet.create({
     borderRadius: Radii.full,
   },
   screen: {
-    width: width,
+    width: '100%',
     flex: 1,
     paddingHorizontal: Theme.padding,
     paddingTop: 80,
