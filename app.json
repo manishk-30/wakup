@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "wakup",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.avish.wakup",
       "supportsTablet": true,
@@ -41,7 +40,12 @@
       "./scripts/withAlarmAudio.js",
       "./scripts/withAppIntent.js",
       "./scripts/withIphoneOnly.js",
-      "expo-audio"
+      "expo-audio",
+      "expo-font",
+      "expo-image",
+      "expo-sharing",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

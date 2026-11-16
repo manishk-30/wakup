@@ -60,7 +60,7 @@ export default function RootLayout() {
 
     const appStateSubscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
       if (
-        appState.current.match(/inactive|background/) &&
+        appState.current?.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
         checkPendingGame();

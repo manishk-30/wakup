@@ -32,7 +32,7 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="home" size={24} color={color} />
+            <Ionicons name="home" size={24} color={color as string} />
           ),
         }}
       />
@@ -41,7 +41,7 @@ export default function TabLayout() {
         options={{
           title: 'Progress',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="bar-chart" size={24} color={color} />
+            <Ionicons name="bar-chart" size={24} color={color as string} />
           ),
         }}
       />
@@ -50,7 +50,7 @@ export default function TabLayout() {
         options={{
           title: 'Commitment',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="document-text" size={24} color={color} />
+            <Ionicons name="document-text" size={24} color={color as string} />
           ),
         }}
       />
@@ -59,7 +59,7 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="settings" size={24} color={color} />
+            <Ionicons name="settings" size={24} color={color as string} />
           ),
         }}
       />

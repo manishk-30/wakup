@@ -10,7 +10,7 @@ export default function ProgressScreen() {
   
   const [streakDays, setStreakDays] = useState<string[]>([]);
   const [streakLength, setStreakLength] = useState(0);
-  const calendarRef = useRef<View>(null);
+  const calendarRef = useRef<any>(null);
 
   const loadStreaks = async () => {
     const days = await storageService.getStreakDays();

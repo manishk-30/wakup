@@ -10,8 +10,8 @@ Pod::Spec.new do |s|
   s.license        = package['license']
   s.author         = package['author']
   s.homepage       = 'https://github.com/manishk-30/wakup'
-  s.platform       = :ios, '13.4'
-  s.swift_version  = '5.4'
+  s.platform       = :ios, '16.4'
+  s.swift_version  = '5.9'
   s.source         = { git: 'https://github.com/manishk-30/wakup' }
   s.static_framework = true
 

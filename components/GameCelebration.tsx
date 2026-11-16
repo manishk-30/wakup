@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     elevation: 9999,
   },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0, 0, 0, 0.65)',
     zIndex: 1,
   },
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     zIndex: 9999,
   },
   centerContainer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
