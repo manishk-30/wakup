@@ -25,7 +25,13 @@ export const alarmService = {
     console.log(`[AlarmKit] Alarm date: ${alarm.hour}:${alarm.minute}`);
 
     if (isNativeModuleAvailable && AlarmKit.default?.scheduleAlarm) {
-      let result = await AlarmKit.default!.scheduleAlarm(alarm);
+      const sanitizedAlarm = {
+        ...alarm,
+        hour: Math.floor(Number(alarm.hour)),
+        minute: Math.floor(Number(alarm.minute)),
+        repeatDays: (alarm.repeatDays || []).map(d => Math.floor(Number(d))),
+      };
+      let result = await AlarmKit.default!.scheduleAlarm(sanitizedAlarm);
       let retries = 0;
 
       // Retry up to 3 times if the OS daemon rejects the scheduling (common right after first authorization)

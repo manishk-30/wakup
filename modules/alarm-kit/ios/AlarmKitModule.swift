@@ -80,12 +80,34 @@ public class AlarmKitModule: Module {
             return
           }
           
-          guard let hour = options["hour"] as? Int else {
+          let parsedHour: Int?
+          if let h = options["hour"] as? Int {
+            parsedHour = h
+          } else if let h = options["hour"] as? Double {
+            parsedHour = Int(h)
+          } else if let h = options["hour"] as? NSNumber {
+            parsedHour = h.intValue
+          } else {
+            parsedHour = nil
+          }
+
+          guard let hour = parsedHour else {
             promise.resolve(["success": false, "error": "Invalid argument: 'hour' must be an Int (got \(String(describing: options["hour"])))"])
             return
           }
           
-          guard let minute = options["minute"] as? Int else {
+          let parsedMinute: Int?
+          if let m = options["minute"] as? Int {
+            parsedMinute = m
+          } else if let m = options["minute"] as? Double {
+            parsedMinute = Int(m)
+          } else if let m = options["minute"] as? NSNumber {
+            parsedMinute = m.intValue
+          } else {
+            parsedMinute = nil
+          }
+
+          guard let minute = parsedMinute else {
             promise.resolve(["success": false, "error": "Invalid argument: 'minute' must be an Int (got \(String(describing: options["minute"])))"])
             return
           }
@@ -95,7 +117,21 @@ public class AlarmKitModule: Module {
             return
           }
           
-          let repeatDays = options["repeatDays"] as? [Int] ?? []
+          let repeatDays: [Int]
+          if let days = options["repeatDays"] as? [Int] {
+            repeatDays = days
+          } else if let days = options["repeatDays"] as? [Double] {
+            repeatDays = days.map { Int($0) }
+          } else if let days = options["repeatDays"] as? [NSNumber] {
+            repeatDays = days.map { $0.intValue }
+          } else {
+            repeatDays = []
+          }
+
+          var sanitizedOptions = options
+          sanitizedOptions["hour"] = hour
+          sanitizedOptions["minute"] = minute
+          sanitizedOptions["repeatDays"] = repeatDays
           
           do {
               let (success, alarmId, errorMsg) = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<(Bool, String?, String?), Error>) in
@@ -103,7 +139,7 @@ public class AlarmKitModule: Module {
                       name: NSNotification.Name("WakupScheduleAlarm"),
                       object: nil,
                       userInfo: [
-                          "options": options,
+                          "options": sanitizedOptions,
                           "completion": { (s: Bool, a: String?, e: String?) in
                               continuation.resume(returning: (s, a, e))
                           }

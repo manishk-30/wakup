@@ -61,15 +61,46 @@ struct WakupAppMetadata: AlarmMetadata { }
                   let completion = userInfo["completion"] as? (Bool, String?, String?) -> Void else { return }
             Task {
                 do {
+                    let hourVal: Int?
+                    if let h = options["hour"] as? Int {
+                        hourVal = h
+                    } else if let h = options["hour"] as? Double {
+                        hourVal = Int(h)
+                    } else if let h = options["hour"] as? NSNumber {
+                        hourVal = h.intValue
+                    } else {
+                        hourVal = nil
+                    }
+
+                    let minuteVal: Int?
+                    if let m = options["minute"] as? Int {
+                        minuteVal = m
+                    } else if let m = options["minute"] as? Double {
+                        minuteVal = Int(m)
+                    } else if let m = options["minute"] as? NSNumber {
+                        minuteVal = m.intValue
+                    } else {
+                        minuteVal = nil
+                    }
+
                     guard let idString = options["id"] as? String,
                           let id = UUID(uuidString: idString),
-                          let hour = options["hour"] as? Int,
-                          let minute = options["minute"] as? Int,
+                          let hour = hourVal,
+                          let minute = minuteVal,
                           let label = options["label"] as? String else {
                         completion(false, nil, "Invalid arguments")
                         return
                     }
-                    let repeatDays = options["repeatDays"] as? [Int] ?? []
+                    let repeatDays: [Int]
+                    if let days = options["repeatDays"] as? [Int] {
+                        repeatDays = days
+                    } else if let days = options["repeatDays"] as? [Double] {
+                        repeatDays = days.map { Int($0) }
+                    } else if let days = options["repeatDays"] as? [NSNumber] {
+                        repeatDays = days.map { $0.intValue }
+                    } else {
+                        repeatDays = []
+                    }
                     let gameId = options["gameId"] as? String ?? "random"
                     let soundName = options["soundName"] as? String ?? "radar.wav"
                     let success = try await self.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays, gameId: gameId, soundName: soundName)
