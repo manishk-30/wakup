@@ -106,7 +106,9 @@ struct WakupAppMetadata: AlarmMetadata { }
                     let success = try await self.schedule(id: id, hour: hour, minute: minute, label: label, repeatDays: repeatDays, gameId: gameId, soundName: soundName)
                     completion(success, id.uuidString, nil)
                 } catch {
-                    completion(false, nil, error.localizedDescription)
+                    let nsError = error as NSError
+                    print("[AlarmKit-Diag] WakupScheduleAlarm caught: domain=\(nsError.domain) code=\(nsError.code) desc=\(nsError.localizedDescription) userInfo=\(nsError.userInfo)")
+                    completion(false, nil, "\(nsError.domain) (\(nsError.code)): \(nsError.localizedDescription)")
                 }
             }
         }
@@ -139,11 +141,17 @@ struct WakupAppMetadata: AlarmMetadata { }
     }
     
     public func schedule(id: UUID, hour: Int, minute: Int, label: String, repeatDays: [Int], gameId: String, soundName: String) async throws -> Bool {
-        // Ensure authorization before scheduling
-        let state = try await AlarmManager.shared.requestAuthorization()
-        guard state == .authorized else {
-            print("[AlarmKit] Authorization not authorized: \(state)")
-            throw NSError(domain: "com.apple.AlarmKit.Alarm", code: 1, userInfo: [NSLocalizedDescriptionKey: "Alarm permission is required. Please enable alarm permissions in Settings."])
+        // Diagnostic 1: Authorization state before calling requestAuthorization()
+        let stateBefore = AlarmManager.shared.authorizationState
+        print("[AlarmKit-Diag] 1. authorizationState BEFORE requestAuthorization(): \(stateBefore)")
+
+        // Diagnostic 2: State returned by requestAuthorization()
+        let stateAfter = try await AlarmManager.shared.requestAuthorization()
+        print("[AlarmKit-Diag] 2. authorizationState AFTER requestAuthorization(): \(stateAfter)")
+
+        guard stateAfter == .authorized else {
+            print("[AlarmKit-Diag] FAILED at our own guard: stateAfter is not authorized (\(stateAfter))")
+            throw NSError(domain: "com.apple.AlarmKit.Alarm", code: 1, userInfo: [NSLocalizedDescriptionKey: "WakupGuard: Alarm permission is required. Current state: \(stateAfter)"])
         }
 
         let weekdays: [Locale.Weekday] = repeatDays.compactMap {
@@ -207,8 +215,23 @@ struct WakupAppMetadata: AlarmMetadata { }
             sound: .named(cleanSoundName)
         )
         
-        _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
-        return true
+        // Diagnostic 3: Whether execution reaches AlarmManager.shared.schedule()
+        print("[AlarmKit-Diag] 3. Reached AlarmManager.shared.schedule(id: \(id), configuration: ...)")
+
+        do {
+            _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
+            print("[AlarmKit-Diag] 3b. AlarmManager.shared.schedule SUCCEEDED!")
+            return true
+        } catch {
+            // Diagnostic 4: If scheduling throws, capture NSError domain, code, localizedDescription and userInfo
+            let nsError = error as NSError
+            print("[AlarmKit-Diag] 4. AlarmManager.shared.schedule THREW:")
+            print("[AlarmKit-Diag]    domain: \(nsError.domain)")
+            print("[AlarmKit-Diag]    code: \(nsError.code)")
+            print("[AlarmKit-Diag]    localizedDescription: \(nsError.localizedDescription)")
+            print("[AlarmKit-Diag]    userInfo: \(nsError.userInfo)")
+            throw error
+        }
     }
     
     public func cancel(id: UUID) throws {
