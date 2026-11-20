@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, useColorScheme, Pressable, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import PortraitContainer from '../../components/PortraitContainer';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   
@@ -35,7 +37,7 @@ export default function SettingsScreen() {
 
   
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.lg, 60) }]}>
       <PortraitContainer>
         <View style={styles.header}>
         <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
@@ -123,7 +125,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: Spacing.xl,
-    paddingTop: 80,
   },
   header: {
     marginBottom: Spacing.xxl,

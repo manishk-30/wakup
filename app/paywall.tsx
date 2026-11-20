@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Animated, Easing, ActivityIndicator, Alert, useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
@@ -13,6 +14,7 @@ import PortraitContainer from '../components/PortraitContainer';
 
 
 export default function PaywallScreen() {
+  const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const themeColors = colorScheme === 'dark' ? Colors.dark : Colors.light;
   
@@ -224,7 +226,7 @@ export default function PaywallScreen() {
   return (
     <View style={styles.container}>
       <PortraitContainer>
-        <View style={styles.screen}>
+        <View style={[styles.screen, { paddingTop: Math.max(insets.top + Spacing.lg, 60) }]}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
             <View style={styles.header}>
               <Text style={styles.headline}>
@@ -357,7 +359,7 @@ export default function PaywallScreen() {
         } else {
           router.replace('/');
         }
-      }} style={styles.closeBtn}>
+      }} style={[styles.closeBtn, { top: Math.max(insets.top + Spacing.sm, 48) }]}>
         <Ionicons name="close" size={28} color={Theme.navy} />
       </Pressable>
     </View>
@@ -371,7 +373,6 @@ const createStyles = (Theme: any) => StyleSheet.create({
   },
   closeBtn: {
     position: 'absolute',
-    top: 60,
     right: 24,
     zIndex: 100,
     padding: 8,
@@ -382,7 +383,6 @@ const createStyles = (Theme: any) => StyleSheet.create({
     width: '100%',
     flex: 1,
     paddingHorizontal: Theme.padding,
-    paddingTop: 80,
   },
   header: {
     marginBottom: 24,

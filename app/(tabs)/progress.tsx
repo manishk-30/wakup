@@ -1,10 +1,12 @@
 import { useCallback, useState, useRef } from 'react';
 import { View, Text, StyleSheet, useColorScheme, ScrollView } from 'react-native';
 import { useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
 import { storageService } from '../../services/storageService';
 
 export default function ProgressScreen() {
+  const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   
@@ -53,7 +55,7 @@ export default function ProgressScreen() {
 
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.lg, 60) }]} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.text }]}>Your Progress</Text>
         <Text style={[styles.subtitle, { color: theme.textMuted }]}>Keep waking up on time.</Text>
@@ -137,7 +139,6 @@ export default function ProgressScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 80,
   },
   header: {
     paddingHorizontal: Spacing.xl,

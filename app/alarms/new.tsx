@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput, useColorScheme, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
 import { storageService } from '../../services/storageService';
@@ -26,6 +27,7 @@ const generateUUID = () => {
 
 export default function AddAlarm() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { isPro } = useProStatus();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
@@ -236,7 +238,7 @@ export default function AddAlarm() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <PortraitContainer>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: Math.max(insets.top + Spacing.sm, 48) }]}>
           <Pressable onPress={handleBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={theme.text} />
           </Pressable>
@@ -272,7 +274,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
-    paddingTop: 60,
     paddingBottom: Spacing.md,
   },
   backButton: {

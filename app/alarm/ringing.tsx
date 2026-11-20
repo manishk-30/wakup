@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Animated, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
 import { GAMES } from '../../types/games';
@@ -11,6 +12,7 @@ import PortraitContainer from '../../components/PortraitContainer';
 
 export default function AlarmRinging() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ alarmId?: string, forceList?: string }>();
   const { width } = useWindowDimensions();
   const isFolded = width <= 480;
@@ -134,7 +136,7 @@ export default function AlarmRinging() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: Math.max(insets.top + Spacing.xl, Spacing.xxl * 1.5) }]}>
       <PortraitContainer>
         {isFolded && (
           <View style={styles.unfoldHintBanner}>
@@ -184,7 +186,6 @@ export default function AlarmRinging() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Spacing.xxl * 2.5,
     backgroundColor: '#0F111A',
   },
   unfoldHintBanner: {

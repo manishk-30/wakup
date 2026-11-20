@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Switch, useColorScheme, Alert, Modal, Image } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { Alarm } from '../../types/alarm';
@@ -12,6 +13,7 @@ import PortraitContainer from '../../components/PortraitContainer';
 
 export default function Home() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { isPro } = useProStatus();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
@@ -108,7 +110,7 @@ export default function Home() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.lg, 60) }]}>
       <PortraitContainer>
         <View style={styles.header}>
           <View>
@@ -272,7 +274,6 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 80,
   },
   header: {
     flexDirection: 'row',
