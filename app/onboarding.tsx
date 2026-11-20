@@ -381,6 +381,11 @@ export default function OnboardingScreen() {
   };
 
   const handleSetAlarm = async () => {
+    const authorized = await alarmService.ensureAuthorization();
+    if (!authorized) {
+      return;
+    }
+
     const newAlarm: Alarm = {
       id: generateUUID(),
       hour: alarmTime.getHours(),
@@ -392,11 +397,16 @@ export default function OnboardingScreen() {
       gameId
     };
 
-    await alarmService.requestAuthorization();
     await storageService.addAlarm(newAlarm);
-    await alarmService.scheduleAlarm(newAlarm);
+    const result = await alarmService.scheduleAlarm(newAlarm);
+    if (!result.success) {
+      Alert.alert(
+        "Alarm Scheduling Notice",
+        result.error || "Could not schedule alarm with the system. You can re-enable it on the Home screen."
+      );
+    }
 
-    handleNext(); // Goes to step 15
+    handleNext(); // Goes to step 20 (Paywall)
   };
 
   const handleSignatureOK = async (signature: string) => {
@@ -937,9 +947,9 @@ export default function OnboardingScreen() {
               🚀
             </Animated.Text>
             <Text style={[styles.title, { color: theme.text }]}>You're all set.</Text>
-            <Text style={[styles.subtitle, { color: theme.textMuted }]}>We need permission to send notifications so your alarm can actually ring when it's time to wake up!</Text>
+            <Text style={[styles.subtitle, { color: theme.textMuted }]}>We need permission to set system alarms so your alarm can actually ring when it's time to wake up!</Text>
             <Pressable style={[styles.button, { backgroundColor: theme.primary, marginTop: Spacing.xl }]} onPress={handleSetAlarm}>
-              <Text style={styles.buttonText}>Allow Notifications & Continue</Text>
+              <Text style={styles.buttonText}>Allow Alarms & Continue</Text>
             </Pressable>
           </ScrollView>
         );

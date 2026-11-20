@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, useColorScheme, ScrollView, Animated } from 'react-native';
+import { View, Text, StyleSheet, Pressable, TextInput, useColorScheme, ScrollView, Animated, Alert, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -84,6 +84,11 @@ export default function AddAlarm() {
   };
 
   const handleSave = async () => {
+    const authorized = await alarmService.ensureAuthorization();
+    if (!authorized) {
+      return;
+    }
+
     const h = time.getHours();
     const m = time.getMinutes();
 
@@ -98,9 +103,19 @@ export default function AddAlarm() {
       gameId,
     };
 
-    await alarmService.requestAuthorization();
     await storageService.addAlarm(newAlarm);
-    await alarmService.scheduleAlarm(newAlarm);
+    const result = await alarmService.scheduleAlarm(newAlarm);
+    if (!result.success) {
+      Alert.alert(
+        'Alarm Scheduling Failed',
+        result.error || 'Could not schedule alarm. Please verify permissions in Settings.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() }
+        ]
+      );
+      return;
+    }
     
     router.back();
   };

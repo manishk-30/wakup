@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Switch, useColorScheme, Alert, Modal, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Switch, useColorScheme, Alert, Modal, Image, Linking } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
@@ -52,15 +52,32 @@ export default function Home() {
   };
 
   const executeToggle = async (alarm: Alarm) => {
-    const updatedAlarm = { ...alarm, enabled: !alarm.enabled };
-    await storageService.updateAlarm(updatedAlarm);
-    
-    if (updatedAlarm.enabled) {
-      await alarmService.scheduleAlarm(updatedAlarm);
+    const willEnable = !alarm.enabled;
+
+    if (willEnable) {
+      const authorized = await alarmService.ensureAuthorization();
+      if (!authorized) {
+        return;
+      }
+
+      const result = await alarmService.scheduleAlarm({ ...alarm, enabled: true });
+      if (!result.success) {
+        Alert.alert(
+          'Could Not Enable Alarm',
+          result.error || 'Please ensure Alarm permissions are allowed in Settings.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() }
+          ]
+        );
+        return;
+      }
     } else {
-      await alarmService.cancelAlarm(updatedAlarm.id);
+      await alarmService.cancelAlarm(alarm.id);
     }
-    
+
+    const updatedAlarm = { ...alarm, enabled: willEnable };
+    await storageService.updateAlarm(updatedAlarm);
     setAlarms(alarms.map(a => (a.id === alarm.id ? updatedAlarm : a)));
   };
 

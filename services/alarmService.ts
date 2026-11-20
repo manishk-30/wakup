@@ -1,7 +1,7 @@
 import { Alarm, AlarmScheduleResult } from '../types/alarm';
 import * as AlarmKit from '../modules/alarm-kit/src';
 import { storageService } from './storageService';
-import { Platform } from 'react-native';
+import { Platform, Alert, Linking } from 'react-native';
 import { createAudioPlayer } from 'expo-audio';
 import { EventSubscription } from 'expo-modules-core';
 
@@ -19,6 +19,22 @@ export const alarmService = {
     return true;
   },
 
+  async ensureAuthorization(): Promise<boolean> {
+    const authorized = await this.requestAuthorization();
+    if (!authorized) {
+      Alert.alert(
+        'Alarm Permission Required',
+        'Wakup needs permission to schedule alarms and wake you up on time. Please enable Alarms in your device Settings.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() }
+        ]
+      );
+      return false;
+    }
+    return true;
+  },
+
   async scheduleAlarm(alarm: Alarm): Promise<AlarmScheduleResult> {
     console.log(`[AlarmKit] Scheduling alarm...`);
     console.log(`[AlarmKit] Alarm ID: ${alarm.id}`);
@@ -26,7 +42,15 @@ export const alarmService = {
 
     if (isNativeModuleAvailable && AlarmKit.default?.scheduleAlarm) {
       try {
-        await this.requestAuthorization();
+        const authorized = await this.requestAuthorization();
+        if (!authorized) {
+          console.warn('[AlarmKit] Scheduling aborted: authorization not granted');
+          return {
+            success: false,
+            alarmId: alarm.id,
+            error: 'Alarm permission is not granted. Please enable Alarms in iOS Settings.'
+          };
+        }
       } catch (e) {
         console.warn('[AlarmKit] Pre-schedule authorization request warning:', e);
       }
@@ -44,7 +68,7 @@ export const alarmService = {
       while (!result.success && retries < 3) {
         console.warn(`[AlarmKit] Scheduling failed, retrying in 500ms... (Attempt ${retries + 1}/3)`);
         await new Promise(resolve => setTimeout(resolve, 500));
-        result = await AlarmKit.default!.scheduleAlarm(alarm);
+        result = await AlarmKit.default!.scheduleAlarm(sanitizedAlarm);
         retries++;
       }
 
