@@ -142,23 +142,12 @@ export default function GameScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom || Spacing.md }]}>
-      <PortraitContainer>
-        <View style={{ flex: 1 }}>
-          {renderGame()}
-          {isCelebrating && (
-            <GameCelebration
-              title={gameId === 'blackjack' ? 'Puzzle Solved!' : 'Challenge Completed!'}
-              subtitle={
-                gameId === 'blackjack'
-                  ? 'All 6 Suns Found • Alarm Beaten!'
-                  : 'Alarm Beaten • Great Job!'
-              }
-              onFinish={handleCelebrationFinish}
-            />
-          )}
-        </View>
-        {!isCelebrating && (
+    <View style={styles.container}>
+      <View style={[styles.contentLayout, { paddingTop: insets.top, paddingBottom: insets.bottom || Spacing.md }]}>
+        <PortraitContainer>
+          <View style={{ flex: 1 }}>
+            {renderGame()}
+          </View>
           <View style={styles.persistentBottomNav}>
             <Pressable 
               style={[
@@ -183,8 +172,21 @@ export default function GameScreen() {
               </Text>
             </Pressable>
           </View>
-        )}
-      </PortraitContainer>
+        </PortraitContainer>
+      </View>
+
+      {/* Full-screen celebration overlay covering notch, home bar, and edges */}
+      {isCelebrating && (
+        <GameCelebration
+          title={gameId === 'blackjack' ? 'Puzzle Solved!' : 'Challenge Completed!'}
+          subtitle={
+            gameId === 'blackjack'
+              ? 'All 6 Suns Found • Alarm Beaten!'
+              : 'Alarm Beaten • Great Job!'
+          }
+          onFinish={handleCelebrationFinish}
+        />
+      )}
     </View>
   );
 }
@@ -193,6 +195,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark.background,
+  },
+  contentLayout: {
+    flex: 1,
   },
   center: {
     alignItems: 'center',

@@ -1,7 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, Animated, Easing } from 'react-native';
-
-const { width, height } = Dimensions.get('window');
+import { View, Text, StyleSheet, Animated, Easing, useWindowDimensions } from 'react-native';
 
 const CONFETTI_COLORS = [
   '#FFB000', // Gold/Sun
@@ -18,9 +16,10 @@ interface ConfettiPieceProps {
   startX: number;
   color: string;
   size: number;
+  fallDistance: number;
 }
 
-function ConfettiPiece({ delay, startX, color, size }: ConfettiPieceProps) {
+function ConfettiPiece({ delay, startX, color, size, fallDistance }: ConfettiPieceProps) {
   const fallAnim = useRef(new Animated.Value(0)).current;
   const swingAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -30,8 +29,8 @@ function ConfettiPiece({ delay, startX, color, size }: ConfettiPieceProps) {
       Animated.delay(delay),
       Animated.parallel([
         Animated.timing(fallAnim, {
-          toValue: height + 60,
-          duration: 2400 + Math.random() * 800,
+          toValue: fallDistance + 60,
+          duration: 2200 + Math.random() * 800,
           easing: Easing.bezier(0.25, 0.1, 0.25, 1),
           useNativeDriver: true,
         }),
@@ -83,7 +82,6 @@ function ConfettiPiece({ delay, startX, color, size }: ConfettiPieceProps) {
             { translateY: fallAnim },
             { translateX: swingAnim },
             { rotateZ: spin },
-            { rotateY: spin },
           ],
         },
       ]}
@@ -102,6 +100,7 @@ export default function GameCelebration({
   subtitle = 'Alarm Beaten • Great Job!',
   onFinish,
 }: GameCelebrationProps) {
+  const { width, height } = useWindowDimensions();
   const scaleAnim = useRef(new Animated.Value(0.3)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const sunburstRotate = useRef(new Animated.Value(0)).current;
@@ -128,7 +127,7 @@ export default function GameCelebration({
       }),
       Animated.timing(opacityAnim, {
         toValue: 1,
-        duration: 300,
+        duration: 250,
         useNativeDriver: true,
       }),
     ]).start();
@@ -158,11 +157,21 @@ export default function GameCelebration({
   });
 
   return (
-    <View style={[StyleSheet.absoluteFill, styles.celebrationWrapper]} pointerEvents="none">
-      {/* Darkened overlay backdrop */}
-      <Animated.View style={[styles.backdrop, { opacity: opacityAnim }]} />
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {/* Solid deep dark backdrop that completely obscures the game underneath */}
+      <Animated.View
+        style={[
+          styles.backdrop,
+          {
+            opacity: opacityAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 0.94],
+            }),
+          },
+        ]}
+      />
 
-      {/* Confetti raining down */}
+      {/* Confetti raining down across the full screen */}
       {pieces.map((p) => (
         <ConfettiPiece
           key={p.id}
@@ -170,6 +179,7 @@ export default function GameCelebration({
           startX={p.startX}
           color={p.color}
           size={p.size}
+          fallDistance={height}
         />
       ))}
 
@@ -198,13 +208,9 @@ export default function GameCelebration({
 }
 
 const styles = StyleSheet.create({
-  celebrationWrapper: {
-    zIndex: 9999,
-    elevation: 9999,
-  },
   backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    backgroundColor: '#090D16',
     zIndex: 1,
   },
   confetti: {
@@ -229,11 +235,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: '#FFB000',
-    shadowColor: '#FFB000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    elevation: 20,
   },
   sunContainer: {
     width: 90,
