@@ -139,6 +139,13 @@ struct WakupAppMetadata: AlarmMetadata { }
     }
     
     public func schedule(id: UUID, hour: Int, minute: Int, label: String, repeatDays: [Int], gameId: String, soundName: String) async throws -> Bool {
+        // Ensure authorization before scheduling
+        let state = try await AlarmManager.shared.requestAuthorization()
+        guard state == .authorized else {
+            print("[AlarmKit] Authorization not authorized: \(state)")
+            throw NSError(domain: "com.apple.AlarmKit.Alarm", code: 1, userInfo: [NSLocalizedDescriptionKey: "Alarm permission is required. Please enable alarm permissions in Settings."])
+        }
+
         let weekdays: [Locale.Weekday] = repeatDays.compactMap {
             switch $0 {
             case 0: return .sunday

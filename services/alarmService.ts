@@ -25,6 +25,12 @@ export const alarmService = {
     console.log(`[AlarmKit] Alarm date: ${alarm.hour}:${alarm.minute}`);
 
     if (isNativeModuleAvailable && AlarmKit.default?.scheduleAlarm) {
+      try {
+        await this.requestAuthorization();
+      } catch (e) {
+        console.warn('[AlarmKit] Pre-schedule authorization request warning:', e);
+      }
+
       const sanitizedAlarm = {
         ...alarm,
         hour: Math.floor(Number(alarm.hour)),
