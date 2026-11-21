@@ -226,7 +226,24 @@ export default function PaywallScreen() {
   return (
     <View style={styles.container}>
       <PortraitContainer>
-        <View style={[styles.screen, { paddingTop: Math.max(insets.top + Spacing.lg, 78) }]}>
+        <View style={[styles.screen, { paddingTop: Math.max(insets.top + Spacing.sm, 64) }]}>
+          <View style={styles.topBar}>
+            <Pressable 
+              onPress={() => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace('/');
+                }
+              }} 
+              style={styles.closeBtn}
+              hitSlop={12}
+            >
+              <View style={styles.closeCircle}>
+                <Ionicons name="close" size={22} color={Theme.navy} />
+              </View>
+            </Pressable>
+          </View>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
             <View style={styles.header}>
               <Text style={styles.headline}>
@@ -352,16 +369,6 @@ export default function PaywallScreen() {
         </View>
       </View>
       </PortraitContainer>
-      
-      <Pressable onPress={() => {
-        if (router.canGoBack()) {
-          router.back();
-        } else {
-          router.replace('/');
-        }
-      }} style={[styles.closeBtn, { top: Math.max(insets.top + Spacing.sm, 48) }]}>
-        <Ionicons name="close" size={28} color={Theme.navy} />
-      </Pressable>
     </View>
   );
 }
@@ -371,13 +378,22 @@ const createStyles = (Theme: any) => StyleSheet.create({
     flex: 1,
     backgroundColor: Theme.background,
   },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    paddingBottom: Spacing.xs,
+    zIndex: 10,
+  },
   closeBtn: {
-    position: 'absolute',
-    right: 24,
-    zIndex: 100,
-    padding: 8,
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    borderRadius: Radii.full,
+    padding: 2,
+  },
+  closeCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(22, 35, 59, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   screen: {
     width: '100%',

@@ -1027,18 +1027,20 @@ export default function OnboardingScreen() {
         );
       case 22:
         return (
-          <View style={{ flex: 1, width: '100%', position: 'relative' }}>
-            <Pressable 
-              style={({ pressed }) => [
-                styles.closeBtn, 
-                pressed && { opacity: 0.7 }
-              ]} 
-              onPress={finishOnboarding}
-            >
-              <View style={styles.closeButtonBg}>
-                <Ionicons name="close" size={28} color="#000" />
-              </View>
-            </Pressable>
+          <View style={{ flex: 1, width: '100%' }}>
+            <View style={styles.pwTopBar}>
+              <Pressable 
+                style={({ pressed }) => [
+                  pressed && { opacity: 0.7 }
+                ]} 
+                onPress={finishOnboarding}
+                hitSlop={12}
+              >
+                <View style={styles.closeButtonBg}>
+                  <Ionicons name="close" size={22} color={theme.text} />
+                </View>
+              </Pressable>
+            </View>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
               <View style={styles.pwHeader}>
                 <Text style={[styles.headline, { color: theme.text }]}>
@@ -1438,16 +1440,8 @@ const styles = StyleSheet.create({
   },
   pwHeader: {
     marginBottom: 24,
-    paddingTop: 40,
     position: 'relative',
     zIndex: 10,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 30,
-    right: 0,
-    zIndex: 10,
-    padding: 8,
   },
   headline: {
     fontSize: 34,
@@ -1658,20 +1652,18 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     marginHorizontal: 8,
   },
-  closeBtn: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    zIndex: 100,
+  pwTopBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    paddingBottom: Spacing.xs,
+    zIndex: 10,
   },
   closeButtonBg: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(22, 35, 59, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
   }
 });
