@@ -96,6 +96,18 @@ export default function SettingsScreen() {
           </Pressable>
           <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
+          <Pressable style={styles.row} onPress={() => router.push('/practice')}>
+            <Text style={[styles.rowText, { color: theme.text }]}>Practice Games</Text>
+            <Ionicons name="game-controller-outline" size={20} color={theme.textMuted} />
+          </Pressable>
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
+          <Pressable style={styles.row} onPress={() => router.push('/onboarding')}>
+            <Text style={[styles.rowText, { color: theme.text }]}>Test Onboarding</Text>
+            <Ionicons name="sparkles-outline" size={20} color={theme.textMuted} />
+          </Pressable>
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
           <Pressable style={styles.row} onPress={() => reviewService.requestReviewDirect()}>
             <Text style={[styles.rowText, { color: theme.text }]}>Rate Wakup ⭐</Text>
             <Ionicons name="chevron-forward" size={20} color={theme.textMuted} />
