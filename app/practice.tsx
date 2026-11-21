@@ -31,7 +31,7 @@ export default function PracticeScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.sm, 78) }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="chevron-back" size={28} color={theme.text} />

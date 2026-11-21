@@ -143,7 +143,7 @@ export default function GameScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.contentLayout, { paddingTop: insets.top, paddingBottom: insets.bottom || Spacing.md }]}>
+      <View style={[styles.contentLayout, { paddingTop: Math.max(insets.top + Spacing.sm, 72), paddingBottom: insets.bottom || Spacing.md }]}>
         <PortraitContainer>
           <View style={{ flex: 1 }}>
             {renderGame()}

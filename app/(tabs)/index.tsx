@@ -127,7 +127,7 @@ export default function Home() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.lg, 60) }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.lg, 78) }]}>
       <PortraitContainer>
         <View style={styles.header}>
           <View>

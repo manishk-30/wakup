@@ -55,7 +55,7 @@ export default function ProgressScreen() {
 
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.lg, 60) }]} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.lg, 78) }]} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.text }]}>Your Progress</Text>
         <Text style={[styles.subtitle, { color: theme.textMuted }]}>Keep waking up on time.</Text>

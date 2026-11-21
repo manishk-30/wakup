@@ -1170,7 +1170,7 @@ export default function OnboardingScreen() {
   const progressPercentage = (step / TOTAL_STEPS) * 100;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top, paddingBottom: insets.bottom || Spacing.lg }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.sm, 78), paddingBottom: insets.bottom || Spacing.lg }]}>
       <PortraitContainer>
         {/* Line Loader Progress Bar */}
         <View style={styles.progressBarContainer}>

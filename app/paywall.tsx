@@ -226,7 +226,7 @@ export default function PaywallScreen() {
   return (
     <View style={styles.container}>
       <PortraitContainer>
-        <View style={[styles.screen, { paddingTop: Math.max(insets.top + Spacing.lg, 60) }]}>
+        <View style={[styles.screen, { paddingTop: Math.max(insets.top + Spacing.lg, 78) }]}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
             <View style={styles.header}>
               <Text style={styles.headline}>

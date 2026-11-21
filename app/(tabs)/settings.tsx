@@ -37,7 +37,7 @@ export default function SettingsScreen() {
 
   
   return (
-    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.lg, 60) }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.lg, 78) }]}>
       <PortraitContainer>
         <View style={styles.header}>
         <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
