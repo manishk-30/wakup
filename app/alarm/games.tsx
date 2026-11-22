@@ -177,7 +177,7 @@ export default function GameScreen() {
             >
               <Text style={[styles.bottomNavButtonText, skipTimeLeft > 0 ? { color: Colors.dark.textMuted } : {}]}>
                 {isPreview === 'true' 
-                  ? 'BACK TO SETUP' 
+                  ? 'CHOOSE ANOTHER GAME' 
                   : skipTimeLeft > 0 
                     ? `CHOOSE ANOTHER GAME (${skipTimeLeft}s)` 
                     : 'CHOOSE ANOTHER GAME'}
