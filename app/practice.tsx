@@ -5,6 +5,7 @@ import { Colors, Typography, Spacing, Radii } from '../constants/theme';
 import { GAMES } from '../types/games';
 import { useProStatus } from '../hooks/useProStatus';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import PortraitContainer from '../components/PortraitContainer';
 
 export default function PracticeScreen() {
   const router = useRouter();
@@ -32,7 +33,8 @@ export default function PracticeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.sm, 78) }]}>
-      <View style={styles.header}>
+      <PortraitContainer>
+        <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="chevron-back" size={28} color={theme.text} />
         </Pressable>
@@ -74,6 +76,7 @@ export default function PracticeScreen() {
           );
         })}
       </ScrollView>
+      </PortraitContainer>
     </View>
   );
 }

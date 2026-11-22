@@ -4,6 +4,7 @@ import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
 import { storageService } from '../../services/storageService';
+import PortraitContainer from '../../components/PortraitContainer';
 
 export default function ProgressScreen() {
   const insets = useSafeAreaInsets();
@@ -55,11 +56,13 @@ export default function ProgressScreen() {
 
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.lg, 78) }]} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.text }]}>Your Progress</Text>
-        <Text style={[styles.subtitle, { color: theme.textMuted }]}>Keep waking up on time.</Text>
-      </View>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: Math.max(insets.top + Spacing.lg, 78) }]}>
+      <PortraitContainer>
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+          <View style={styles.header}>
+            <Text style={[styles.title, { color: theme.text }]}>Your Progress</Text>
+            <Text style={[styles.subtitle, { color: theme.textMuted }]}>Keep waking up on time.</Text>
+          </View>
       
       <View style={styles.content}>
         
@@ -132,7 +135,9 @@ export default function ProgressScreen() {
           Wake up to your next alarm to keep your streak alive.
         </Text>
       </View>
-    </ScrollView>
+        </ScrollView>
+      </PortraitContainer>
+    </View>
   );
 }
 
