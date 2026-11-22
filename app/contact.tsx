@@ -1,16 +1,28 @@
 import { useState } from 'react';
 import { ScrollView, View, Text, TextInput, StyleSheet, Pressable, useColorScheme, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, Linking } from 'react-native';
 import { useHeaderHeight } from '@react-navigation/elements';
-import { Colors, Typography, Spacing, Radii } from '../constants/theme';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors, Typography, Spacing, Radii, UI } from '../constants/theme';
+import PortraitContainer from '../components/PortraitContainer';
 
 export default function ContactScreen() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+  const router = useRouter();
 
   const [name, setName] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  };
 
   const handleSend = async () => {
     if (!name.trim() || !subject.trim() || !description.trim()) {
@@ -50,60 +62,66 @@ export default function ContactScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={headerHeight}
     >
-      <ScrollView style={styles.container}>
-        <Text style={[styles.header, { color: theme.text }]}>Contact Us</Text>
-      <Text style={[styles.paragraph, { color: theme.textMuted }]}>
-        Have a question, feedback, or need support? Fill out the form below and we'll get in touch.
-      </Text>
+      <PortraitContainer>
+        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+          <Text style={[styles.header, { color: theme.text }]}>Contact Us</Text>
+          <Text style={[styles.paragraph, { color: theme.textMuted }]}>
+            Have a question, feedback, or need support? Fill out the form below and we'll get in touch.
+          </Text>
 
-      <View style={styles.form}>
-        <Text style={[styles.label, { color: theme.text }]}>Name</Text>
-        <TextInput
-          style={[styles.input, { color: theme.text, backgroundColor: theme.surface, borderColor: theme.border }]}
-          value={name}
-          onChangeText={setName}
-          placeholder="Your Name"
-          placeholderTextColor={theme.textMuted}
-        />
+          <View style={styles.form}>
+            <Text style={[styles.label, { color: theme.text }]}>Name</Text>
+            <TextInput
+              style={[styles.input, { color: theme.text, backgroundColor: theme.surface, borderColor: theme.border }]}
+              value={name}
+              onChangeText={setName}
+              placeholder="Your Name"
+              placeholderTextColor={theme.textMuted}
+            />
 
-        <Text style={[styles.label, { color: theme.text }]}>Subject</Text>
-        <TextInput
-          style={[styles.input, { color: theme.text, backgroundColor: theme.surface, borderColor: theme.border }]}
-          value={subject}
-          onChangeText={setSubject}
-          placeholder="What is this regarding?"
-          placeholderTextColor={theme.textMuted}
-        />
+            <Text style={[styles.label, { color: theme.text }]}>Subject</Text>
+            <TextInput
+              style={[styles.input, { color: theme.text, backgroundColor: theme.surface, borderColor: theme.border }]}
+              value={subject}
+              onChangeText={setSubject}
+              placeholder="What is this regarding?"
+              placeholderTextColor={theme.textMuted}
+            />
 
-        <Text style={[styles.label, { color: theme.text }]}>Description</Text>
-        <TextInput
-          style={[
-            styles.input, 
-            styles.textArea,
-            { color: theme.text, backgroundColor: theme.surface, borderColor: theme.border }
-          ]}
-          value={description}
-          onChangeText={setDescription}
-          placeholder="Write your message here..."
-          placeholderTextColor={theme.textMuted}
-          multiline
-          numberOfLines={6}
-          textAlignVertical="top"
-        />
+            <Text style={[styles.label, { color: theme.text }]}>Description</Text>
+            <TextInput
+              style={[styles.input, styles.textArea, { color: theme.text, backgroundColor: theme.surface, borderColor: theme.border }]}
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Tell us more about your inquiry..."
+              placeholderTextColor={theme.textMuted}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
 
-        <Pressable 
-          style={[styles.sendButton, { backgroundColor: theme.primary, opacity: isSubmitting ? 0.7 : 1 }]}
-          onPress={handleSend}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color="#FFF" />
-          ) : (
-            <Text style={styles.sendButtonText}>Send Message</Text>
-          )}
-        </Pressable>
-      </View>
-      </ScrollView>
+            <Pressable
+              style={[styles.button, { backgroundColor: theme.primary }, isSubmitting && styles.buttonDisabled]}
+              onPress={handleSend}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.buttonText}>Send Message</Text>
+              )}
+            </Pressable>
+
+            <Pressable
+              style={[styles.backButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
+              onPress={handleBack}
+            >
+              <Ionicons name="arrow-back" size={20} color={theme.text} />
+              <Text style={[styles.backButtonText, { color: theme.text }]}>Back to Previous Screen</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </PortraitContainer>
     </KeyboardAvoidingView>
   );
 }
@@ -111,7 +129,10 @@ export default function ContactScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: {
     padding: Spacing.xl,
+    paddingBottom: Spacing.xxl * 2,
   },
   header: {
     ...Typography.h1,
@@ -126,34 +147,51 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: Spacing.md,
-    paddingBottom: Spacing.xxl * 2,
   },
   label: {
-    ...Typography.bodyLarge,
+    ...Typography.body,
     fontWeight: '600',
-    marginBottom: 4,
   },
   input: {
-    ...Typography.bodyLarge,
-    padding: Spacing.md,
-    borderRadius: Radii.md,
+    height: 48,
     borderWidth: 1,
+    borderRadius: Radii.md,
+    paddingHorizontal: Spacing.md,
+    fontSize: 16,
   },
   textArea: {
-    minHeight: 120,
+    height: 120,
     paddingTop: Spacing.md,
+    paddingBottom: Spacing.md,
   },
-  sendButton: {
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: Radii.lg,
+  button: {
+    height: 48,
+    borderRadius: Radii.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: Spacing.sm,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  backButton: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: Spacing.lg,
-    minHeight: 56,
+    height: UI.buttonHeight,
+    borderRadius: Radii.md,
+    borderWidth: 1,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.xxl,
+    gap: Spacing.sm,
   },
-  sendButtonText: {
-    ...Typography.h3,
-    color: '#FFF',
+  backButtonText: {
+    ...Typography.bodyLarge,
+    fontWeight: '700',
   },
 });

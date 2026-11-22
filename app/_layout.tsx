@@ -1,11 +1,43 @@
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Colors } from '../constants/theme';
-import { useColorScheme, AppState, AppStateStatus } from 'react-native';
+import { useColorScheme, AppState, AppStateStatus, Pressable, Text, View } from 'react-native';
 import { useEffect, useRef } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { alarmService } from '../services/alarmService';
 import { storageService } from '../services/storageService';
 import { subscriptionService } from '../services/subscriptionService';
+
+function HeaderBackButton({ label = 'Back', icon = 'chevron-back' }: { label?: string; icon?: keyof typeof Ionicons.glyphMap }) {
+  const router = useRouter();
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+
+  return (
+    <Pressable
+      onPress={() => {
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace('/');
+        }
+      }}
+      hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 6,
+        paddingRight: 10,
+        marginLeft: -4,
+      }}
+    >
+      <Ionicons name={icon} size={24} color={theme.text} />
+      <Text style={{ color: theme.text, fontSize: 17, fontWeight: '600', marginLeft: 4 }}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -91,13 +123,50 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Home' }} />
-        <Stack.Screen name="about" options={{ title: 'About Us' }} />
-        <Stack.Screen name="contact" options={{ title: 'Contact Us' }} />
-        <Stack.Screen name="privacy" options={{ title: 'Privacy Policy' }} />
-        <Stack.Screen name="terms" options={{ title: 'Terms of Service' }} />
-        <Stack.Screen name="refund" options={{ title: 'Refund Policy' }} />
+        <Stack.Screen 
+          name="about" 
+          options={{ 
+            title: 'About Us',
+            headerLeft: () => <HeaderBackButton />,
+          }} 
+        />
+        <Stack.Screen 
+          name="contact" 
+          options={{ 
+            title: 'Contact Us',
+            headerLeft: () => <HeaderBackButton />,
+          }} 
+        />
+        <Stack.Screen 
+          name="privacy" 
+          options={{ 
+            title: 'Privacy Policy',
+            headerLeft: () => <HeaderBackButton />,
+          }} 
+        />
+        <Stack.Screen 
+          name="terms" 
+          options={{ 
+            title: 'Terms of Service',
+            headerLeft: () => <HeaderBackButton />,
+          }} 
+        />
+        <Stack.Screen 
+          name="refund" 
+          options={{ 
+            title: 'Refund Policy',
+            headerLeft: () => <HeaderBackButton />,
+          }} 
+        />
         <Stack.Screen name="practice" options={{ headerShown: false }} />
-        <Stack.Screen name="sounds" options={{ title: 'Select Sound', presentation: 'modal' }} />
+        <Stack.Screen 
+          name="sounds" 
+          options={{ 
+            title: 'Select Sound', 
+            presentation: 'modal',
+            headerLeft: () => <HeaderBackButton label="Cancel" icon="close" />,
+          }} 
+        />
         <Stack.Screen name="alarms/new" options={{ title: 'Add Alarm', presentation: 'modal' }} />
         <Stack.Screen name="alarm/ringing" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="alarm/games" options={{ headerShown: false, presentation: 'fullScreenModal' }} />

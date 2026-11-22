@@ -5,7 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { createAudioPlayer } from 'expo-audio';
 import { ALARM_SOUNDS } from '../constants/sounds';
 import { soundSelectionStore } from '../services/soundSelectionStore';
-import { Colors, Typography, Spacing, Radii } from '../constants/theme';
+import { Colors, Typography, Spacing, Radii, UI } from '../constants/theme';
+import PortraitContainer from '../components/PortraitContainer';
 
 export default function SoundSelectionScreen() {
   const router = useRouter();
@@ -65,61 +66,74 @@ export default function SoundSelectionScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={[styles.title, { color: theme.text }]}>Alarm Sound</Text>
-        <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-          Choose the sound you want to wake up to.
-        </Text>
-        
-        <View style={styles.list}>
-          {ALARM_SOUNDS.map((sound) => {
-            const isSelected = selectedSoundId === sound.id;
-            const isPlaying = playingSoundId === sound.id;
+      <PortraitContainer>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <Text style={[styles.title, { color: theme.text }]}>Alarm Sound</Text>
+          <Text style={[styles.subtitle, { color: theme.textMuted }]}>
+            Choose the sound you want to wake up to.
+          </Text>
+          
+          <View style={styles.list}>
+            {ALARM_SOUNDS.map((sound) => {
+              const isSelected = selectedSoundId === sound.id;
+              const isPlaying = playingSoundId === sound.id;
 
-            return (
-              <Pressable
-                key={sound.id}
-                style={[
-                  styles.soundRow,
-                  { 
-                    backgroundColor: isSelected ? 'rgba(255, 176, 0, 0.1)' : theme.surface,
-                    borderColor: isSelected ? theme.primary : theme.border,
-                  }
-                ]}
-                onPress={() => handleSelect(sound.id)}
-              >
+              return (
                 <Pressable
+                  key={sound.id}
                   style={[
-                    styles.playButton,
-                    { backgroundColor: isPlaying ? theme.primary : (isSelected ? 'rgba(255, 176, 0, 0.2)' : theme.background) }
+                    styles.soundRow,
+                    { 
+                      backgroundColor: isSelected ? 'rgba(255, 176, 0, 0.1)' : theme.surface,
+                      borderColor: isSelected ? theme.primary : theme.border,
+                    }
                   ]}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    togglePlay(sound.id);
-                  }}
+                  onPress={() => handleSelect(sound.id)}
                 >
-                  <Ionicons 
-                    name={isPlaying ? "pause" : "play"} 
-                    size={24} 
-                    color={isPlaying ? "#FFF" : theme.primary} 
-                  />
-                </Pressable>
-                
-                <Text style={[
-                  styles.soundLabel,
-                  { color: isSelected ? theme.primary : theme.text }
-                ]}>
-                  {sound.label}
-                </Text>
+                  <Pressable
+                    style={[
+                      styles.playButton,
+                      { backgroundColor: isPlaying ? theme.primary : (isSelected ? 'rgba(255, 176, 0, 0.2)' : theme.background) }
+                    ]}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      togglePlay(sound.id);
+                    }}
+                  >
+                    <Ionicons 
+                      name={isPlaying ? "pause" : "play"} 
+                      size={24} 
+                      color={isPlaying ? "#FFF" : theme.primary} 
+                    />
+                  </Pressable>
+                  
+                  <Text style={[
+                    styles.soundLabel,
+                    { color: isSelected ? theme.primary : theme.text }
+                  ]}>
+                    {sound.label}
+                  </Text>
 
-                {isSelected && (
-                  <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
-                )}
-              </Pressable>
-            );
-          })}
-        </View>
-      </ScrollView>
+                  {isSelected && (
+                    <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <Pressable
+            style={[styles.cancelButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
+            onPress={() => {
+              stopPreview();
+              router.back();
+            }}
+          >
+            <Ionicons name="close" size={20} color={theme.text} />
+            <Text style={[styles.cancelButtonText, { color: theme.text }]}>Close</Text>
+          </Pressable>
+        </ScrollView>
+      </PortraitContainer>
     </View>
   );
 }
@@ -129,36 +143,54 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: Spacing.md,
+    padding: Spacing.xl,
+    paddingBottom: Spacing.xxl * 2,
   },
   title: {
-    ...Typography.h2,
+    ...Typography.h1,
+    fontSize: 28,
     marginBottom: Spacing.xs,
   },
   subtitle: {
-    ...Typography.body,
-    marginBottom: Spacing.lg,
+    ...Typography.bodyLarge,
+    marginBottom: Spacing.xl,
   },
   list: {
-    gap: Spacing.sm,
+    gap: Spacing.md,
   },
   soundRow: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
-    borderWidth: 1,
     borderRadius: Radii.lg,
+    borderWidth: 1,
   },
   playButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
+    justifyContent: 'center',
     marginRight: Spacing.md,
   },
   soundLabel: {
-    ...Typography.h3,
+    ...Typography.bodyLarge,
     flex: 1,
+    fontWeight: '600',
+  },
+  cancelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: UI.buttonHeight,
+    borderRadius: Radii.md,
+    borderWidth: 1,
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.xxl,
+    gap: Spacing.sm,
+  },
+  cancelButtonText: {
+    ...Typography.bodyLarge,
+    fontWeight: '700',
   },
 });
