@@ -89,14 +89,15 @@ export default function MinesGame({ onWin, onLose }: GameProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: Spacing.xl,
-    paddingTop: Spacing.xxl,
+    width: '100%',
+    padding: Spacing.md,
+    paddingTop: Spacing.sm,
     alignItems: 'center',
     backgroundColor: Colors.dark.background,
   },
   header: {
     alignItems: 'center',
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   headerTitle: {
     ...Typography.h2,

@@ -4,31 +4,22 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  Dimensions,
   Animated,
   ScrollView,
+  useWindowDimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { Typography, Radii } from '../../constants/theme';
+import { useIsFoldedCover } from '../../components/PortraitContainer';
 import {
   generateSundokuPuzzle,
   SundokuPuzzle,
   REGION_COLORS,
 } from './sundokuEngine';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const GRID_SIZE = 6;
 const GAP_SIZE = 4; // Small, consistent white gap
-// Responsively compute board dimensions:
-// Fits screen width (with 24px safety margins) AND screen height (up to 46% of height)
-// so Header + Rules + 6x6 Board fits on ANY iPhone without overlapping Dynamic Island or bottom nav
-const maxBoardFromWidth = Math.min(SCREEN_WIDTH - 36, 380);
-const maxBoardFromHeight = Math.min(SCREEN_HEIGHT * 0.46, 380);
-const BOARD_SIZE = Math.floor(Math.min(maxBoardFromWidth, maxBoardFromHeight));
-const CELL_SIZE = Math.floor(
-  (BOARD_SIZE - GAP_SIZE * (GRID_SIZE + 1)) / GRID_SIZE
-);
 
 const STORAGE_ACTIVE_PUZZLE = '@wakup_sundoku_active';
 const DOUBLE_TAP_WINDOW = 320; // Generous window to ensure double-taps never miss
@@ -288,6 +279,15 @@ function MiniGridRuleThree() {
 }
 
 export default function SundokuGame({ onWin, onLose: _onLose }: SundokuGameProps) {
+  const { width, height } = useWindowDimensions();
+  const isFolded = useIsFoldedCover();
+  const maxBoardFromWidth = Math.min((isFolded ? width - 64 : width) - 36, 380);
+  const maxBoardFromHeight = Math.min(height * 0.44, 380);
+  const boardSize = Math.floor(Math.min(maxBoardFromWidth, maxBoardFromHeight));
+  const dynamicCellSize = Math.floor(
+    (boardSize - GAP_SIZE * (GRID_SIZE + 1)) / GRID_SIZE
+  );
+
   const [puzzle, setPuzzle] = useState<SundokuPuzzle | null>(null);
   const [gridState, setGridState] = useState<CellState[][]>(
     Array.from({ length: 6 }, () => new Array(6).fill('empty'))
@@ -608,7 +608,7 @@ export default function SundokuGame({ onWin, onLose: _onLose }: SundokuGameProps
                         col={c}
                         cellColor={REGION_COLORS[puzzle.regions[r][c]]}
                         state={gridState[r][c]}
-                        cellSize={CELL_SIZE}
+                        cellSize={dynamicCellSize}
                         onPress={handleCellPress}
                       />
                     ))}
@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 18,
     paddingTop: 8,
-    paddingBottom: 12,
+    paddingBottom: 36,
   },
   topSection: {
     width: '100%',

@@ -238,15 +238,17 @@ export default function PotionMixGame({ onWin, onLose }: PotionMixGameProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FFFFFF',
-    padding: Spacing.xl,
+    padding: Spacing.md,
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   title: {
     ...Typography.h1,
     color: Colors.light.text,
-    marginTop: Spacing.xl,
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   centerContainer: {
     flex: 1,
@@ -255,19 +257,19 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   potionContainer: {
-    width: 300,
-    height: 300,
+    width: 240,
+    height: 240,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
   glow: {
     position: 'absolute',
-    width: 160,
-    height: 260,
+    width: 130,
+    height: 200,
     borderRadius: 20,
     top: 20,
-    left: 70,
+    left: 55,
     zIndex: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 0 },
@@ -275,10 +277,10 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
   },
   bottomContainer: {
-    height: 100,
+    height: 70,
     justifyContent: 'flex-end',
     alignItems: 'center',
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.sm,
   },
   message: {
     ...Typography.h2,

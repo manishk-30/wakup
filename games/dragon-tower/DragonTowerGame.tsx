@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors, Typography, Spacing, Radii } from '../../constants/theme';
 import { createTower, TowerRow } from './dragonTowerEngine';
@@ -15,6 +15,8 @@ const LIGHT_PREVIEW_GREEN = '#86EFAC'; // Soft light pastel green for memorizati
 const LIGHT_PREVIEW_RED = '#FCA5A5';   // Soft light pastel red for memorization
 
 export default function DragonTowerGame({ onWin, onLose }: GameProps) {
+  const { height } = useWindowDimensions();
+  const isShort = height < 740;
   const [tower, setTower] = useState<TowerRow[]>([]);
   const [currentRow, setCurrentRow] = useState(0);
   const [gameState, setGameState] = useState<'MEMORIZING' | 'PLAYING' | 'WON' | 'LOST'>('MEMORIZING');
@@ -111,8 +113,8 @@ export default function DragonTowerGame({ onWin, onLose }: GameProps) {
         <Text style={styles.headerSubtitle}>{getSubtitle()}</Text>
       </View>
 
-      <View style={styles.towerContainer}>
-        <View style={styles.board}>
+      <View style={[styles.towerContainer]}>
+        <View style={[styles.board, isShort && { padding: 8, gap: 6 }]}>
           {/* Render from top to bottom (row 6 down to row 0) */}
           {[...tower].reverse().map((rowObj, reversedIdx) => {
             const originalIdx = TOWER_ROWS - 1 - reversedIdx;
@@ -127,7 +129,7 @@ export default function DragonTowerGame({ onWin, onLose }: GameProps) {
               : 0.5;
 
             return (
-              <View key={originalIdx} style={[styles.row, { opacity: rowOpacity }]}>
+              <View key={originalIdx} style={[styles.row, isShort && { gap: 8 }, { opacity: rowOpacity }]}>
                 {[0, 1, 2].map((colIndex) => {
                   const isSafe = !rowObj.dragonIndices.includes(colIndex);
 
@@ -156,10 +158,14 @@ export default function DragonTowerGame({ onWin, onLose }: GameProps) {
                     <Pressable
                       key={colIndex}
                       disabled={isMemorizing || gameState !== 'PLAYING' || originalIdx !== currentRow}
-                      style={[styles.tile, { backgroundColor: tileColor, borderWidth }]}
+                      style={[
+                        styles.tile,
+                        isShort && { width: 88, height: 46 },
+                        { backgroundColor: tileColor, borderWidth }
+                      ]}
                       onPress={() => handleTilePress(originalIdx, colIndex)}
                     >
-                      <Text style={styles.tileText}>{content}</Text>
+                      <Text style={[styles.tileText, isShort && { fontSize: 22 }]}>{content}</Text>
                     </Pressable>
                   );
                 })}
@@ -175,6 +181,7 @@ export default function DragonTowerGame({ onWin, onLose }: GameProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: '100%',
     paddingHorizontal: Spacing.md,
     justifyContent: 'center',
     alignItems: 'center',
@@ -182,7 +189,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   headerTitle: {
     ...Typography.h2,

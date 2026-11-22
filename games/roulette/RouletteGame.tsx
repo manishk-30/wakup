@@ -171,23 +171,24 @@ export default function RouletteGame({ onWin, onLose }: GameProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: Spacing.xl,
+    padding: Spacing.md,
     backgroundColor: Colors.dark.background,
   },
   title: {
-    fontSize: 30,
+    fontSize: 26,
     fontWeight: '800',
     color: Colors.dark.text,
     letterSpacing: 1.5,
-    marginBottom: Spacing.xs,
+    marginBottom: 2,
     textAlign: 'center',
   },
   subtitle: {
     ...Typography.bodyLarge,
     color: Colors.dark.textMuted,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xs,
     textAlign: 'center',
   },
   wheelContainer: {
@@ -195,8 +196,8 @@ const styles = StyleSheet.create({
     height: WHEEL_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: Spacing.md,
-    marginBottom: Spacing.md,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.xs,
     position: 'relative',
   },
   wheel: {
@@ -290,14 +291,14 @@ const styles = StyleSheet.create({
   buttonsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.md,
+    gap: Spacing.sm,
     marginTop: Spacing.xs,
     width: '100%',
     justifyContent: 'center',
   },
   button: {
     width: '47%',
-    height: UI.buttonHeight,
+    height: 50,
     borderRadius: Radii.md,
     justifyContent: 'center',
     alignItems: 'center',

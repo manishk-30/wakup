@@ -164,9 +164,10 @@ export default function DiceGame({ onWin, onLose }: GameProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: Spacing.xl,
+    padding: Spacing.md,
     backgroundColor: Colors.dark.background,
   },
   title: {
@@ -177,17 +178,17 @@ const styles = StyleSheet.create({
   subtitle: {
     ...Typography.bodyLarge,
     color: Colors.dark.textMuted,
-    marginTop: Spacing.md,
+    marginTop: Spacing.xs,
   },
   animationArea: {
-    height: 180,
+    height: 140,
     justifyContent: 'flex-end', // So it bounces up from the bottom
     alignItems: 'center',
-    paddingBottom: Spacing.xl,
+    paddingBottom: Spacing.sm,
   },
   diceFace: {
-    width: 100,
-    height: 100,
+    width: 88,
+    height: 88,
     backgroundColor: '#FFF', // White dice
     borderWidth: 2,
     borderColor: '#000000',
@@ -227,17 +228,17 @@ const styles = StyleSheet.create({
   },
   controlsWrapper: {
     width: '100%',
-    gap: Spacing.md,
-    marginTop: Spacing.md,
+    gap: Spacing.sm,
+    marginTop: Spacing.xs,
   },
   buttonsContainer: {
     flexDirection: 'row',
-    gap: Spacing.md,
+    gap: Spacing.sm,
     width: '100%',
   },
   button: {
     flex: 1,
-    height: UI.buttonHeight * 1.5,
+    height: 52,
     borderRadius: Radii.md,
     justifyContent: 'center',
     alignItems: 'center',

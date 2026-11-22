@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors, Typography, Spacing, Radii, UI } from '../../constants/theme';
 import { alarmService } from '../../services/alarmService';
@@ -145,9 +145,21 @@ export default function GameScreen() {
     <View style={styles.container}>
       <View style={[styles.contentLayout, { paddingTop: Math.max(insets.top + Spacing.sm, 72), paddingBottom: insets.bottom || Spacing.md }]}>
         <PortraitContainer>
-          <View style={{ flex: 1 }}>
-            {renderGame()}
-          </View>
+          {gameId === 'blackjack' ? (
+            <View style={styles.gameViewContainer}>
+              {renderGame()}
+            </View>
+          ) : (
+            <ScrollView
+              style={styles.gameScrollView}
+              contentContainerStyle={styles.gameScrollContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              bounces={true}
+            >
+              {renderGame()}
+            </ScrollView>
+          )}
           <View style={styles.persistentBottomNav}>
             <Pressable 
               style={[
@@ -232,10 +244,28 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFF',
   },
+  gameViewContainer: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+  gameScrollView: {
+    flex: 1,
+  },
+  gameScrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+    paddingBottom: Spacing.xl,
+  },
   persistentBottomNav: {
+    backgroundColor: Colors.dark.background,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.xs,
-    paddingBottom: Spacing.sm,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.xs,
+    zIndex: 10,
   },
   bottomNavButton: {
     height: UI.buttonHeight,

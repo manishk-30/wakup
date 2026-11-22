@@ -128,9 +128,10 @@ export default function CoinFlipGame({ onWin, onLose }: GameProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: Spacing.xl,
+    padding: Spacing.md,
     backgroundColor: Colors.dark.background,
   },
   title: {
@@ -141,10 +142,10 @@ const styles = StyleSheet.create({
   subtitle: {
     ...Typography.bodyLarge,
     color: Colors.dark.textMuted,
-    marginTop: Spacing.md,
+    marginTop: Spacing.xs,
   },
   coinWrapper: {
-    marginVertical: Spacing.xxl,
+    marginVertical: Spacing.lg,
   },
   coinContainer: {
     width: 150,

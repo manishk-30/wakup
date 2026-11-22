@@ -96,15 +96,17 @@ export default function HigherLowerGame({ onWin, onLose }: GameProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.md,
+    width: '100%',
+    paddingHorizontal: Spacing.md,
+    paddingBottom: Spacing.xs,
     alignItems: 'center',
     justifyContent: 'space-evenly',
     backgroundColor: Colors.dark.background,
   },
   header: {
     alignItems: 'center',
-    marginTop: 80,
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   headerTitle: {
     ...Typography.h2,
@@ -131,7 +133,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     gap: Spacing.md,
-    paddingBottom: Spacing.xl,
+    paddingBottom: Spacing.sm,
   },
   actionButton: {
     flex: 1,

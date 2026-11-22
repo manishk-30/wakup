@@ -179,13 +179,14 @@ export default function LuckyRaceGame({ onWin, onLose }: LuckyRaceGameProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: Colors.light.background,
-    padding: Spacing.lg,
+    padding: Spacing.md,
   },
   fullContainer: {
     flex: 1,
     justifyContent: 'space-between',
-    paddingVertical: Spacing.xl,
+    paddingVertical: Spacing.md,
   },
   centerContainer: {
     flex: 1,
@@ -282,19 +283,19 @@ const styles = StyleSheet.create({
   raceTitle: {
     ...Typography.h2,
     textAlign: 'center',
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
     color: Colors.light.text,
   },
   trackArea: {
     width: '100%',
-    gap: Spacing.md,
+    gap: Spacing.sm,
     borderRightWidth: 4,
     borderRightColor: '#E5E7EB', // Finish line visual
     paddingRight: 4,
   },
   lane: {
     width: '100%',
-    height: 50,
+    height: 44,
     borderBottomWidth: 1,
     borderBottomColor: Colors.light.border,
     justifyContent: 'center',

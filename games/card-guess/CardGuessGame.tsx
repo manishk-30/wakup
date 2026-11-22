@@ -84,10 +84,11 @@ export default function CardGuessGame({ onWin, onLose }: GameProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: Spacing.xl,
-    paddingTop: Spacing.xxl,
+    padding: Spacing.md,
+    paddingTop: Spacing.sm,
     backgroundColor: Colors.dark.background,
   },
   title: {
@@ -98,10 +99,10 @@ const styles = StyleSheet.create({
   subtitle: {
     ...Typography.bodyLarge,
     color: Colors.dark.textMuted,
-    marginTop: Spacing.sm,
+    marginTop: Spacing.xs,
   },
   cardContainer: {
-    marginVertical: Spacing.xxl,
+    marginVertical: Spacing.lg,
   },
   resultContainer: {
     height: UI.buttonHeight,
