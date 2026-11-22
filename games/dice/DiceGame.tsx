@@ -128,15 +128,15 @@ export default function DiceGame({ onWin, onLose }: GameProps) {
               style={styles.button}
               onPress={() => handleChoice('HIGH')}
             >
-              <Text style={styles.buttonText}>HIGH</Text>
-              <Text style={styles.subButtonText}>4, 5, 6</Text>
+              <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.buttonText}>HIGH</Text>
+              <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.subButtonText}>4, 5, 6</Text>
             </Pressable>
             <Pressable 
               style={styles.button}
               onPress={() => handleChoice('LOW')}
             >
-              <Text style={styles.buttonText}>LOW</Text>
-              <Text style={styles.subButtonText}>1, 2, 3</Text>
+              <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.buttonText}>LOW</Text>
+              <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.subButtonText}>1, 2, 3</Text>
             </Pressable>
           </View>
           <View style={styles.buttonsContainer}>
@@ -144,15 +144,15 @@ export default function DiceGame({ onWin, onLose }: GameProps) {
               style={styles.button}
               onPress={() => handleChoice('EVEN')}
             >
-              <Text style={styles.buttonText}>EVEN</Text>
-              <Text style={styles.subButtonText}>2, 4, 6</Text>
+              <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.buttonText}>EVEN</Text>
+              <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.subButtonText}>2, 4, 6</Text>
             </Pressable>
             <Pressable 
               style={styles.button}
               onPress={() => handleChoice('ODD')}
             >
-              <Text style={styles.buttonText}>ODD</Text>
-              <Text style={styles.subButtonText}>1, 3, 5</Text>
+              <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.buttonText}>ODD</Text>
+              <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.subButtonText}>1, 3, 5</Text>
             </Pressable>
           </View>
         </View>
@@ -242,6 +242,7 @@ const styles = StyleSheet.create({
     borderRadius: Radii.md,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: Spacing.xs,
     backgroundColor: Colors.dark.primary,
     borderWidth: 2,
     borderColor: '#000000',

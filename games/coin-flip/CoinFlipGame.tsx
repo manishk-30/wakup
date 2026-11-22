@@ -111,13 +111,13 @@ export default function CoinFlipGame({ onWin, onLose }: GameProps) {
             style={styles.button}
             onPress={() => handleChoice('HEADS')}
           >
-            <Text style={styles.buttonText}>HEADS</Text>
+            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.buttonText}>HEADS</Text>
           </Pressable>
           <Pressable 
             style={styles.button}
             onPress={() => handleChoice('TAILS')}
           >
-            <Text style={styles.buttonText}>TAILS</Text>
+            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.buttonText}>TAILS</Text>
           </Pressable>
         </View>
       )}

@@ -175,7 +175,12 @@ export default function GameScreen() {
                 }
               }}
             >
-              <Text style={[styles.bottomNavButtonText, skipTimeLeft > 0 ? { color: Colors.dark.textMuted } : {}]}>
+              <Text 
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.75}
+                style={[styles.bottomNavButtonText, skipTimeLeft > 0 ? { color: Colors.dark.textMuted } : {}]}
+              >
                 {isPreview === 'true' 
                   ? 'CHOOSE ANOTHER GAME' 
                   : skipTimeLeft > 0 
@@ -272,6 +277,7 @@ const styles = StyleSheet.create({
     borderRadius: Radii.md,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: Spacing.md,
     backgroundColor: Colors.dark.primaryMuted,
     borderWidth: 1,
     borderColor: Colors.dark.primary,
@@ -280,5 +286,6 @@ const styles = StyleSheet.create({
     ...Typography.bodyLarge,
     fontWeight: '700',
     color: '#FFF',
+    textAlign: 'center',
   },
 });

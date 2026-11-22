@@ -67,13 +67,13 @@ export default function CardGuessGame({ onWin, onLose }: GameProps) {
             style={[styles.button, { backgroundColor: Colors.dark.danger }]}
             onPress={() => handleChoice('RED')}
           >
-            <Text style={styles.buttonText}>RED</Text>
+            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.buttonText}>RED</Text>
           </Pressable>
           <Pressable 
             style={[styles.button, { backgroundColor: '#111827' }]}
             onPress={() => handleChoice('BLACK')}
           >
-            <Text style={styles.buttonText}>BLACK</Text>
+            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.buttonText}>BLACK</Text>
           </Pressable>
         </View>
       )}

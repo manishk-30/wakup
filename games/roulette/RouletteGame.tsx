@@ -160,7 +160,9 @@ export default function RouletteGame({ onWin, onLose }: GameProps) {
             ]}
             onPress={() => handleChoice(col)}
           >
-            <Text style={styles.buttonText}>{COLOR_CONFIG[col].emoji} {COLOR_CONFIG[col].label}</Text>
+            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.buttonText}>
+              {COLOR_CONFIG[col].emoji} {COLOR_CONFIG[col].label}
+            </Text>
           </Pressable>
         ))}
       </View>
@@ -302,6 +304,7 @@ const styles = StyleSheet.create({
     borderRadius: Radii.md,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: Spacing.xs,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.2)',
   },

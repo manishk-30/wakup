@@ -79,13 +79,13 @@ export default function HigherLowerGame({ onWin, onLose }: GameProps) {
             style={styles.actionButton} 
             onPress={() => handleChoice('HIGHER')}
           >
-            <Text style={styles.buttonText}>HIGHER</Text>
+            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.buttonText}>HIGHER</Text>
           </Pressable>
           <Pressable 
             style={styles.actionButton} 
             onPress={() => handleChoice('LOWER')}
           >
-            <Text style={styles.buttonText}>LOWER</Text>
+            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.buttonText}>LOWER</Text>
           </Pressable>
         </View>
       )}
