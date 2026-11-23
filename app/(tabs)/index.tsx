@@ -232,56 +232,68 @@ export default function Home() {
         animationType="fade"
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' }}>
-          <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.xl }} showsVerticalScrollIndicator={false}>
-            <View style={{ width: '100%', maxWidth: 420, backgroundColor: theme.surface, borderRadius: Radii.xl, padding: Spacing.xl, alignItems: 'center' }}>
-              <Text style={{ fontSize: 40, marginBottom: Spacing.md }}>🥺</Text>
-              <Text style={{ ...Typography.h2, color: theme.text, textAlign: 'center', marginBottom: Spacing.sm }}>
-                You promised yourself one real chance.
-              </Text>
-              <Text style={{ ...Typography.body, color: theme.textMuted, textAlign: 'center', marginBottom: Spacing.xl }}>
-                Are you sure you want to turn off your last alarm?
-              </Text>
+          <PortraitContainer>
+            <ScrollView 
+              contentContainerStyle={{ 
+                flexGrow: 1, 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                paddingHorizontal: Spacing.lg,
+                paddingTop: Math.max(insets.top + Spacing.md, 78),
+                paddingBottom: Math.max(insets.bottom + Spacing.md, Spacing.xl),
+              }} 
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={{ width: '100%', maxWidth: 400, backgroundColor: theme.surface, borderRadius: Radii.xl, padding: Spacing.xl, alignItems: 'center' }}>
+                <Text style={{ fontSize: 36, marginBottom: Spacing.sm }}>🥺</Text>
+                <Text style={{ ...Typography.h2, fontSize: 24, color: theme.text, textAlign: 'center', marginBottom: Spacing.xs }}>
+                  You promised yourself one real chance.
+                </Text>
+                <Text style={{ ...Typography.body, color: theme.textMuted, textAlign: 'center', marginBottom: Spacing.lg }}>
+                  Are you sure you want to turn off your last alarm?
+                </Text>
 
-              <View style={{ width: '100%', backgroundColor: theme.background, padding: Spacing.md, borderRadius: Radii.lg, borderWidth: 1, borderColor: theme.border, marginBottom: Spacing.xl }}>
-                 <Text style={{ ...Typography.bodyLarge, color: theme.text, textAlign: 'center' }}>
-                   "I am committing to my future self right now.{"\n\n"}
-                   I will wake up, beat the alarm, and win the morning.{"\n\n"}
-                   My goals are worth more than sleep."
-                 </Text>
-                 <View style={{ height: 100, width: '100%', marginTop: Spacing.md, backgroundColor: '#fff', borderRadius: Radii.sm, overflow: 'hidden' }}>
-                   {commitmentData?.signatureImage && (
-                     <Image source={{ uri: commitmentData.signatureImage }} style={{ flex: 1 }} resizeMode="contain" />
-                   )}
-                 </View>
-              </View>
+                <View style={{ width: '100%', backgroundColor: theme.background, padding: Spacing.md, borderRadius: Radii.lg, borderWidth: 1, borderColor: theme.border, marginBottom: Spacing.lg }}>
+                   <Text style={{ ...Typography.bodyLarge, fontSize: 15, lineHeight: 22, color: theme.text, textAlign: 'center' }}>
+                     "I am committing to my future self right now.{"\n\n"}
+                     I will wake up, beat the alarm, and win the morning.{"\n\n"}
+                     My goals are worth more than sleep."
+                   </Text>
+                   <View style={{ height: 80, width: '100%', marginTop: Spacing.sm, backgroundColor: '#fff', borderRadius: Radii.sm, overflow: 'hidden' }}>
+                     {commitmentData?.signatureImage && (
+                       <Image source={{ uri: commitmentData.signatureImage }} style={{ flex: 1 }} resizeMode="contain" />
+                     )}
+                   </View>
+                </View>
 
-              <Pressable 
-                style={[styles.button, { backgroundColor: theme.primary, width: '100%', marginBottom: Spacing.md }]} 
-                onPress={() => {
-                  setShowCommitmentModal(false);
-                  setPendingAction(null);
-                }}
-              >
-                <Text style={styles.buttonText}>Keep My Alarm</Text>
-              </Pressable>
-              
-              <Pressable 
-                style={{ padding: Spacing.sm }}
-                onPress={() => {
-                  setShowCommitmentModal(false);
-                  if (pendingAction) {
-                    if (pendingAction.type === 'toggle') {
-                      executeToggle(pendingAction.alarm);
-                    } else {
-                      executeDelete(pendingAction.alarm);
+                <Pressable 
+                  style={[styles.button, { backgroundColor: theme.primary, width: '100%', marginBottom: Spacing.sm }]} 
+                  onPress={() => {
+                    setShowCommitmentModal(false);
+                    setPendingAction(null);
+                  }}
+                >
+                  <Text style={styles.buttonText}>Keep My Alarm</Text>
+                </Pressable>
+                
+                <Pressable 
+                  style={{ padding: Spacing.sm }}
+                  onPress={() => {
+                    setShowCommitmentModal(false);
+                    if (pendingAction) {
+                      if (pendingAction.type === 'toggle') {
+                        executeToggle(pendingAction.alarm);
+                      } else {
+                        executeDelete(pendingAction.alarm);
+                      }
                     }
-                  }
-                }}
-              >
-                <Text style={{ ...Typography.body, color: Colors.dark.danger || '#ef4444' }}>Delete Anyway</Text>
-              </Pressable>
-            </View>
-          </ScrollView>
+                  }}
+                >
+                  <Text style={{ ...Typography.body, color: Colors.dark.danger || '#ef4444' }}>Delete Anyway</Text>
+                </Pressable>
+              </View>
+            </ScrollView>
+          </PortraitContainer>
         </View>
       </Modal>
     </View>
